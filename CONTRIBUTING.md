@@ -39,6 +39,10 @@ them.
 - **Plain JavaScript with JSDoc types.** The source must stay readable without a build.
 - **Every behaviour change comes with a test.** Fixtures live in `test/fixtures`; use
   `window.__wait(id)` / `window.__open(id)` to hold a run open instead of timeouts.
+- **`html` is fuzzed.** `test/unit/html.property.test.js` checks its escaping and URL rules
+  on generated inputs, and `test/e2e/html-oracle.spec.js` checks its context analysis
+  against each browser's HTML parser. The seed changes daily; a failure prints it, and
+  `FUZZ_SEED=<seed>` replays it (`FUZZ_RUNS` sets the number of cases).
 - **Mind the budgets.** `scripts/size.js` holds the limits. Raising one is a deliberate
   decision that belongs in the pull request description.
 - **Document what users see.** Update `docs/`, the README and `CHANGELOG.md`
