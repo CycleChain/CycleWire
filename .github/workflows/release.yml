@@ -2,11 +2,13 @@ name: Release
 
 # Pushing a tag such as v1.2.0 verifies the commit, publishes it to npm through
 # trusted publishing (OIDC, with provenance) and creates the GitHub Release.
-# See docs/releasing.md.
+# Running the workflow by hand only checks that npm accepts trusted publishing
+# from it, and releases nothing. See docs/releasing.md.
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,8 +18,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  trusted-publishing:
+    name: Check trusted publishing
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node scripts/npm-oidc.js
+
   verify:
     name: Verify ${{ github.ref_name }}
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -71,6 +89,8 @@ jobs:
           fi
           tag=latest
           case "$version" in *-*) tag=next ;; esac
+          # Fails with npm's reason if it would not accept this workflow.
+          node scripts/npm-oidc.js
           # The verify job already built and tested this commit.
           npm publish --provenance --access public --tag "$tag" --ignore-scripts
       - name: Fetch the published package

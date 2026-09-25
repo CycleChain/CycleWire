@@ -52,8 +52,10 @@ These steps need the owner's npm and GitHub accounts.
 
 2. **Trusted publisher.** On npmjs.com, open `cyclewire`, then Settings, then Trusted
    Publisher, then GitHub Actions. Enter organization `CycleChain`, repository
-   `CycleWire` and workflow `release.yml`. Afterwards, in the package's publishing
-   access settings, you can disallow tokens altogether.
+   `CycleWire` and workflow `release.yml`. To check it without releasing anything, run
+   the Release workflow by hand (Actions, then Release, then Run workflow): it asks npm
+   for a publish token the way `npm publish` does and prints npm's answer. Once that
+   passes, you can disallow tokens altogether in the package's publishing access settings.
 
 3. **GitHub Pages.** In the repository settings, set Pages to be deployed by "GitHub
    Actions". The `github-pages` environment then accepts deployments from `main`, which
@@ -92,5 +94,10 @@ cdnjs has no `@1`-style ranges, so its URLs always name an exact version.
   tag (`git tag -d vX.Y.Z && git push origin :refs/tags/vX.Y.Z`), push again.
 - **npm publish succeeded, release step failed:** re-run the workflow. The publish step
   skips versions that are already on npm.
+- **npm refused trusted publishing:** nothing was published. The publish step prints the
+  repository, workflow and environment that GitHub vouched for, and npm's reason. Make the
+  trusted publisher settings match them, check again by running the workflow by hand,
+  then re-run the release. Without that check, npm falls back to a token it does not have
+  and reports `E404 Not Found`.
 - **A bad version reached npm:** publish a fixed patch release. Use `npm deprecate` rather
   than unpublishing.
