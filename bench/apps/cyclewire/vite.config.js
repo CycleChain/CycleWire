@@ -11,5 +11,9 @@ export default defineConfig({
         assetsDir: '',
         manifest: true,
         rollupOptions: { input: 'src/main.js' },
+        // The backend-integration guide asks to either import the modulepreload
+        // polyfill or turn it off. It is off: Vite's preload helper then checks
+        // for modulepreload support itself. Preloading an action's imports stays on.
+        modulePreload: { polyfill: false },
     },
 });

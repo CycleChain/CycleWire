@@ -1,8 +1,9 @@
 /**
- * The page server behind the `static`, `vanilla` and `cyclewire` apps. It
- * renders the reference markup on every request and handles the plain form
- * posts that work without JavaScript. An app passes hooks to add its own
- * attributes and scripts, and a folder of built files served under /js/.
+ * The page server behind the apps that render the reference markup (or their
+ * own template of it) with plain Node. It renders the page on every request
+ * and handles the plain form posts that work without JavaScript. An app passes
+ * hooks to add its own attributes and scripts, a folder of built files served
+ * under /js/, and, if it has its own template, a render function.
  *
  *   GET  /              the page; q, category, view, subscribed and newsletter describe its state
  *   POST /cart          id → adds one, then back to the page it came from
@@ -18,15 +19,16 @@ import { renderPage, stateFrom } from './render.js';
 /**
  * @param {object} options
  * @param {(state: import('./render.js').State) => import('./render.js').Hooks} [options.hooks]
+ * @param {(state: import('./render.js').State, hooks: import('./render.js').Hooks) => string} [options.render] the reference render by default
  * @param {string} [options.js] folder served under /js/
  */
-export function createPageServer({ hooks = () => ({}), js } = {}) {
+export function createPageServer({ hooks = () => ({}), render = renderPage, js } = {}) {
     return createServer(async (req, res) => {
         const url = new URL(req.url ?? '/', 'http://localhost');
         try {
             if (req.method === 'GET' && url.pathname === '/') {
                 const state = stateFrom(url, readCart(req.headers.cookie));
-                return send(res, 200, renderPage(state, hooks(state)), 'text/html; charset=utf-8');
+                return send(res, 200, render(state, hooks(state)), 'text/html; charset=utf-8');
             }
             if (req.method === 'POST' && url.pathname === '/cart') {
                 const next = add(readCart(req.headers.cookie), (await form(req)).get('id') ?? '');

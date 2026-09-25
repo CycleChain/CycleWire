@@ -20,7 +20,7 @@
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
     },
     {
-      "choice": "The server writes the entry's <script> and <link rel=\"modulepreload\"> tags from Vite's manifest.",
+      "choice": "The server writes the entry's <script> and <link rel=\"modulepreload\"> tags from Vite's manifest, and the modulepreload polyfill is turned off rather than imported, as the backend integration guide allows. Preloading an action's imports stays on.",
       "docs": "https://vite.dev/guide/backend-integration"
     },
     {
