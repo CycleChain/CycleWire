@@ -1,0 +1,76 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "sveltekit",
+  "name": "SvelteKit",
+  "kind": "meta-framework",
+  "summary": "The page rendered per request by SvelteKit's Node adapter and hydrated by Svelte 5. Search and category live in the URL and filter the list in the browser; add to cart and the newsletter are form actions enhanced with use:enhance; the quick view is a shallow-routed modal.",
+  "build": "npm run build",
+  "start": "node build",
+  "search": "live",
+  "packages": [
+    "@sveltejs/kit",
+    "svelte"
+  ],
+  "idioms": [
+    {
+      "choice": "adapter-node builds a standalone Node server: `vite build`, then `node build`, which reads PORT, HOST and ORIGIN from the environment.",
+      "docs": "https://svelte.dev/docs/kit/adapter-node"
+    },
+    {
+      "choice": "The project is laid out the way `npx sv create` writes it: SvelteKit's options passed to its Vite plugin in vite.config.js (with runes mode on) and the template's src/app.html, with adapter-node in place of adapter-auto.",
+      "docs": "https://svelte.dev/docs/kit/configuration"
+    },
+    {
+      "choice": "A `$scenario` alias points at the shared scenario modules outside the app's folder, which the server imports rather than copying; Vite's server.fs.allow lets the dev server read them.",
+      "docs": "https://svelte.dev/docs/kit/configuration#alias"
+    },
+    {
+      "choice": "One +page.server.js load returns the cart from the `cart` cookie, the product listing and the quick view's product. It reads only the `view` search parameter: SvelteKit tracks search parameters one by one, so changing the search or the category does not run it again.",
+      "docs": "https://svelte.dev/docs/kit/load#Rerunning-load-functions"
+    },
+    {
+      "choice": "Search and category are search parameters in the URL, where the docs keep filters that affect server rendering. Categories are plain links, so choosing one clears the search. The page reads both from page.url and filters the products it already has with $derived, so a filter change is a client-side navigation with no request.",
+      "docs": "https://svelte.dev/docs/kit/state-management#Storing-state-in-the-URL"
+    },
+    {
+      "choice": "The search box is a GET form, which the router handles like a link. It is sent on every input (requestSubmit) with data-sveltekit-keepfocus, -noscroll and -replacestate, so results update as you type without a history entry per key. Filtering in the browser needs no debounce.",
+      "docs": "https://svelte.dev/docs/kit/form-actions#GET-vs-POST"
+    },
+    {
+      "choice": "Add to cart and the newsletter are named form actions (?/add and ?/subscribe), so they work without JavaScript. Form actions are the stable API; the form remote function the docs point to as their successor is still experimental.",
+      "docs": "https://svelte.dev/docs/kit/form-actions#Named-actions"
+    },
+    {
+      "choice": "Both forms use use:enhance with its defaults: it posts with fetch and, after a success, resets the form and re-runs the page's load (invalidateAll), which reads the cart cookie the action set.",
+      "docs": "https://svelte.dev/docs/kit/form-actions#Progressive-enhancement-use:enhance"
+    },
+    {
+      "choice": "The cart cookie is written with SvelteKit's cookies API (HttpOnly, SameSite=Lax and Secure by default) in the shared format, and read with cookies.get, which also sees a cookie set earlier in the same request, so a post without JavaScript renders the new cart.",
+      "docs": "https://svelte.dev/docs/kit/load#Cookies"
+    },
+    {
+      "choice": "An invalid email returns fail(422) with the message, which the page shows through the form prop, with or without JavaScript.",
+      "docs": "https://svelte.dev/docs/kit/form-actions#Anatomy-of-an-action-Validation-errors"
+    },
+    {
+      "choice": "The quick view uses shallow routing, as the docs show for a modal: the link's click handler awaits preloadData (already started by data-sveltekit-preload-data on hover or tap), then calls pushState, and the dialog opens with showModal(); Back closes it. The link's address, /?view=<id>, is the fallback: the server renders it with the dialog open.",
+      "docs": "https://svelte.dev/docs/kit/shallow-routing"
+    },
+    {
+      "choice": "Add to cart inside the quick view calls refreshAll after the action instead of use:enhance's default invalidateAll, which also resets page.state and would close the dialog.",
+      "docs": "https://svelte.dev/docs/kit/$app-navigation#refreshAll"
+    },
+    {
+      "choice": "data-sveltekit-preload-data=\"hover\" on <body>, as in the default template: a link's data starts loading when the pointer rests on it or a finger touches it.",
+      "docs": "https://svelte.dev/docs/kit/link-options#data-sveltekit-preload-data"
+    },
+    {
+      "choice": "The shared stylesheet is a plain <link> in src/app.html, and no component has a <style> block, as the scenario requires.",
+      "docs": "https://svelte.dev/docs/kit/project-structure#Project-files-src"
+    },
+    {
+      "choice": "Images are plain <img> elements with the reference's attributes, as the scenario requires, rather than the @sveltejs/enhanced-img the docs suggest for build-time optimisation.",
+      "docs": "https://svelte.dev/docs/kit/images"
+    }
+  ]
+}

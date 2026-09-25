@@ -44,6 +44,8 @@ Every stack runs its own production server, and the browser reaches it through
 - **Caching.** Static assets are cacheable for a year and immutable. Everything else is
   `no-store`: every visit renders on the server. Validators are removed, so no stack gets
   `304` responses and none depends on its server's cache headers.
+- Other response headers pass through unchanged, among them `Set-Cookie` and `Link`
+  (some stacks send their module preloads that way).
 - The stylesheet, the images and the JSON API are served by one shared server behind the
   same proxy, so they are the same bytes for every stack.
 
