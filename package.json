@@ -90,16 +90,18 @@
   "scripts": {
     "build": "node scripts/build.js && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check:es": "node scripts/check-es.js",
     "dev": "node scripts/serve.js",
     "examples": "node examples/build.js",
     "size": "node scripts/size.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "node --import ./test/unit/setup.js --test \"test/unit/**/*.test.js\"",
     "test:e2e": "playwright test",
-    "prepublishOnly": "npm run build && npm run size && npm test"
+    "prepublishOnly": "npm run build && npm run check:es && npm run size && npm test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "acorn": "^8.18.0",
     "datatables.net-dt": "^3.1.2",
     "esbuild": "^0.28.2",
     "flatpickr": "^4.6.13",

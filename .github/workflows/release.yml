@@ -37,6 +37,7 @@ jobs:
           grep -q "^## \[$version\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no entry for $version"; exit 1; }
       - run: npm run build
       - run: npm run typecheck
+      - run: npm run check:es
       - run: npm run size
       - run: npm run test:unit
       - run: npx playwright install --with-deps chromium firefox webkit

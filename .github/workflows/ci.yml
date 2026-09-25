@@ -26,6 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run typecheck
+      - run: npm run check:es
       - run: npm run size
       - run: npm run test:unit
       - name: Package contents
