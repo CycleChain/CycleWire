@@ -31,6 +31,9 @@ The end-to-end tests run against the built files, so run `npm run build` before
 `npm run test:e2e`. They build the examples themselves, since some tests run against
 them.
 
+The benchmark lives in [`bench/`](bench/README.md), with its own `package.json`; its
+[contributing guide](bench/CONTRIBUTING.md) explains how to add or correct a stack.
+
 ## Guidelines
 
 - **Zero runtime dependencies.** Development tooling is limited to esbuild, TypeScript

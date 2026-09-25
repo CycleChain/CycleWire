@@ -83,7 +83,10 @@ a metric, special-casing the runner, or loading less than a real app of this kin
 1. Create `apps/<id>/` with a `package.json` and its lockfile (`npm install` there).
 2. Add `bench.json`: `id`, `name`, `kind`, a one-line `summary`, the `build` and `start`
    commands (the server must listen on `$PORT` and `127.0.0.1`), `search`, the npm
-   `packages` whose versions to record, and `idioms`.
+   `packages` whose versions to record, and `idioms`. The server runs with `PORT`,
+   `HOST` and `HOSTNAME` set, `NODE_ENV=production`, and `ORIGIN` set to the address the
+   browser uses (`https://localhost:<port>`); the proxy also sends `X-Forwarded-Proto`,
+   `X-Forwarded-Host` and the original `Host`.
 3. Run `node run.js --check --stacks=<id>` until every check passes, then
    `node run.js --stacks=static,<id> --iterations=3` to see numbers.
 4. Open a pull request. CI runs the harness's tests, the conformance check and one short run.

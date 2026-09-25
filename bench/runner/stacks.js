@@ -127,11 +127,14 @@ export async function start(stacks, { log = console.log } = {}) {
         const routes = [];
         for (const stack of stacks) {
             const port = await freePort();
+            const listen = await freePort();
             const child = spawn(stack.manifest.start, {
                 cwd: stack.dir,
                 shell: true,
                 detached: process.platform !== 'win32',
-                env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', HOSTNAME: '127.0.0.1', NODE_ENV: 'production' },
+                // ORIGIN is the address the browser uses, through the proxy:
+                // servers that check the origin of form posts need it.
+                env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', HOSTNAME: '127.0.0.1', ORIGIN: `https://localhost:${listen}`, NODE_ENV: 'production' },
                 stdio: ['ignore', 'pipe', 'pipe'],
             });
             let output = '';
@@ -143,7 +146,7 @@ export async function start(stacks, { log = console.log } = {}) {
             } catch (error) {
                 throw new Error(`${stack.id}: its server (${stack.manifest.start}) ${error.message}\n${output}`);
             }
-            routes.push({ id: stack.id, upstream: port, listen: await freePort() });
+            routes.push({ id: stack.id, upstream: port, listen });
         }
 
         const proxy = fork(PROXY, [], { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
