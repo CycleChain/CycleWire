@@ -9,7 +9,7 @@
  * hashes match what jsDelivr and unpkg deliver.
  */
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const [tag, dist = 'dist'] = process.argv.slice(2);
@@ -30,16 +30,14 @@ const rest = changelog.slice(match.index + match[0].length);
 const end = rest.search(/^## \[|^\[[^\]]+\]: /m);
 const section = (end < 0 ? rest : rest.slice(0, end)).trim();
 
-const files = [
-    'cyclewire.global.min.js',
-    'cyclewire.full.global.min.js',
-    'cyclewire.min.js',
-    'css.min.js',
-    'dom.min.js',
-    'morph.min.js',
-    'signals.min.js',
-    'bootstrap.min.js',
-];
+// Every bundle the package ships, so a new module can't be left out: the
+// core classic script first, then the other classic scripts, the core module
+// and the modules by name.
+const rank = (file) =>
+    file === 'cyclewire.global.min.js' ? 0 : file.endsWith('.global.min.js') ? 1 : file === 'cyclewire.min.js' ? 2 : 3;
+const files = (await readdir(dist))
+    .filter((file) => file.endsWith('.min.js'))
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 const sri = {};
 for (const file of files) {
     sri[file] = `sha384-${createHash('sha384').update(await readFile(join(dist, file))).digest('base64')}`;
