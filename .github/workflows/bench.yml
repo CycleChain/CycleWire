@@ -1,7 +1,8 @@
 name: Benchmark
 
 # check:   on changes to bench/, the harness's tests, the conformance check for
-#          every stack, and one short run to prove the pipeline works.
+#          every stack, and a short run (one journey and the early tap) to prove
+#          the pipeline works.
 # measure: by hand or weekly, the full run for each profile, kept as artifacts.
 # publish: when every profile was measured, a pull request from
 #          github-actions[bot] replaces bench/results/ with the new runs.
@@ -45,7 +46,7 @@ jobs:
     name: Conformance and a short run
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -59,8 +60,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - run: node run.js --check
-      - name: One iteration
-        run: node run.js --iterations=1 --skip-build --out=results/check.json
+      - name: A short run
+        run: node run.js --iterations=1 --kinds=journeys,early --journeys=cart --skip-build --out=results/check.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -3,9 +3,9 @@
 One product page, Wirestore, built with each stack the way its documentation
 recommends, served through the same proxy and measured the same way in Chromium.
 
-> **Status: work in progress.** The harness and the control stacks are in place. The
-> stacks from other projects arrive next, and the first results will be published as a
-> preview, with a window for corrections, before anything is announced.
+> **Status: preview.** The harness, the two controls and the first wave of stacks are in
+> place. The first results will be published as a preview, with a window for corrections,
+> before anything is announced.
 
 ## What it measures
 
@@ -26,13 +26,18 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | --- | --- |
 | `static` | Control: the page with no JavaScript. Forms post and links navigate |
 | `vanilla` | Control: one small hand-written module, no library |
-| `cyclewire` | The page activated by CycleWire, set up as its documentation recommends |
+| `cyclewire` | CycleWire: the core up front, each interaction's code on intent |
+| `htmx` | htmx: server-rendered fragments swapped into the page |
+| `alpine` | Alpine.js: directives in the server's markup, stores for shared state |
+| `astro` | Astro with Preact islands, nanostores and Astro Actions |
+| `next` | Next.js App Router: Server Components, Server Actions, an intercepted modal |
+| `qwik` | Qwik City: resumable components, route loaders and actions |
+| `sveltekit` | SvelteKit: load functions, form actions, shallow routing |
 
-Next: htmx, Alpine.js, Next.js, SvelteKit, Qwik City and Astro with Preact islands, then
-Nuxt, Angular and Stimulus. Each lives in `apps/<id>/` with its own `package.json`,
-lockfile and [`bench.json`](schema/bench.v1.json) manifest, which lists every choice
-the app makes and the documentation behind it. [CONTRIBUTING.md](CONTRIBUTING.md) says
-what a stack must build and how to add one.
+Next: Nuxt, Angular and Stimulus. Each stack lives in `apps/<id>/` with its own
+`package.json`, lockfile and [`bench.json`](schema/bench.v1.json) manifest, which lists
+every choice the app makes and the documentation behind it.
+[CONTRIBUTING.md](CONTRIBUTING.md) says what a stack must build and how to add one.
 
 ## Run it
 
