@@ -1,12 +1,12 @@
 name: Pages
 
 # Deploys the landing page (site/ plus the built dist/) and the live examples
-# (examples/dist/, under /examples/) to GitHub Pages for every release tag, or
-# on demand.
+# (examples/dist/, under /examples/) to GitHub Pages on every push to main, so
+# the live site always matches main. Run it by hand to redeploy.
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 
 permissions:

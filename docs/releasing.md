@@ -28,8 +28,8 @@ The tag starts `.github/workflows/release.yml`, which:
 4. creates the GitHub Release. The notes come from `CHANGELOG.md`, and the `dist/` bundles
    and their SRI hashes are attached.
 
-The same tag also redeploys the landing page and the live examples
-(`.github/workflows/pages.yml`).
+The landing page and the live examples redeploy on every push to `main`
+(`.github/workflows/pages.yml`), the release commit included.
 
 ## Pre-releases
 
@@ -56,9 +56,8 @@ These steps need the owner's npm and GitHub accounts.
    access settings, you can disallow tokens altogether.
 
 3. **GitHub Pages.** In the repository settings, set Pages to be deployed by "GitHub
-   Actions". Then, under Environments, `github-pages`, allow tags matching `v*` to
-   deploy: the environment starts out accepting only the default branch, and the Pages
-   workflow deploys release tags.
+   Actions". The `github-pages` environment then accepts deployments from `main`, which
+   is where the Pages workflow deploys from.
 
 ## If something fails
 
