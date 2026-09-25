@@ -2,7 +2,7 @@
 
 ## What the page pays on load
 
-- **One script.** The core is 4.6 kB brotli, or 4.8 kB for the classic-script build
+- **One script.** The core is 4.7 kB brotli, or 4.8 kB for the classic-script build
   that also starts itself.
 - **No action code** until someone reaches for it, or a trigger or preload asks for it.
 - **No work on load** beyond attaching listeners and one `querySelectorAll` for triggers

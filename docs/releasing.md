@@ -59,6 +59,33 @@ These steps need the owner's npm and GitHub accounts.
    Actions". The `github-pages` environment then accepts deployments from `main`, which
    is where the Pages workflow deploys from.
 
+## cdnjs
+
+jsDelivr and unpkg serve every npm version automatically; cdnjs needs a one-time listing,
+and accepts libraries once they have some adoption. After that, cdnjs imports new versions
+from npm by itself. To apply, fork [cdnjs/packages](https://github.com/cdnjs/packages),
+add `packages/c/cyclewire.json` and open a pull request:
+
+```json
+{
+  "name": "cyclewire",
+  "description": "Zero-initial-JS selective activation engine. Turn server-rendered HTML into instant interactivity on intent.",
+  "keywords": ["resumability", "event-delegation", "lazy-loading", "progressive-enhancement", "server-rendered", "zero-dependency"],
+  "authors": [{ "name": "CycleChain", "url": "https://cyclechain.io" }],
+  "license": "MIT",
+  "homepage": "https://cyclechain.github.io/CycleWire/",
+  "repository": { "type": "git", "url": "https://github.com/CycleChain/CycleWire.git" },
+  "filename": "cyclewire.global.min.js",
+  "autoupdate": {
+    "source": "npm",
+    "target": "cyclewire",
+    "fileMap": [{ "basePath": "dist", "files": ["*.min.js", "*.min.js.map"] }]
+  }
+}
+```
+
+cdnjs has no `@1`-style ranges, so its URLs always name an exact version.
+
 ## If something fails
 
 - **Tests or budgets fail:** nothing was published. Fix, commit, delete and recreate the

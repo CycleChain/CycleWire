@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CycleWire · Server-rendered HTML, wired on intent</title>
-    <meta name="description" content="CycleWire is a 4.6 kB, zero-dependency engine that makes server-rendered HTML interactive without hydration: one listener per event type, and action code loaded on intent.">
+    <meta name="description" content="CycleWire is a 4.7 kB, zero-dependency engine that makes server-rendered HTML interactive without hydration: one listener per event type, and action code loaded on intent.">
     <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0c10" media="(prefers-color-scheme: dark)">
     <meta property="og:type" content="website">
@@ -423,7 +423,7 @@
                         <h2 id="network-title">What this page has downloaded</h2>
                     </div>
                     <ul class="network__list" aria-live="polite">
-                        <li class="file file--boot" title="cyclewire.min.js · at boot · 4.6 kB"><span class="dot dot--boot" aria-hidden="true"></span><code>cyclewire.min.js</code><span class="file__size">4.6 kB</span><span class="sr-only">, at boot</span></li>
+                        <li class="file file--boot" title="cyclewire.min.js · at boot · 4.7 kB"><span class="dot dot--boot" aria-hidden="true"></span><code>cyclewire.min.js</code><span class="file__size">4.7 kB</span><span class="sr-only">, at boot</span></li>
                     </ul>
                     <div class="network__foot">
                         <p class="network__total">1 file · the only script at boot</p>
@@ -436,7 +436,7 @@
 
         <div class="wrap">
             <section class="stats" aria-label="At a glance">
-                <div><b>4.6 kB</b><span>core, brotli</span></div>
+                <div><b>4.7 kB</b><span>core, brotli</span></div>
                 <div><b>0</b><span>hydration passes</span></div>
                 <div><b>0</b><span>runtime dependencies</span></div>
                 <div><b>Any</b><span>backend or framework</span></div>
@@ -770,11 +770,11 @@ export async function run({ element, signal }) {
                     <table>
                         <thead><tr><th>Import</th><th>What it does</th><th>brotli</th></tr></thead>
                         <tbody>
-                            <tr><td><code>cyclewire</code></td><td>Delegation, registry, triggers, preloading, concurrency, lifecycle events, shadow DOM, plugins</td><td>4.6 kB</td></tr>
+                            <tr><td><code>cyclewire</code></td><td>Delegation, registry, triggers, preloading, concurrency, lifecycle events, shadow DOM, plugins</td><td>4.7 kB</td></tr>
                             <tr><td><code>cyclewire/css</code></td><td>Stylesheets that arrive with the actions that need them: <code>{ module, css }</code> entries and <code>css()</code>, shadow roots included</td><td>0.6 kB</td></tr>
-                            <tr><td><code>cyclewire/dom</code></td><td><code>html</code> templates escaped by context, inert <code>fragment()</code>, <code>swap()</code>, View Transitions, Trusted Types</td><td>1.9 kB</td></tr>
+                            <tr><td><code>cyclewire/dom</code></td><td><code>html</code> templates escaped by context, inert <code>fragment()</code>, <code>swap()</code>, View Transitions, Trusted Types</td><td>2.2 kB</td></tr>
                             <tr><td><code>cyclewire/morph</code></td><td>DOM morphing that keeps elements, focus and input: the virtual-DOM job without the virtual DOM</td><td>1.8 kB</td></tr>
-                            <tr><td><code>cyclewire/signals</code></td><td>Signals, reactive stores, <code>data-cw-bind</code>, resumed lazily from server state</td><td>2.9 kB</td></tr>
+                            <tr><td><code>cyclewire/signals</code></td><td>Signals, reactive stores, <code>data-cw-bind</code>, resumed lazily from server state</td><td>3.1 kB</td></tr>
                             <tr><td><code>cyclewire/bootstrap</code></td><td>Bootstrap 5's data API (modal, dropdown, collapse, offcanvas, tabs, alerts) without its JavaScript</td><td>2.1 kB</td></tr>
                         </tbody>
                     </table>

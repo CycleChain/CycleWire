@@ -1,6 +1,6 @@
 # cyclewire/dom
 
-Safe markup building and one-shot insertion. 1.9 kB brotli.
+Safe markup building and one-shot insertion. 2.2 kB brotli.
 
 ```js
 import { html, fragment, swap, transition, escapeHTML, isSafeHTML, SafeHTML } from 'cyclewire/dom';
