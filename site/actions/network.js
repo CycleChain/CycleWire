@@ -8,23 +8,27 @@ export function run({ element, signal }) {
     const seen = new Set();
     let bytes = 0;
 
+    const span = (className, text) => Object.assign(document.createElement('span'), { className, textContent: text });
+
     const add = (entry) => {
         const url = new URL(entry.name);
         if (!/\.(?:js|css)$/.test(url.pathname) || seen.has(url.pathname)) return;
         seen.add(url.pathname);
         const size = entry.encodedBodySize || entry.decodedBodySize || 0;
         bytes += size;
-        const item = document.createElement('li');
-        const name = document.createElement('code');
-        name.textContent = url.pathname.split('/').pop();
-        const when = document.createElement('span');
+        const name = url.pathname.split('/').pop();
         const early = entry.startTime <= boot;
-        when.className = early ? 'tag tag--boot' : 'tag tag--demand';
-        when.textContent = early ? 'at boot' : 'on demand';
-        const weight = document.createElement('span');
-        weight.className = 'network__size';
-        weight.textContent = size ? `${(size / 1000).toFixed(1)} kB` : 'cached';
-        item.append(name, when, weight);
+        const when = early ? 'at boot' : 'on demand';
+        const weight = size ? `${(size / 1000).toFixed(1)} kB` : 'cached';
+
+        const item = document.createElement('li');
+        item.className = early ? 'file file--boot' : 'file';
+        item.title = `${name} · ${when} · ${weight}`;
+        const dot = span(early ? 'dot dot--boot' : 'dot', '');
+        dot.setAttribute('aria-hidden', 'true');
+        const code = document.createElement('code');
+        code.textContent = name;
+        item.append(dot, code, span('file__size', weight), span('sr-only', `, ${when}`));
         list.append(item);
         total.textContent = `${seen.size} ${seen.size === 1 ? 'file' : 'files'} · ${(bytes / 1000).toFixed(1)} kB transferred`;
     };
