@@ -11,15 +11,17 @@ test.describe('forms', () => {
     test('a bound form runs once per submission and is not submitted natively', async ({ page }) => {
         await boot(page, { html: FORM });
         const url = page.url();
+        const submissions = async () => (await log(page)).map((entry) => `${entry.type}:${entry.submitter}`);
+        // One submission at a time: forms default to drop, so one that arrives
+        // while the previous run is still loading its module is ignored
+        // (concurrency.spec.js covers that).
         await page.click('#send');
+        await expect.poll(submissions).toEqual(['submit:send']);
         await page.focus('#q');
         await page.keyboard.press('Enter');
+        await expect.poll(submissions).toEqual(['submit:send', 'submit:send']);
         await page.evaluate(() => document.getElementById('f').requestSubmit());
-        await expect.poll(async () => (await log(page)).map((entry) => `${entry.type}:${entry.submitter}`)).toEqual([
-            'submit:send',
-            'submit:send',
-            'submit:null',
-        ]);
+        await expect.poll(submissions).toEqual(['submit:send', 'submit:send', 'submit:null']);
         expect(page.url()).toBe(url);
     });
 
