@@ -1,0 +1,19 @@
+# Weekly updates for the workflows' actions and the development dependencies.
+# CycleWire itself has no runtime dependencies.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+    groups:
+      development:
+        dependency-type: development

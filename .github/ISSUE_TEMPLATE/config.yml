@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Questions and ideas
+    url: https://github.com/CycleChain/CycleWire/discussions
+    about: Ask, suggest and show what you built in GitHub Discussions.
   - name: Documentation
     url: https://github.com/CycleChain/CycleWire/tree/main/docs
     about: Guides and the complete API reference.
