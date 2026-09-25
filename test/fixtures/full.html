@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire full classic-script fixture</title>
+    <script src="/fixtures/harness.js"></script>
+    <script type="application/json" data-cyclewire>
+        {
+            "actions": {
+                "widget": { "module": "/fixtures/actions/styled.js", "css": "/fixtures/styles/widget.css" },
+                "state": "/fixtures/actions/state.js"
+            }
+        }
+    </script>
+    <script src="/dist/cyclewire.full.global.min.js"></script>
+</head>
+<body>
+    <div id="widget" data-cw-action="widget" data-cw-trigger="load">widget</div>
+    <section data-cw-state='{"count": 2}'>
+        <output id="count" data-cw-bind="text: count">2</output>
+        <button id="inc" data-cw-action="state#inc">+1</button>
+    </section>
+</body>
+</html>
