@@ -91,6 +91,7 @@
     "build": "node scripts/build.js && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev": "node scripts/serve.js",
+    "examples": "node examples/build.js",
     "size": "node scripts/size.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "node --import ./test/unit/setup.js --test \"test/unit/**/*.test.js\"",
@@ -99,7 +100,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "datatables.net-dt": "^3.1.2",
     "esbuild": "^0.28.2",
-    "typescript": "^7.0.2"
+    "flatpickr": "^4.6.13",
+    "jquery": "^4.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "svelte": "^5.57.1",
+    "sweetalert2": "^11.26.25",
+    "typescript": "^7.0.2",
+    "vue": "^3.5.43"
   }
 }

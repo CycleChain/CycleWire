@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CycleWire + Vue islands</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="../example.css">
+    <script type="module" src="./main.js"></script>
+</head>
+<body>
+    <main class="page">
+        <p class="crumbs"><a href="../">All examples</a> · <a href="https://github.com/CycleChain/CycleWire/tree/main/examples/vue">Source</a></p>
+        <h1>Vue islands, loaded by CycleWire</h1>
+        <p class="lead">Everything here is HTML rendered on the server, the counter below included. CycleWire hydrates the counter when it scrolls into view. Until then this page has not downloaded Vue; check <code>wire.loaded()</code> in the console.</p>
+        <div class="spacer">Scroll down ↓</div>
+        <section class="card">
+            <h2>A Vue component</h2>
+            <p class="note">"+1" is Vue. "Save" is a CycleWire action inside the component: it sends the count Vue rendered, and Vue shows the result.</p>
+            <div id="counter" class="island" data-cw-action="islands#counter" data-cw-trigger="visible" data-cw-props='{"start": 3}'><!--ssr:counter--></div>
+        </section>
+    </main>
+</body>
+</html>

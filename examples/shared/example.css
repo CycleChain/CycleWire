@@ -1,0 +1,59 @@
+/* Shared look for the examples. Nothing here is needed by CycleWire. */
+:root {
+    color-scheme: light dark;
+    --bg: #f7f7fb;
+    --surface: #ffffff;
+    --text: #1d1d2b;
+    --muted: #5d5d73;
+    --border: #dcdce8;
+    --accent: #5b5bd6;
+    --accent-text: #ffffff;
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #111118;
+        --surface: #1a1a24;
+        --text: #ececf4;
+        --muted: #a3a3b8;
+        --border: #2e2e3d;
+        --accent: #8b8bf0;
+        --accent-text: #111118;
+    }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
+.page { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 12px; }
+a { color: var(--accent); }
+.crumbs { font-size: .92rem; color: var(--muted); }
+h2 { font-size: 1.15rem; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+.lead, .note { color: var(--muted); }
+code { font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 20px 0; }
+.spacer { min-height: 120vh; display: grid; place-items: center; color: var(--muted); }
+
+button, input, select { font: inherit; }
+button {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+button:disabled { opacity: .55; cursor: default; }
+input { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+
+/* CycleWire marks elements while their action runs. */
+[data-cw-pending] { cursor: progress; }
+
+/* Islands: the server-rendered HTML is shown until the framework takes over. */
+.island { min-height: 150px; }
+.counter { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.counter__value { font-size: 2rem; font-weight: 700; min-width: 2ch; }
+.counter__status { flex-basis: 100%; margin: 0; color: var(--muted); }
+/* Until hydration the framework's own buttons are inert, so say so. CycleWire's
+   actions (Save) work from the start: they only need the HTML. */
+.counter:not([data-ready]) .counter__inc { cursor: progress; }

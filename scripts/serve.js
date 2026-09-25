@@ -4,6 +4,7 @@
  *
  *   /            → site/          (the landing page, so its "./dist/…" links resolve as on GitHub Pages)
  *   /dist/       → dist/
+ *   /examples/   → examples/dist/ (built with `npm run examples`, laid out as on GitHub Pages)
  *   /fixtures/   → test/fixtures/
  *
  * Test helpers:
@@ -27,6 +28,7 @@ const host = option('--host', '127.0.0.1');
 
 const mounts = [
     ['/dist/', join(root, 'dist')],
+    ['/examples/', join(root, 'examples', 'dist')],
     ['/fixtures/', join(root, 'test', 'fixtures')],
     ['/', join(root, 'site')],
 ];
