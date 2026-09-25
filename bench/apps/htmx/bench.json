@@ -1,0 +1,70 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "htmx",
+  "name": "htmx",
+  "kind": "library",
+  "summary": "The reference page from a plain Node server, with htmx attributes on its links and forms. Without JavaScript they load full pages; with htmx they fetch HTML fragments (the results, the quick view, the cart header, the newsletter message) and swap them in.",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "htmx.org"
+  ],
+  "idioms": [
+    {
+      "choice": "htmx.min.js loads with a plain <script> in <head>, as the installation guide describes. The guide mentions neither defer nor the ESM build for a script tag, so neither is used.",
+      "docs": "https://htmx.org/docs/#installing"
+    },
+    {
+      "choice": "No build step: the app's server serves dist/htmx.min.js from the htmx.org npm package at a content-hashed URL. The guide needs no build system and leaves serving the npm file to the app's own tooling.",
+      "docs": "https://htmx.org/docs/#npm"
+    },
+    {
+      "choice": "A plain node:http server, no web framework: a hypermedia app can use any server-side technology.",
+      "docs": "https://htmx.org/essays/hypermedia-on-whatever-youd-like/"
+    },
+    {
+      "choice": "Progressive enhancement: each hx-get or hx-post repeats its link's href or its form's action (the docs' other option, hx-boost, swaps the whole body), and the server checks the HX-Request header to answer with a fragment or with the full page.",
+      "docs": "https://htmx.org/docs/#progressive_enhancement"
+    },
+    {
+      "choice": "Answers that depend on HX-Request carry Vary: HX-Request, and htmx.config.historyRestoreAsHxRequest is off (set in a <meta name=\"htmx-config\"> tag), as the caching section requires when HX-Request selects fragments.",
+      "docs": "https://htmx.org/docs/#caching"
+    },
+    {
+      "choice": "htmx.config.reportValidityOfForms is on, which the validation section says to always do, so an invalid field is reported as a native form submission would.",
+      "docs": "https://htmx.org/docs/#validation"
+    },
+    {
+      "choice": "Search follows the Active Search example, with the trigger on the search form so the query goes with the form's category field and Enter searches at once: hx-trigger=\"submit, input changed delay:200ms\". The delay is the scenario's 200 ms; the example uses 500 ms. Only the results are swapped, never the input, and no history entry is pushed, as in the example.",
+      "docs": "https://htmx.org/examples/active-search/"
+    },
+    {
+      "choice": "Search and category requests both fill #products and share hx-sync=\"#products:replace\", so a newer one aborts one still in flight. The hx-sync page recommends replace for active search.",
+      "docs": "https://htmx.org/attributes/hx-sync/"
+    },
+    {
+      "choice": "Answers that update more than their target carry <hx-partial> swap commands, added in 2.0.11 for responses that update several parts of the page (its example is #cart-count and #cart-total): the result count, the cart header, and after a category link the search form and the category links.",
+      "docs": "https://htmx.org/docs/#partial_swaps"
+    },
+    {
+      "choice": "Add to cart is answered with partials only, so the form that posted is left unchanged without hx-swap=\"none\".",
+      "docs": "https://htmx.org/attributes/hx-partial/#partials-only-response"
+    },
+    {
+      "choice": "The docs' first choice for updating other content is to expand the target, but the reference markup has no element around the result count and the list, so the count is a partial.",
+      "docs": "https://htmx.org/examples/update-other-content/#which-should-i-use"
+    },
+    {
+      "choice": "Quick view swaps the product into the <dialog> and opens it as a modal with hx-on::after-swap=\"if (!this.open) this.showModal()\": htmx has no dialog attribute, and hx-on is its way to handle an htmx event inline.",
+      "docs": "https://htmx.org/attributes/hx-on/"
+    },
+    {
+      "choice": "Forms sent by htmx get their fragment back directly, without the Post/Redirect/Get that the plain forms keep.",
+      "docs": "https://htmx.org/docs/#response-headers"
+    },
+    {
+      "choice": "An invalid newsletter address is answered with 200 and the message, which htmx swaps by default, rather than 422 plus a responseHandling rule, the alternative the docs show.",
+      "docs": "https://htmx.org/docs/#response-handling-examples"
+    }
+  ]
+}

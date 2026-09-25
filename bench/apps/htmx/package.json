@@ -1,0 +1,11 @@
+{
+  "name": "bench-htmx",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "htmx.org": "2.0.11"
+  }
+}
