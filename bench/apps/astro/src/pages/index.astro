@@ -1,0 +1,55 @@
+---
+// The Wirestore page, rendered for every request. Astro renders the static
+// parts; the interactive parts are Preact islands, each hydrated when it is
+// needed, sharing state through nanostores (src/stores/).
+//
+// Without JavaScript the page still works: the search form and the category
+// links load filtered pages, "Quick view" loads the page with the dialog
+// open, and the add-to-cart and newsletter forms post to this page through
+// their actions.
+import { actions } from 'astro:actions';
+import { readCart } from '../../../../scenario/cart.js';
+import { detail, isCategory, listing, product, products, summary } from '../../../../scenario/catalog.js';
+import CartSummary from '../components/CartSummary';
+import Catalog from '../components/Catalog';
+import Newsletter, { failure } from '../components/Newsletter';
+import QuickView from '../components/QuickView';
+import Layout from '../layouts/Layout.astro';
+import type { ProductDetail } from '../stores/quick-view';
+
+// An add-to-cart form sent without JavaScript: return to the page it was sent
+// from, so that reloading it does not add the item again (POST/Redirect/GET).
+const added = Astro.getActionResult(actions.addToCart);
+if (added && !added.error) {
+    const from = URL.parse(Astro.request.headers.get('referer') ?? '');
+    return Astro.redirect(from?.origin === Astro.url.origin ? from.pathname + from.search : '/', 303);
+}
+
+const params = Astro.url.searchParams;
+const category = params.get('category') ?? '';
+const viewed = product(params.get('view') ?? '');
+// detail() is untyped JavaScript: it returns the product without its image parameters.
+const view = viewed && (detail(viewed) as ProductDetail);
+const cart = summary(readCart(Astro.request.headers.get('cookie') ?? undefined));
+
+// A newsletter form sent without JavaScript: show the server's message.
+const subscribed = Astro.getActionResult(actions.newsletter);
+const status = !subscribed ? '' : subscribed.error ? failure(subscribed.error) : subscribed.data.message;
+---
+
+<Layout>
+    <header class="top">
+        <a class="brand" href="/">Wirestore</a>
+        <CartSummary client:load count={cart.count} total={cart.total} />
+    </header>
+    <main>
+        <section class="intro">
+            <h1>Everyday objects, made well</h1>
+            <p>Lamps, chairs, pans and pens from small workshops. Free returns for 60 days.</p>
+        </section>
+        <Catalog client:load products={products.map(listing)} q={params.get('q') ?? ''} category={isCategory(category) ? category : ''} />
+        <Newsletter client:visible status={status} />
+    </main>
+    <QuickView client:idle product={view} />
+    <footer class="bottom"><p>Wirestore is a benchmark scenario. Nothing here is for sale.</p></footer>
+</Layout>

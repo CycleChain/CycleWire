@@ -6,7 +6,9 @@
 import data from './products.json' with { type: 'json' };
 import { CATEGORIES, cartSummary, matches } from './markup.js';
 
-/** @type {Array<{ id: string, name: string, category: string, price: number, description: string, art: object }>} */
+/** @typedef {{ id: string, name: string, category: string, price: number, description: string, art: object }} Product */
+
+/** @type {Product[]} */
 export const products = data;
 
 export const product = (id) => products.find((candidate) => candidate.id === id) ?? null;
@@ -22,5 +24,9 @@ export const summary = (items) => cartSummary(items, products);
 /** The fields a product listing needs, without the description. */
 export const listing = ({ id, name, category, price }) => ({ id, name, category, price });
 
-/** A product without the image art parameters. */
+/**
+ * A product without the image art parameters.
+ * @param {Product} product
+ * @returns {Omit<Product, 'art'>}
+ */
 export const detail = ({ art, ...rest }) => rest;

@@ -1,0 +1,89 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "astro",
+  "name": "Astro + Preact",
+  "kind": "meta-framework",
+  "summary": "Astro renders the page on demand with its Node adapter. The header, the catalog, the quick view and the newsletter are Preact islands, each hydrated when it is needed; they share state through nanostores and call Astro Actions, which the same forms also use without JavaScript.",
+  "build": "npm run build",
+  "start": "node ./dist/server/entry.mjs",
+  "search": "live",
+  "packages": [
+    "astro",
+    "@astrojs/preact",
+    "preact"
+  ],
+  "idioms": [
+    {
+      "choice": "output: 'server': the page is rendered on demand for every request, since its header reads the cart cookie. HTML streaming stays on, the default.",
+      "docs": "https://docs.astro.build/en/guides/on-demand-rendering/#server-mode"
+    },
+    {
+      "choice": "The Node adapter in standalone mode. The start command runs its built server, node ./dist/server/entry.mjs, which reads HOST and PORT and also serves the built client files.",
+      "docs": "https://docs.astro.build/en/guides/integrations-guide/node/#standalone"
+    },
+    {
+      "choice": "Astro components render everything static (the document, the header's brand, the introduction, the footer) with no JavaScript. Four Preact islands hold the interactive parts: the cart summary, the catalog, the quick view and the newsletter.",
+      "docs": "https://docs.astro.build/en/concepts/islands/#client-islands"
+    },
+    {
+      "choice": "The cart summary and the catalog (search, categories, result count and cards, one island because they share the filters) hydrate with client:load: they are on the first screen and must respond at once.",
+      "docs": "https://docs.astro.build/en/reference/directives-reference/#clientload"
+    },
+    {
+      "choice": "The quick view dialog hydrates with client:idle: it is closed until someone asks for it, and a request made before it hydrates waits in its store.",
+      "docs": "https://docs.astro.build/en/reference/directives-reference/#clientidle"
+    },
+    {
+      "choice": "The newsletter, below the 50 cards, hydrates with client:visible. Until then its form still posts without JavaScript.",
+      "docs": "https://docs.astro.build/en/reference/directives-reference/#clientvisible"
+    },
+    {
+      "choice": "Islands share state through nanostores and @nanostores/preact: $cart (set by add to cart, read by the header) and $quickView (set by the catalog, read by the dialog). Only the browser writes to the stores; server renders use props.",
+      "docs": "https://docs.astro.build/en/recipes/sharing-state-islands/"
+    },
+    {
+      "choice": "The page reads the cart cookie and the URL on the server and passes islands their data as props: the cart summary, and the 50 products without descriptions for the catalog.",
+      "docs": "https://docs.astro.build/en/guides/framework-components/#passing-props-to-framework-components"
+    },
+    {
+      "choice": "Search and category filters run in the browser, in the catalog island's state, over the products it received as props: results change on every key without a request, so there is no debounce. The island already holds the listing, so asking the server on each key would only add a request and the scenario's 200 ms wait. Without JavaScript, the GET form and the category links render the filtered page on the server, as in the reference.",
+      "docs": "https://docs.astro.build/en/guides/framework-components/#hydrating-interactive-components"
+    },
+    {
+      "choice": "Astro Actions instead of the shared JSON API: addToCart and newsletter accept form data, getProduct takes JSON for the quick view, and the islands call them through the actions client. The cart cookie is written with context.cookies in the scenario's format.",
+      "docs": "https://docs.astro.build/en/guides/actions/"
+    },
+    {
+      "choice": "The forms work without JavaScript: method=post, with the action's query string (?_action=…) as their action, so the server runs the same action and renders the page. Once hydrated, the islands call the action instead of submitting.",
+      "docs": "https://docs.astro.build/en/guides/actions/#call-actions-from-an-html-form-action"
+    },
+    {
+      "choice": "An add to cart posted without JavaScript redirects (303) back to the page it came from on success, so reloading does not add the item again (POST/Redirect/GET).",
+      "docs": "https://docs.astro.build/en/guides/actions/#redirect-on-action-success"
+    },
+    {
+      "choice": "A newsletter form posted without JavaScript is answered with the page rendered from the action's result, Astro's default for form actions.",
+      "docs": "https://docs.astro.build/en/guides/actions/#update-the-ui-with-a-form-action-result"
+    },
+    {
+      "choice": "The newsletter action validates the address with Zod, using the scenario's rule and message, and both the page and the island show that field's message with isInputError().",
+      "docs": "https://docs.astro.build/en/guides/actions/#displaying-form-input-errors"
+    },
+    {
+      "choice": "security.allowedDomains trusts the proxy's X-Forwarded-Proto and X-Forwarded-Host for https://localhost on any port, so Astro.url is the address the browser uses and the origin check on form posts and actions, on by default, stays on.",
+      "docs": "https://docs.astro.build/en/reference/configuration-reference/#securityalloweddomains"
+    },
+    {
+      "choice": "Scenario rule: /assets/app.css is linked with a plain <link> in the layout's <head>, the documented way to load a static stylesheet, with no component styles or CSS imports. Astro adds only its 62-byte inline style for <astro-island>.",
+      "docs": "https://docs.astro.build/en/guides/styling/#load-a-static-stylesheet-via-link-tags"
+    },
+    {
+      "choice": "Scenario rule: card and dialog images are plain <img> elements, the framework's own image syntax inside Preact components, with the reference's src, width, height, loading and decoding. Astro's <Image /> would re-encode the shared images and cannot be used inside framework components.",
+      "docs": "https://docs.astro.build/en/guides/images/#images-in-ui-framework-components"
+    },
+    {
+      "choice": "Defaults kept: no <ClientRouter /> and no prefetching, both opt-in. The site is one page, and its filters run in place.",
+      "docs": "https://docs.astro.build/en/guides/prefetch/"
+    }
+  ]
+}

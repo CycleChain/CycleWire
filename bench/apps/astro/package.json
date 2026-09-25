@@ -1,0 +1,18 @@
+{
+  "name": "bench-astro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node ./dist/server/entry.mjs"
+  },
+  "dependencies": {
+    "@astrojs/node": "11.1.6",
+    "@astrojs/preact": "6.0.5",
+    "@nanostores/preact": "1.1.0",
+    "astro": "7.3.5",
+    "nanostores": "1.5.4",
+    "preact": "10.29.8"
+  }
+}
