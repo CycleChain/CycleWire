@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire shadow DOM fixture</title>
+    <script src="/fixtures/harness.js"></script>
+</head>
+<body>
+    <!-- Declarative shadow DOM: the browser attaches these roots while parsing. -->
+    <x-card id="host">
+        <template shadowrootmode="open">
+            <button id="inner" data-cw-action="log">Inside</button>
+            <form id="inner-form" data-cw-action="log"><input name="q" value="x"><button id="inner-submit">Go</button></form>
+            <select id="inner-select" data-cw-action="log"><option>a</option><option>b</option></select>
+            <span id="inner-load" data-cw-action="log#second" data-cw-trigger="load"></span>
+        </template>
+    </x-card>
+    <script type="module">
+        const build = new URLSearchParams(location.search).get('build') || 'esm-dev';
+        window.CW = await import(`/dist/${build}/index.js`);
+        window.__ready = true;
+    </script>
+</body>
+</html>

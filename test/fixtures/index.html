@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire fixture</title>
+    <style>
+        .spacer { height: 3000px; }
+    </style>
+    <script src="/fixtures/harness.js"></script>
+</head>
+<body>
+    <main id="app"></main>
+    <script type="module">
+        // ?build=esm (production) | esm-dev (default, with warnings) | min (bundled CDN files)
+        const build = new URLSearchParams(location.search).get('build') || 'esm-dev';
+        const file = (name) => (build === 'min' ? `/dist/${name === 'index' ? 'cyclewire' : name}.min.js` : `/dist/${build}/${name}.js`);
+        const [core, css, dom, morph, signals, bootstrap] = await Promise.all(
+            ['index', 'css', 'dom', 'morph', 'signals', 'bootstrap'].map((name) => import(file(name))),
+        );
+        Object.assign(window, { CW: core, CWX: { css, dom, morph, signals, bootstrap } });
+        window.__ready = true;
+    </script>
+</body>
+</html>

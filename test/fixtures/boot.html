@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire boot fixture</title>
+    <script src="/fixtures/harness.js"></script>
+    <script type="module">
+        import * as wire from '/dist/cyclewire.min.js';
+        window.CW = wire;
+        wire.start({
+            actions: {
+                log: '/fixtures/actions/log.js',
+                gated: '/fixtures/actions/gated.js',
+            },
+        });
+        window.__ready = true;
+    </script>
+</head>
+<body>
+    <!-- Server-rendered markup: nothing here may load an action module until it is used. -->
+    <button id="like" data-cw-action="log">Like</button>
+    <a id="link" href="/fixtures/boot.html#done" data-cw-on-click="log#second">Link</a>
+    <form id="form" data-cw-action="gated"><button>Send</button></form>
+    <p id="deferred" data-cw-action="log" data-cw-trigger="visible" style="margin-top: 3000px">far below</p>
+</body>
+</html>

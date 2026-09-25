@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire import map fixture</title>
+    <!-- Import maps must be in place before the first module is resolved. -->
+    <script type="importmap">{ "imports": { "app/log": "/fixtures/actions/log.js" } }</script>
+    <script src="/fixtures/harness.js"></script>
+</head>
+<body>
+    <button id="b" data-cw-action="log">go</button>
+    <script type="module">
+        import { start } from '/dist/esm-dev/index.js';
+        start({ actions: { log: 'app/log' } });
+        window.__ready = true;
+    </script>
+</body>
+</html>
