@@ -1,0 +1,17 @@
+# Build (the client build goes to dist/, the Node server build to server/)
+/dist
+/server
+/tmp
+
+# Development
+node_modules
+.env
+*.local
+
+# Cache
+.cache
+.rollup.cache
+tsconfig.tsbuildinfo
+
+# Logs
+*.log

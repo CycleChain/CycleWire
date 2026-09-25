@@ -1,0 +1,96 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "qwik",
+  "name": "Qwik City",
+  "kind": "meta-framework",
+  "summary": "The page as a Qwik City app on its Node.js server adapter: rendered per request and resumed in the browser, nothing hydrates. Route loaders read the cart cookie and the URL, the forms are route actions, search and filters are signals, and the quick view fetches its product through server$.",
+  "build": "npm run build",
+  "start": "npm run serve",
+  "search": "live",
+  "packages": [
+    "@builder.io/qwik",
+    "@builder.io/qwik-city"
+  ],
+  "idioms": [
+    {
+      "choice": "The production server is the one `npm run qwik add node-server` sets up: Node's http.createServer with Qwik City's Node middleware, which renders the page and serves the client build from dist/. It starts with `npm run serve`. The adapter's entry listens on $PORT; it also takes $HOST (127.0.0.1), which the template leaves out.",
+      "docs": "https://qwik.dev/docs/deployments/node/#node-middleware"
+    },
+    {
+      "choice": "`npm run build` runs `qwik build`: the client build, the adapter's server build and a type check. The adapter's static generation step prerenders no page, since none is listed for it.",
+      "docs": "https://qwik.dev/docs/deployments/node/#production-build"
+    },
+    {
+      "choice": "The page is rendered for every request and sets no cacheControl, as the docs advise for pages that differ per visitor: the header shows the visitor's cart.",
+      "docs": "https://qwik.dev/docs/caching/#when-not-to-cache"
+    },
+    {
+      "choice": "The Node middleware takes the site's origin from the ORIGIN environment variable (the runner sets it to the proxy's address), and its CSRF check compares form posts' Origin header with it.",
+      "docs": "https://qwik.dev/docs/deployments/#origin"
+    },
+    {
+      "choice": "Code loading keeps Qwik's defaults: the page resumes instead of hydrating, the Qwik Loader is a module script, and the preloader adds <link rel=\"modulepreload\"> for the bundles the page's listeners may need.",
+      "docs": "https://qwik.dev/docs/advanced/speculative-module-fetching/"
+    },
+    {
+      "choice": "No service worker. Since Qwik 1.14 the preloader has replaced the prefetching service worker; <ServiceWorkerRegister /> stays only in older apps, to unregister it, and the 1.20 starter has neither it nor a service-worker.ts.",
+      "docs": "https://qwik.dev/blog/qwik-1-14-preloader/#1-unregister-the-service-worker"
+    },
+    {
+      "choice": "Two routeLoader$s in the route file: the cart summary, read from the cart cookie with Qwik City's cookie API, and the catalog (every product without its description, with the search, category and ?view= product from the URL). The page passes their values to its components as props.",
+      "docs": "https://qwik.dev/docs/route-loader/"
+    },
+    {
+      "choice": "Add to cart and the newsletter are routeAction$s used through <Form>: without JavaScript it posts natively, with it Qwik City submits it with fetch and runs the route loaders again, which updates the header's cart.",
+      "docs": "https://qwik.dev/docs/action/#using-actions-with-form"
+    },
+    {
+      "choice": "The actions validate with the scenario's own functions (readCart, add, validEmail) and return failures with fail(): 404 for an unknown product, 422 for a rejected address, with the scenario's message. There is no zod$ schema.",
+      "docs": "https://qwik.dev/docs/action/#action-failures"
+    },
+    {
+      "choice": "The cart cookie is set with Qwik City's cookie API, with the same name, value and attributes as the scenario's cartCookie(). Its value is live within the request, so the loaders that run after the action read the new cart.",
+      "docs": "https://qwik.dev/docs/middleware/#cookie"
+    },
+    {
+      "choice": "Search and category filters work in the browser: the query (bound with bind:value) and the category are signals, and the list is a useComputed$ over the loader's products, so results change as you type without a request, and without the 200 ms debounce that asking the server would need.",
+      "docs": "https://qwik.dev/docs/core/state/#usecomputed"
+    },
+    {
+      "choice": "The search form keeps action=\"/\" method=\"get\" and each category is a link to /?category=, so without JavaScript both load the page. With it, preventdefault:submit and preventdefault:click keep the page, and a category's onClick$ sets it and clears the search.",
+      "docs": "https://qwik.dev/docs/core/events/#preventdefault--stoppropagation"
+    },
+    {
+      "choice": "The list is rendered with .map() and a key per product. Each card is a component with primitive props, so a filter change renders only the cards it adds.",
+      "docs": "https://qwik.dev/docs/core/rendering/#rendering-a-list-of-items"
+    },
+    {
+      "choice": "The brand link is a plain <a>, a full page load, rather than <Link>: the docs note that full page loads are cheap in Qwik, and the page has no other route.",
+      "docs": "https://qwik.dev/docs/api/#link"
+    },
+    {
+      "choice": "Quick view asks for the product's details with a server$ function, Qwik City's RPC. Its link's href, ?view=, renders the dialog open on the server without JavaScript.",
+      "docs": "https://qwik.dev/docs/server$/"
+    },
+    {
+      "choice": "The <dialog id=\"quick-view\"> opens with showModal() from a useVisibleTask$, the task that runs after rendering, so the modal never shows before its content. The component that holds it only mounts once a product is chosen, so nothing runs eagerly on page load.",
+      "docs": "https://qwik.dev/docs/core/tasks/#usevisibletask"
+    },
+    {
+      "choice": "Scenario: the shared stylesheet is a plain <link rel=\"stylesheet\" href=\"/assets/app.css\"> in root.tsx instead of the starter's imported global.css, with no component styles. The only inline <style> is Qwik City's own :root{view-transition-name:none}.",
+      "docs": "https://qwik.dev/docs/core/styles/#global-styles"
+    },
+    {
+      "choice": "Scenario: plain <img> elements with the reference's src, width, height, loading and decoding, instead of Qwik's image optimization.",
+      "docs": "https://qwik.dev/docs/integrations/image-optimization/"
+    },
+    {
+      "choice": "The title comes from the route's head export. RouterHead renders it with the viewport meta, without the starter's canonical link and favicon.",
+      "docs": "https://qwik.dev/docs/pages/#head-export"
+    },
+    {
+      "choice": "The shared modules are imported from ../../scenario. For `npm run dev`, server.fs.allow lets Vite's dev server serve that folder; production builds need no setting.",
+      "docs": "https://vite.dev/config/server-options#server-fs-allow"
+    }
+  ]
+}
