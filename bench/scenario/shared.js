@@ -4,6 +4,7 @@
  * code whichever stack is measured:
  *
  *   GET  /assets/app.css
+ *   GET  /favicon.ico                 204: the page has no icon
  *   GET  /images/<id>.webp
  *   GET  /api/products?q=&category=   { count, items: [{ id, name, category, price }] }
  *   GET  /api/products/<id>           { id, name, category, price, description }
@@ -22,7 +23,7 @@ import { INVALID_EMAIL, thanks, validEmail } from './markup.js';
 const SCENARIO = fileURLToPath(new URL('.', import.meta.url));
 
 /** Paths the proxy routes to this server rather than to the stack. */
-export const SHARED = /^\/(?:assets\/app\.css$|images\/|api\/)/;
+export const SHARED = /^\/(?:assets\/app\.css$|favicon\.ico$|images\/|api\/)/;
 
 const cartJson = (items) => ({ ...summary(items), items });
 
@@ -32,6 +33,8 @@ export async function handle(req, res) {
     const { pathname } = url;
     try {
         if (req.method === 'GET' && pathname === '/assets/app.css') return await file(res, SCENARIO, 'app.css');
+        // The browser asks for an icon on its own; an empty answer keeps a 404 out of the console.
+        if (req.method === 'GET' && pathname === '/favicon.ico') return send(res, 204, '');
         if (req.method === 'GET' && /^\/images\/p\d{2}\.webp$/.test(pathname)) return await file(res, IMAGES, pathname.slice('/images/'.length));
 
         if (req.method === 'GET' && pathname === '/api/products') {
