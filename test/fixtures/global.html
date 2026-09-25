@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire classic-script fixture</title>
+    <script src="/fixtures/harness.js"></script>
+    <!-- Configured from JSON, with unprefixed attributes. -->
+    <script type="application/json" data-cyclewire>
+        {
+            "prefix": "",
+            "actions": {
+                "like": "/fixtures/actions/log.js",
+                "outbound": "/fixtures/actions/log.js",
+                "widget": "/fixtures/actions/log.js"
+            }
+        }
+    </script>
+    <script src="/dist/cyclewire.global.min.js"></script>
+</head>
+<body>
+    <button id="like" data-action="like">Like</button>
+    <a id="outbound" href="/fixtures/global.html#outbound" target="_blank" rel="noopener" data-action="outbound">Website</a>
+    <div id="widget" data-action="widget" data-trigger="load" data-once>widget</div>
+</body>
+</html>
