@@ -1,0 +1,81 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "next",
+  "name": "Next.js",
+  "kind": "meta-framework",
+  "summary": "App Router Server Components render the page per request from the URL and the cart cookie. Server Actions add to the cart and sign up for the newsletter, typing in the search box updates ?q= for the server to render the results, and the quick view is an intercepted route shown in a modal.",
+  "build": "npm run build",
+  "start": "npm start",
+  "search": "live",
+  "packages": [
+    "next",
+    "react",
+    "react-dom"
+  ],
+  "idioms": [
+    {
+      "choice": "Built with next build (Turbopack, the default bundler) and served by next start, the Node.js server of the deployment docs. --hostname 127.0.0.1 binds it to the loopback address; the port comes from $PORT, which next start reads.",
+      "docs": "https://nextjs.org/docs/app/getting-started/deploying#nodejs-server"
+    },
+    {
+      "choice": "turbopack.root is bench/, the documented setting when a project imports files from outside its folder: the app imports the shared catalog, cart and markup modules from bench/scenario/. Next.js uses the same root for output file tracing.",
+      "docs": "https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory"
+    },
+    {
+      "choice": "Every request renders on the server (dynamic rendering, the default for request-time APIs): the root layout reads the cart cookie with cookies() and the page filters by its searchParams. Cache Components, opt-in in Next.js 16, is not enabled.",
+      "docs": "https://nextjs.org/docs/app/api-reference/file-conventions/page#handling-filtering-with-searchparams"
+    },
+    {
+      "choice": "The header with the cart is in the root layout, the UI every page shares. Layouts do not render again on navigation, so a filter or a search fetches only the page.",
+      "docs": "https://nextjs.org/docs/app/getting-started/layouts-and-pages#creating-a-layout"
+    },
+    {
+      "choice": "Add to cart is a Server Action passed to <form action> in a Server Component, so the form posts before hydration and without JavaScript, and the server answers with the page. The product id is a hidden input, the reference's markup and the forms guide's alternative to bind().",
+      "docs": "https://nextjs.org/docs/app/guides/forms#passing-additional-arguments"
+    },
+    {
+      "choice": "The action sets the cart cookie with cookies().set(). Setting a cookie makes Next.js render the current route again and send it in the action's response, so it calls neither refresh() nor revalidatePath().",
+      "docs": "https://nextjs.org/docs/app/guides/server-actions#a-single-response-carries-data-and-ui"
+    },
+    {
+      "choice": "The newsletter form is a Client Component with useActionState and a Server Action that returns the message, as the forms guide shows for messages from the server; before hydration the form posts and the page comes back with the message. The button is disabled while the action is pending, as in the guide.",
+      "docs": "https://nextjs.org/docs/app/guides/forms#validation-errors"
+    },
+    {
+      "choice": "Live search as the Next.js Learn course teaches it: the query is in the URL, useDebouncedCallback (use-debounce) calls router.replace(), and the page's Server Components render the results. The course waits 300 ms; the scenario sets 200 ms for every stack that searches on the server. The course's Suspense boundary and skeleton around the results are left out (see loading.js below).",
+      "docs": "https://nextjs.org/learn/dashboard-app/adding-search-and-pagination"
+    },
+    {
+      "choice": "The page passes the query and category it read from searchParams to the search box as props, where the course's box reads useSearchParams(): the results are data the page loads, and while the quick view is open the URL is /products/<id> but the list behind it keeps its query. The box follows navigations it did not make, so choosing a category clears it.",
+      "docs": "https://nextjs.org/docs/app/getting-started/layouts-and-pages#what-to-use-and-when"
+    },
+    {
+      "choice": "The search form is next/form: Enter navigates on the client, and without JavaScript it is a GET form that keeps the selected category in a hidden field.",
+      "docs": "https://nextjs.org/docs/app/api-reference/components/form"
+    },
+    {
+      "choice": "Category filters are <Link>s to /?category=…, and every link keeps the default prefetching. The routes are dynamic and have no loading.js, so, as the prefetching guide describes, the prefetches of links in view carry no page data, and the page is rendered on click.",
+      "docs": "https://nextjs.org/docs/app/guides/prefetching#prefetching-static-vs-dynamic-routes"
+    },
+    {
+      "choice": "No loading.js, although the navigation docs suggest one for dynamic routes. With it, every full page load sends the page behind the loading fallback and reveals it with an inline script, so without JavaScript only the fallback shows, and the first product images, the page's LCP element, would sit inside the boundary. The streaming guide advises keeping LCP elements outside Suspense boundaries and not adding boundaries you don't need; the catalog renders from memory in one pass.",
+      "docs": "https://nextjs.org/docs/app/guides/streaming#lcp-largest-contentful-paint"
+    },
+    {
+      "choice": "The quick view uses the docs' pattern for modals: an @modal parallel route with the intercepting route (.)products/[id]. A Quick view link to /products/<id> opens the product in a modal over the list, with its own URL; back closes it and forward reopens it. On a full page load, /products/<id> renders the shop with the dialog open, which is how the reference shows a quick view without JavaScript, and @modal/page.js renders nothing, so a navigation to / closes that one.",
+      "docs": "https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes#modals"
+    },
+    {
+      "choice": "The modal is a native <dialog id=\"quick-view\"> opened with showModal() in an effect, as in the docs' nextgram example. Its Close button (a method=\"dialog\" form) and Escape close it, and the close event calls router.back().",
+      "docs": "https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes#closing-the-modal"
+    },
+    {
+      "choice": "Scenario-forced: the stylesheet is a plain <link rel=\"stylesheet\" href=\"/assets/app.css\"> in the root layout's <head>, not an imported CSS file (the docs' default); the docs note that React's <link rel=\"stylesheet\"> can be used. React adds a preload for it.",
+      "docs": "https://nextjs.org/docs/app/getting-started/css#external-stylesheets"
+    },
+    {
+      "choice": "Scenario-forced: product images are plain <img> elements with the reference's src, width, height, loading and decoding, not next/image, which serves resized copies from its image optimizer. React preloads the four eager ones.",
+      "docs": "https://nextjs.org/docs/app/getting-started/images"
+    }
+  ]
+}
