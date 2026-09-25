@@ -1,0 +1,13 @@
+/* Registered with the chart action as { module, css }: fetched when the card
+   nears the viewport and applied before the chart is drawn. */
+.chart__bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 84px 1fr 60px; align-items: center; gap: 10px; font-size: .88rem; }
+.bar__label { color: var(--muted); font-family: var(--mono); font-size: .8rem; }
+.bar__track { height: 12px; border-radius: 99px; background: var(--border); overflow: hidden; }
+.bar__fill { display: block; height: 100%; width: calc(var(--size) * 100%); border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transform-origin: left; transform: scaleX(0); transition: transform .9s cubic-bezier(.2, .8, .2, 1); }
+.is-drawn .bar__fill { transform: scaleX(1); }
+.bar__value { text-align: right; font-family: var(--mono); font-size: .8rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .bar__fill { transition: none; }
+}

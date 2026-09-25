@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CycleWire · Server-rendered HTML, wired on intent</title>
+    <meta name="description" content="CycleWire is a 4.6 kB, zero-dependency engine that makes server-rendered HTML interactive without hydration: one listener per event type, and action code loaded on intent.">
+    <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0c10" media="(prefers-color-scheme: dark)">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CycleWire: server-rendered HTML, wired on intent">
+    <meta property="og:description" content="Zero-initial-JS selective activation engine. No hydration, no virtual DOM, no dependencies.">
+    <meta property="og:url" content="https://cyclechain.github.io/CycleWire/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f766e'/%3E%3Cpath d='M6 20h6l3-8 3 8h8' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='15' cy='12' r='2.4' fill='%23fbbf24'/%3E%3C/svg%3E">
+    <script>try { var theme = localStorage.getItem('cw-theme'); if (theme) document.documentElement.dataset.theme = theme; } catch (e) {}</script>
+    <script type="importmap">
+        {
+            "imports": {
+                "cyclewire": "./dist/cyclewire.min.js",
+                "cyclewire/css": "./dist/css.min.js",
+                "cyclewire/dom": "./dist/dom.min.js",
+                "cyclewire/morph": "./dist/morph.min.js",
+                "cyclewire/signals": "./dist/signals.min.js"
+            }
+        }
+    </script>
+    <link rel="modulepreload" href="./dist/cyclewire.min.js">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f8fa;
+            --bg-glow: rgba(15, 118, 110, .10);
+            --surface: #ffffff;
+            --surface-2: #f1f3f7;
+            --border: #e1e5ed;
+            --border-strong: #cbd2de;
+            --text: #0d1321;
+            --muted: #4c5668;
+            --faint: #778194;
+            --accent: #0f766e;
+            --accent-2: #6d28d9;
+            --accent-soft: rgba(15, 118, 110, .10);
+            --accent-ink: #ffffff;
+            --spark: #b45309;
+            --spark-soft: rgba(180, 83, 9, .12);
+            --danger: #be123c;
+            --code-bg: #0d1117;
+            --code-text: #e6edf3;
+            --code-border: #1f2630;
+            --shadow: 0 1px 2px rgba(13, 19, 33, .04), 0 12px 32px -18px rgba(13, 19, 33, .25);
+            --radius: 16px;
+            --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                color-scheme: dark;
+                --bg: #0a0c10;
+                --bg-glow: rgba(94, 234, 212, .08);
+                --surface: #11151c;
+                --surface-2: #171c25;
+                --border: #232a35;
+                --border-strong: #333c4a;
+                --text: #e8ebf0;
+                --muted: #a0a9b8;
+                --faint: #6f7888;
+                --accent: #5eead4;
+                --accent-2: #a78bfa;
+                --accent-soft: rgba(94, 234, 212, .12);
+                --accent-ink: #042f2b;
+                --spark: #fbbf24;
+                --spark-soft: rgba(251, 191, 36, .14);
+                --danger: #fb7185;
+                --code-bg: #0b0f15;
+                --code-border: #1c232d;
+                --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 20px 40px -24px rgba(0, 0, 0, .9);
+            }
+        }
+
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0a0c10;
+            --bg-glow: rgba(94, 234, 212, .08);
+            --surface: #11151c;
+            --surface-2: #171c25;
+            --border: #232a35;
+            --border-strong: #333c4a;
+            --text: #e8ebf0;
+            --muted: #a0a9b8;
+            --faint: #6f7888;
+            --accent: #5eead4;
+            --accent-2: #a78bfa;
+            --accent-soft: rgba(94, 234, 212, .12);
+            --accent-ink: #042f2b;
+            --spark: #fbbf24;
+            --spark-soft: rgba(251, 191, 36, .14);
+            --danger: #fb7185;
+            --code-bg: #0b0f15;
+            --code-border: #1c232d;
+            --shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 20px 40px -24px rgba(0, 0, 0, .9);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body {
+            margin: 0;
+            background:
+                radial-gradient(1100px 520px at 85% -10%, var(--bg-glow), transparent 70%),
+                var(--bg);
+            color: var(--text);
+            font: 16px/1.6 var(--font);
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+        a:hover { text-decoration-thickness: 2px; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+        code, kbd, pre { font-family: var(--mono); }
+        p code, li code, td code {
+            font-size: .88em;
+            padding: .08em .38em;
+            border-radius: 6px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+        h1, h2, h3 { line-height: 1.15; letter-spacing: -.02em; margin: 0; }
+        img, svg { display: block; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .skip { position: absolute; left: 16px; top: -48px; padding: 8px 14px; background: var(--accent); color: var(--accent-ink); border-radius: 8px; z-index: 10; }
+        .skip:focus { top: 12px; }
+        .wrap { width: min(1120px, 100%); margin: 0 auto; padding: 0 20px; }
+        .muted { color: var(--muted); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: .5em;
+            padding: .7em 1.15em;
+            border-radius: 11px;
+            border: 1px solid var(--border-strong);
+            background: var(--surface);
+            color: var(--text);
+            font: 600 .95rem/1 var(--font);
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .15s ease, border-color .15s ease, background .15s ease;
+        }
+        .btn:hover { border-color: var(--accent); text-decoration: none; }
+        .btn:active { transform: translateY(1px); }
+        .btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+        .btn--primary:hover { filter: brightness(1.05); }
+        .btn[disabled] { opacity: .45; cursor: not-allowed; }
+        [data-cw-pending] { cursor: progress; }
+        .btn[data-cw-pending] { opacity: .7; }
+
+        /* Navigation */
+        .nav { position: sticky; top: 0; z-index: 5; backdrop-filter: saturate(1.4) blur(12px); background: color-mix(in srgb, var(--bg) 78%, transparent); border-bottom: 1px solid var(--border); }
+        .nav .wrap { display: flex; align-items: center; gap: 18px; height: 60px; }
+        .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 750; letter-spacing: -.02em; text-decoration: none; font-size: 1.05rem; }
+        .brand:hover { text-decoration: none; }
+        .brand__version { font: 600 .7rem/1 var(--mono); color: var(--muted); padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; }
+        .nav__links { display: flex; gap: 18px; margin-left: auto; align-items: center; }
+        .nav__links a { color: var(--muted); text-decoration: none; font-size: .93rem; font-weight: 550; }
+        .nav__links a:hover { color: var(--text); }
+        .icon-btn { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+        .icon-btn:hover { border-color: var(--accent); }
+        .icon-btn .moon { display: none; }
+        :root[data-theme="dark"] .icon-btn .sun { display: none; }
+        :root[data-theme="dark"] .icon-btn .moon { display: block; }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme]) .icon-btn .sun { display: none; }
+            :root:not([data-theme]) .icon-btn .moon { display: block; }
+        }
+        @media (max-width: 720px) { .nav__links .hide-sm { display: none; } }
+
+        /* Hero */
+        .hero { padding: clamp(48px, 8vw, 96px) 0 40px; }
+        .hero .wrap { display: grid; gap: 40px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; }
+        @media (max-width: 920px) { .hero .wrap { grid-template-columns: 1fr; } }
+        .eyebrow { display: inline-flex; gap: 8px; align-items: center; font: 600 .78rem/1 var(--mono); color: var(--muted); padding: 7px 11px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+        .eyebrow b { color: var(--accent); font-weight: 700; }
+        .hero h1 { font-size: clamp(2.5rem, 6.4vw, 4.6rem); font-weight: 820; letter-spacing: -.045em; line-height: 1.02; margin: 22px 0 18px; }
+        .hero h1 span { background: linear-gradient(95deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .lead { font-size: clamp(1.05rem, 1.6vw, 1.22rem); color: var(--muted); max-width: 38em; margin: 0 0 28px; }
+        .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+        .install { display: inline-flex; align-items: center; gap: 4px; padding: 5px 5px 5px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--code-bg); color: var(--code-text); }
+        .install code { font-size: .92rem; white-space: nowrap; }
+        .install code::before { content: "$ "; color: #7d8590; }
+        .install__copy { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 7px 10px; border: 0; border-radius: 8px; background: rgba(255, 255, 255, .08); color: var(--code-text); font: 600 .8rem/1 var(--font); cursor: pointer; }
+        .install__copy:hover { background: rgba(255, 255, 255, .16); }
+
+        /* Cards */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+        /* Network panel */
+        .network { padding: 20px 20px 18px; }
+        .network__head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .network__head h2 { font-size: .95rem; letter-spacing: 0; }
+        .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent-soft); animation: pulse 2.4s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+        .network__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .88rem; max-height: 290px; overflow: auto; }
+        .network__list li { display: grid; grid-template-columns: 1fr auto 64px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); animation: arrive .45s ease-out; }
+        .network__list code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 0; padding: 0; font-size: .86rem; }
+        .network__size { text-align: right; color: var(--muted); font: .8rem/1 var(--mono); }
+        @keyframes arrive { from { opacity: 0; transform: translateY(-4px); } }
+        .tag { font: 700 .66rem/1 var(--font); letter-spacing: .04em; text-transform: uppercase; padding: 5px 7px; border-radius: 6px; }
+        .tag--boot { color: var(--accent); background: var(--accent-soft); }
+        .tag--demand { color: var(--spark); background: var(--spark-soft); }
+        .network__total { margin: 14px 0 4px; font: 600 .85rem/1.4 var(--mono); }
+        .network__hint { margin: 0; color: var(--muted); font-size: .86rem; }
+
+        /* Sections */
+        section { scroll-margin-top: 72px; }
+        .section { padding: 72px 0; }
+        .section__head { max-width: 46em; margin-bottom: 32px; }
+        .section__head h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); letter-spacing: -.035em; margin-bottom: 10px; }
+        .section__head p { color: var(--muted); margin: 0; font-size: 1.05rem; }
+        .kicker { display: block; font: 700 .75rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+
+        /* Stats */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .stats div { background: var(--surface); padding: 22px; }
+        .stats b { display: block; font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.04em; line-height: 1.1; }
+        .stats span { color: var(--muted); font-size: .9rem; }
+        @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+        /* How it works */
+        .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: step; position: relative; }
+        .steps::before { content: ""; position: absolute; top: 27px; left: 8%; right: 8%; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--spark)); opacity: .5; }
+        .steps li { position: relative; padding: 0 6px; counter-increment: step; }
+        .steps li::before { content: counter(step); display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border-strong); font: 700 1.2rem/1 var(--mono); color: var(--accent); position: relative; }
+        .steps h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .steps p { margin: 0; color: var(--muted); font-size: .95rem; }
+        @media (max-width: 860px) {
+            .steps { grid-template-columns: 1fr 1fr; }
+            .steps::before { display: none; }
+        }
+        @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+
+        /* Demos */
+        .demos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        @media (max-width: 860px) { .demos { grid-template-columns: 1fr; } }
+        .demo { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+        .demo header { display: flex; align-items: baseline; gap: 12px; }
+        .demo__num { font: 700 .8rem/1 var(--mono); color: var(--accent); }
+        .demo h3 { font-size: 1.12rem; }
+        .demo > p { margin: 0; color: var(--muted); font-size: .95rem; }
+        .demo__stage { padding: 18px; border-radius: 12px; background: var(--surface-2); border: 1px dashed var(--border-strong); min-height: 120px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+        .demo__code { border-top: 1px solid var(--border); padding-top: 12px; margin-top: auto; }
+        .demo__code summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--muted); }
+        .demo__code summary:hover { color: var(--text); }
+        .demo__code pre { margin: 12px 0 0; }
+
+        pre {
+            margin: 0;
+            padding: 16px 18px;
+            overflow: auto;
+            border-radius: 12px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid var(--code-border);
+            font-size: .84rem;
+            line-height: 1.65;
+            tab-size: 4;
+        }
+        pre + pre { margin-top: 10px; }
+        .tok-com { color: #7d8590; font-style: italic; }
+        .tok-str { color: #a5d6ff; }
+        .tok-kw { color: #ff7b72; }
+        .tok-fn { color: #d2a8ff; }
+        .tok-num { color: #79c0ff; }
+        .tok-tag { color: #7ee787; }
+        .tok-attr { color: #ffa657; }
+
+        /* Demo: like */
+        .like { align-self: center; display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: 650 1rem/1 var(--font); cursor: pointer; }
+        .like svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+        .like[aria-pressed="true"] { border-color: var(--danger); color: var(--danger); }
+        .like[aria-pressed="true"] svg { fill: currentColor; }
+        .like__count { font-family: var(--mono); color: var(--muted); }
+
+        /* Demo: search */
+        .search input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: 1rem/1.2 var(--font); }
+        .search__meta { margin: 0; font-size: .85rem; color: var(--muted); }
+        .search__results { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .search__results li { display: grid; gap: 2px; padding: 8px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); }
+        .search__results a { font-weight: 650; text-decoration: none; }
+        .search__results span { color: var(--muted); font-size: .86rem; }
+        mark { background: var(--spark-soft); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+        /* Demo: cart */
+        .cart__badge { display: flex; align-items: center; gap: 8px; font-weight: 650; }
+        .cart__badge svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 1.8; }
+        .cart__count { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); font: 700 .85rem/1 var(--mono); }
+        .products { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .products li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 6px 6px 6px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+        .products .btn { padding: .5em .9em; font-size: .85rem; }
+        .price { font-family: var(--mono); color: var(--muted); font-size: .88rem; }
+        .cart__foot { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: .88rem; color: var(--muted); }
+
+        /* Demo: morph */
+        .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .board__row { display: grid; grid-template-columns: 26px 1fr minmax(0, 110px) 44px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+        .board__rank { font: 700 .85rem/1 var(--mono); color: var(--accent); }
+        .board__name { font-weight: 600; }
+        .board__note { min-width: 0; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: .85rem/1.2 var(--font); }
+        .board__score { text-align: right; font-family: var(--mono); }
+        .board__round { font: 600 .78rem/1 var(--mono); opacity: .75; }
+        ::view-transition-group(*) { animation-duration: .4s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+
+        /* Quick start tabs */
+        .tabs { display: grid; grid-template-columns: repeat(4, auto) 1fr; }
+        .tabs input { position: absolute; opacity: 0; pointer-events: none; }
+        .tabs label { padding: 10px 16px; border: 1px solid transparent; border-bottom: 0; border-radius: 10px 10px 0 0; color: var(--muted); font-weight: 600; font-size: .93rem; cursor: pointer; }
+        .tabs label:hover { color: var(--text); }
+        .tabs input:checked + label { background: var(--surface); border-color: var(--border); color: var(--text); }
+        .tabs input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .tabs__panel { grid-column: 1 / -1; grid-row: 2; display: none; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 0 var(--radius) var(--radius) var(--radius); }
+        .tabs__panel p { margin: 0 0 12px; color: var(--muted); }
+        #qs-cdn:checked ~ [data-for="qs-cdn"], #qs-npm:checked ~ [data-for="qs-npm"], #qs-map:checked ~ [data-for="qs-map"], #qs-modules:checked ~ [data-for="qs-modules"] { display: block; }
+        @media (max-width: 640px) {
+            .tabs { grid-template-columns: 1fr 1fr; }
+            .tabs label { border-radius: 10px; border: 1px solid var(--border); margin: 0 6px 6px 0; text-align: center; }
+            .tabs__panel { grid-row: auto; border-radius: var(--radius); }
+        }
+
+        /* Tables */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+        table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+        th, td { padding: 11px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: 0; }
+        th { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); background: var(--surface-2); }
+        td:first-child { white-space: nowrap; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        /* Why */
+        .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .why article { padding: 22px; }
+        .why h3 { font-size: 1.08rem; margin-bottom: 8px; }
+        .why p { margin: 0; color: var(--muted); font-size: .95rem; }
+        @media (max-width: 860px) { .why { grid-template-columns: 1fr; } }
+
+        /* Stack */
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+        .chips li { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-weight: 600; font-size: .9rem; }
+
+        /* Footer */
+        .footer { margin-top: 40px; padding: 36px 0 48px; border-top: 1px solid var(--border); color: var(--muted); font-size: .92rem; }
+        .footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 28px; justify-content: space-between; }
+        .footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
+        .footer a { color: var(--muted); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+            ::view-transition-group(*) { animation: none; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+        <div class="wrap">
+            <a class="brand" href="#top" aria-label="CycleWire home">
+                <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0f766e"/><path d="M6 20h6l3-8 3 8h8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="12" r="2.4" fill="#fbbf24"/></svg>
+                CycleWire <span class="brand__version">v1.0.0</span>
+            </a>
+            <nav class="nav__links" aria-label="Main">
+                <a class="hide-sm" href="#demos">Demos</a>
+                <a class="hide-sm" href="#start">Quick start</a>
+                <a class="hide-sm" href="./examples/">Examples</a>
+                <a href="https://github.com/CycleChain/CycleWire/tree/main/docs">Docs</a>
+                <a href="https://github.com/CycleChain/CycleWire">GitHub</a>
+                <button type="button" class="icon-btn" data-cw-action="theme" aria-label="Toggle dark mode" aria-pressed="false">
+                    <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="hero" id="top">
+            <div class="wrap">
+                <div>
+                    <span class="eyebrow"><b>v1.0.0</b> MIT · zero dependencies · inspired by Qwik</span>
+                    <h1>Server-rendered HTML, <span>wired on intent.</span></h1>
+                    <p class="lead">
+                        CycleWire makes the HTML your server already rendered interactive, without hydration. One tiny
+                        listener per event type; the code behind a button loads when someone reaches for it. Works with
+                        Laravel, Rails, Django, Astro, Web Components, or any other stack.
+                    </p>
+                    <div class="hero__actions">
+                        <a class="btn btn--primary" href="#start">Get started <span aria-hidden="true">→</span></a>
+                        <a class="btn" href="https://github.com/CycleChain/CycleWire/tree/main/docs">Read the docs</a>
+                        <div class="install">
+                            <code>npm i cyclewire</code>
+                            <button type="button" class="install__copy" data-cw-action="copy" data-cw-once data-copy="npm i cyclewire" aria-label="Copy the install command">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                                <span class="copy__label">Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="network card" aria-labelledby="network-title" data-cw-action="network" data-cw-trigger="idle">
+                    <div class="network__head">
+                        <span class="pulse" aria-hidden="true"></span>
+                        <h2 id="network-title">What this page has downloaded</h2>
+                    </div>
+                    <ul class="network__list" aria-live="polite">
+                        <li><code>cyclewire.min.js</code><span class="tag tag--boot">at boot</span><span class="network__size">4.6 kB</span></li>
+                    </ul>
+                    <p class="network__total">1 file · the only script at boot</p>
+                    <p class="network__hint">Use the demos below and watch each module arrive the moment it is needed.</p>
+                </aside>
+            </div>
+        </section>
+
+        <div class="wrap">
+            <section class="stats" aria-label="At a glance">
+                <div><b>4.6 kB</b><span>core, brotli</span></div>
+                <div><b>0</b><span>hydration passes</span></div>
+                <div><b>0</b><span>runtime dependencies</span></div>
+                <div><b>Any</b><span>backend or framework</span></div>
+            </section>
+        </div>
+
+        <section class="section" id="how" aria-labelledby="how-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">How it works</span>
+                    <h2 id="how-title">The server renders. CycleWire only connects the wires.</h2>
+                    <p>Qwik's loader architecture, without Qwik's compiler: markup carries the intent, one listener per event type does the rest.</p>
+                </div>
+                <ol class="steps">
+                    <li>
+                        <h3>Server renders HTML</h3>
+                        <p>Your markup is the UI and works before any JavaScript: links link, forms submit. Intent is written as <code>data-cw-action="cart#add"</code>.</p>
+                    </li>
+                    <li>
+                        <h3>One listener per event</h3>
+                        <p>A single delegated listener serves every button on the page, including content added later by any framework.</p>
+                    </li>
+                    <li>
+                        <h3>Intent preloads</h3>
+                        <p>Hover, focus or touch fetches the action with <code>modulepreload</code>: downloaded and compiled, not run.</p>
+                    </li>
+                    <li>
+                        <h3>Interaction runs</h3>
+                        <p>On click the module is ready. CycleWire yields so the press paints, then runs your handler with an abort signal.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="section" id="demos" aria-labelledby="demos-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Live demos</span>
+                    <h2 id="demos-title">Try it, and keep an eye on the network panel.</h2>
+                    <p>Every demo below is plain server-rendered HTML. Each one pulls in its own action module, and <code>dom</code>, <code>morph</code> or <code>signals</code> where it needs them, only when you use it.</p>
+                </div>
+
+                <div class="demos">
+                    <article class="demo card">
+                        <header><span class="demo__num">01</span><h3>Fetched on intent, run on click</h3></header>
+                        <p>The like button's code is not on the page yet. Hover or focus the button and <code>like.js</code> starts downloading; click and it runs.</p>
+                        <div class="demo__stage">
+                            <button type="button" class="like" data-cw-action="like" aria-pressed="false">
+                                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.3-4.4-9.3-8.9C1.3 8.4 3.3 4.5 7 4.5c2 0 3.5 1 4.3 2.3.1.2.4.2.5 0 .8-1.3 2.3-2.3 4.2-2.3 3.7 0 5.7 3.9 4.3 7.1-2 4.5-8.3 8.9-8.3 8.9z"/></svg>
+                                <span>Like</span>
+                                <span class="like__count">128</span>
+                            </button>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup and action</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;button data-cw-action="like" aria-pressed="false"&gt;
+    ♥ Like &lt;span class="like__count"&gt;128&lt;/span&gt;
+&lt;/button&gt;</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/like.js
+export function run({ element }) {
+    const pressed = element.getAttribute('aria-pressed') === 'true';
+    element.setAttribute('aria-pressed', String(!pressed));
+    const count = element.querySelector('.like__count');
+    count.textContent = Number(count.textContent) + (pressed ? -1 : 1);
+}</code></pre>
+                        </details>
+                    </article>
+
+                    <article class="demo card">
+                        <header><span class="demo__num">02</span><h3>Search as you type</h3></header>
+                        <p>Input runs in <code>restart</code> mode: every keystroke aborts the stale run's signal. Results are rendered with the context-escaping <code>html</code> template from <code>cyclewire/dom</code>, which loads with the first keystroke.</p>
+                        <div class="demo__stage search">
+                            <label class="sr-only" for="api-search">Search web platform APIs</label>
+                            <input id="api-search" type="search" autocomplete="off" spellcheck="false" placeholder="Try “transition” or “observer”"
+                                   data-cw-action="search" data-cw-debounce="120"
+                                   data-cw-props='{"source": "./data/apis.json", "results": "api-results", "meta": "api-meta"}'>
+                            <p id="api-meta" class="search__meta" aria-live="polite">Type to search 34 web platform APIs.</p>
+                            <ul id="api-results" class="search__results"></ul>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup and action</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;input type="search" data-cw-action="search" data-cw-debounce="120"&gt;
+&lt;ul id="results"&gt;&lt;/ul&gt;</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/search.js
+import { html, swap } from 'cyclewire/dom';
+
+export async function run({ element, signal }) {
+    const response = await fetch(`/search?q=${element.value}`, { signal });
+    const hits = await response.json();
+    swap(results, html`${hits.map((hit) =&gt; html`&lt;li&gt;${hit.name}&lt;/li&gt;`)}`);
+}</code></pre>
+                        </details>
+                    </article>
+
+                    <article class="demo card" data-cw-action="chart" data-cw-trigger="visible">
+                        <header><span class="demo__num">03</span><h3>Wakes up when it scrolls into view, styles included</h3></header>
+                        <p>This card has a <code>visible</code> trigger. As it approached the viewport, its module was fetched with <code>cyclewire/dom</code> and <code>cyclewire/css</code>, and the chart's stylesheet applied before the bars were drawn from the real <code>sizes.json</code>. None of it was on the page before.</p>
+                        <div class="demo__stage">
+                            <div class="chart__bars" aria-live="polite"><p class="muted">The chart module loads when this card comes into view.</p></div>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/chart.js
+import { css } from 'cyclewire/css';
+import { html, swap } from 'cyclewire/dom';
+
+export async function run({ element, signal }) {
+    const [sizes] = await Promise.all([
+        fetch('./dist/sizes.json', { signal }).then((response) =&gt; response.json()),
+        css('./styles/chart.css', element), // applied before the bars are drawn
+    ]);
+    swap(element.querySelector('.chart__bars'), html`…`);
+}</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;article data-cw-action="chart" data-cw-trigger="visible"&gt;
+    &lt;!-- server-rendered placeholder --&gt;
+&lt;/article&gt;
+
+&lt;div data-cw-action="analytics" data-cw-trigger="idle"&gt;&lt;/div&gt;
+&lt;nav data-cw-action="menu#compact" data-cw-trigger="media:(max-width: 40em)"&gt;&lt;/nav&gt;</code></pre>
+                        </details>
+                    </article>
+
+                    <article class="demo card">
+                        <script type="application/json" data-cw-store="cart">{"items": []}</script>
+                        <header><span class="demo__num">04</span><h3>State that resumes, not re-renders</h3></header>
+                        <p>The badge below was rendered by the server. On your first click, <code>cyclewire/signals</code> reads the serialized store and wires only the bindings that depend on it.</p>
+                        <div class="demo__stage">
+                            <div class="cart__badge" aria-live="polite">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.1"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg>
+                                <span class="cart__count" data-cw-bind="text: $cart.count">0</span>
+                                <span data-cw-bind="text: $cart.total">$0.00</span>
+                            </div>
+                            <ul class="products">
+                                <li><span>Wire mug</span><span class="price">$12</span><button type="button" class="btn" data-cw-action="cart#add" data-cw-concurrency="parallel" data-cw-props='{"name": "Wire mug", "price": 12}'>Add</button></li>
+                                <li><span>Spark tee</span><span class="price">$24</span><button type="button" class="btn" data-cw-action="cart#add" data-cw-concurrency="parallel" data-cw-props='{"name": "Spark tee", "price": 24}'>Add</button></li>
+                                <li><span>Signal sticker</span><span class="price">$3</span><button type="button" class="btn" data-cw-action="cart#add" data-cw-concurrency="parallel" data-cw-props='{"name": "Signal sticker", "price": 3}'>Add</button></li>
+                            </ul>
+                            <div class="cart__foot">
+                                <span data-cw-bind="text: $cart.summary">Nothing yet.</span>
+                                <button type="button" class="btn" data-cw-action="cart#clear" data-cw-bind="attr.disabled: $cart.empty" disabled>Clear</button>
+                            </div>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup and action</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;script type="application/json" data-cw-store="cart"&gt;{"items": []}&lt;/script&gt;
+
+&lt;span data-cw-bind="text: $cart.count"&gt;0&lt;/span&gt;
+&lt;button data-cw-action="cart#add" data-cw-props='{"name": "Wire mug", "price": 12}'&gt;Add&lt;/button&gt;</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/cart.js
+import { store } from 'cyclewire/signals';
+
+export function add({ props }) {
+    const cart = store('cart', { get count() { return this.items.length; } });
+    cart.items.push(props); // the badge updates itself
+}</code></pre>
+                        </details>
+                    </article>
+
+                    <article class="demo card">
+                        <header><span class="demo__num">05</span><h3>Morph server HTML, keep the state</h3></header>
+                        <p>Type a note next to a name, then refresh. The new standings come from the server as HTML; <code>morph()</code> moves the existing rows (with <code>moveBefore()</code> where available) so your note, and even your cursor, travel with them.</p>
+                        <div class="demo__stage">
+                            <ol id="board" class="board">
+<li id="p-ada" class="board__row" style="view-transition-name: p-ada"><span class="board__rank">1</span><span class="board__name">Ada</span><input id="note-ada" class="board__note" aria-label="Note for Ada" placeholder="note…"><b class="board__score">98</b></li>
+<li id="p-grace" class="board__row" style="view-transition-name: p-grace"><span class="board__rank">2</span><span class="board__name">Grace</span><input id="note-grace" class="board__note" aria-label="Note for Grace" placeholder="note…"><b class="board__score">91</b></li>
+<li id="p-alan" class="board__row" style="view-transition-name: p-alan"><span class="board__rank">3</span><span class="board__name">Alan</span><input id="note-alan" class="board__note" aria-label="Note for Alan" placeholder="note…"><b class="board__score">87</b></li>
+<li id="p-hedy" class="board__row" style="view-transition-name: p-hedy"><span class="board__rank">4</span><span class="board__name">Hedy</span><input id="note-hedy" class="board__note" aria-label="Note for Hedy" placeholder="note…"><b class="board__score">80</b></li>
+<li id="p-linus" class="board__row" style="view-transition-name: p-linus"><span class="board__rank">5</span><span class="board__name">Linus</span><input id="note-linus" class="board__note" aria-label="Note for Linus" placeholder="note…"><b class="board__score">74</b></li>
+                            </ol>
+                            <button type="button" class="btn" data-cw-action="board#refresh">Refresh from the server <span class="board__round">1/3</span></button>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Action</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/board.js
+import { html } from 'cyclewire/dom';
+import { morph } from 'cyclewire/morph';
+
+export async function refresh({ signal }) {
+    const response = await fetch('/partials/board', { signal });
+    await morph(board, html.raw(await response.text()), { transition: true });
+}</code></pre>
+                        </details>
+                    </article>
+
+                    <article class="demo card">
+                        <header><span class="demo__num">06</span><h3>Inside a shadow root</h3></header>
+                        <p>A server-rendered web component with a declarative shadow root. <code>submit</code> never leaves a shadow root, so CycleWire observes it: this page starts with <code>{ shadow: true }</code>.</p>
+                        <div class="demo__stage">
+                            <cw-greeter>
+                                <template shadowrootmode="open">
+                                    <style>
+                                        :host { display: block; }
+                                        form { display: flex; gap: 8px; flex-wrap: wrap; }
+                                        input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: 1rem/1.2 var(--font); }
+                                        button { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font: 600 .95rem/1 var(--font); cursor: pointer; }
+                                        output { display: block; margin-top: 12px; color: var(--muted); font-size: .92rem; }
+                                    </style>
+                                    <form data-cw-action="shadow#greet">
+                                        <input name="name" autocomplete="off" placeholder="Your name" aria-label="Your name">
+                                        <button>Greet</button>
+                                    </form>
+                                    <output aria-live="polite">This form lives in a shadow root.</output>
+                                </template>
+                            </cw-greeter>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup</summary>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;cw-greeter&gt;
+    &lt;template shadowrootmode="open"&gt;
+        &lt;form data-cw-action="shadow#greet"&gt;…&lt;/form&gt;
+    &lt;/template&gt;
+&lt;/cw-greeter&gt;</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">start({ actions, shadow: true }); // or observe(host.shadowRoot)</code></pre>
+                        </details>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="start" aria-labelledby="start-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Quick start</span>
+                    <h2 id="start-title">Three steps, any stack.</h2>
+                    <p>Mark up the intent, write the action as a plain ES module, register it. Pick how you load CycleWire:</p>
+                </div>
+                <div class="tabs">
+                    <input type="radio" name="qs" id="qs-cdn" checked><label for="qs-cdn">Script tag</label>
+                    <input type="radio" name="qs" id="qs-npm"><label for="qs-npm">npm + bundler</label>
+                    <input type="radio" name="qs" id="qs-map"><label for="qs-map">Import map</label>
+                    <input type="radio" name="qs" id="qs-modules"><label for="qs-modules">Add modules</label>
+
+                    <div class="tabs__panel" data-for="qs-cdn">
+                        <p>No build step. Map action names to URLs in a JSON block placed before the script.</p>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;button data-cw-action="cart#add" data-cw-props='{"sku": "wire-01"}'&gt;Add to cart&lt;/button&gt;
+
+&lt;script type="application/json" data-cyclewire&gt;
+    { "actions": { "cart": "/js/actions/cart.js" } }
+&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/cyclewire@1/dist/cyclewire.global.min.js" defer&gt;&lt;/script&gt;</code></pre>
+                    </div>
+                    <div class="tabs__panel" data-for="qs-npm">
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="sh">npm install cyclewire</code></pre>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">import { start, fromGlob } from 'cyclewire';
+
+start({
+    // Vite: every file in ./actions becomes its own chunk.
+    actions: fromGlob(import.meta.glob('./actions/**/*.js')),
+});</code></pre>
+                    </div>
+                    <div class="tabs__panel" data-for="qs-map">
+                        <p>Native ES modules from a CDN, with the optional modules one import away.</p>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="html">&lt;script type="importmap"&gt;
+    { "imports": {
+        "cyclewire": "https://cdn.jsdelivr.net/npm/cyclewire@1/dist/cyclewire.min.js",
+        "cyclewire/dom": "https://cdn.jsdelivr.net/npm/cyclewire@1/dist/dom.min.js"
+    } }
+&lt;/script&gt;
+&lt;script type="module"&gt;
+    import { start } from 'cyclewire';
+    start({ actions: { cart: './js/actions/cart.js' } });
+&lt;/script&gt;</code></pre>
+                    </div>
+                    <div class="tabs__panel" data-for="qs-modules">
+                        <p>Boot with the core alone. Import an optional module from the action that needs it, and it downloads with that action: this page works exactly like that.</p>
+<pre data-cw-action="highlight" data-cw-trigger="visible"><code data-lang="js">// actions/refresh.js: cyclewire/dom and cyclewire/morph arrive with this action
+import { html } from 'cyclewire/dom';
+import { morph } from 'cyclewire/morph';
+
+export async function run({ element, signal }) {
+    const response = await fetch(element.dataset.url, { signal });
+    await morph(document.querySelector(element.dataset.target), html.raw(await response.text()));
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="api" aria-labelledby="api-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Reference</span>
+                    <h2 id="api-title">Everything fits on one screen.</h2>
+                    <p>Plain <code>data-*</code> attributes: valid HTML, safe in JSX and every template language. The full reference lives in the <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/html-api.md">docs</a>.</p>
+                </div>
+                <div class="grid-2">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Attribute</th><th>Does</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>data-cw-action</code></td><td>Runs on the element's natural event: submit, input, change, toggle or click</td></tr>
+                                <tr><td><code>data-cw-on-&lt;event&gt;</code></td><td>Runs on any delegated event, e.g. <code>keydown</code> or <code>command</code></td></tr>
+                                <tr><td><code>data-cw-trigger</code></td><td><code>load</code>, <code>idle</code>, <code>visible</code>, <code>media:(…)</code></td></tr>
+                                <tr><td><code>data-cw-preload</code></td><td><code>intent</code> (default), <code>visible</code>, <code>idle</code>, <code>load</code>, <code>none</code></td></tr>
+                                <tr><td><code>data-cw-props</code></td><td>JSON for the handler, as <code>ctx.props</code></td></tr>
+                                <tr><td><code>data-cw-concurrency</code></td><td><code>drop</code>, <code>restart</code>, <code>latest</code>, <code>parallel</code></td></tr>
+                                <tr><td><code>data-cw-once</code> · <code>-debounce</code></td><td>One successful run · wait for a pause</td></tr>
+                                <tr><td><code>data-cw-prevent</code></td><td>Explicit <code>preventDefault()</code>; links are never prevented otherwise</td></tr>
+                                <tr><td><code>data-cw-ignore</code></td><td>Stop the search for bindings: for user content</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>JavaScript</th><th>Does</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>start(options)</code></td><td>Delegate events, activate triggers, watch the DOM</td></tr>
+                                <tr><td><code>register(map)</code></td><td>Name → loader function, URL or import-map specifier</td></tr>
+                                <tr><td><code>run(name, el)</code></td><td>Run an action through the same pipeline</td></tr>
+                                <tr><td><code>observe(shadowRoot)</code></td><td>Handle events that never leave a shadow root</td></tr>
+                                <tr><td><code>preload(name)</code></td><td>Fetch a module ahead of time</td></tr>
+                                <tr><td><code>loaded()</code></td><td>Modules imported so far (<code>[]</code> on load)</td></tr>
+                                <tr><td><code>listen(types)</code> · <code>scan(root)</code></td><td>More event types · activate a subtree</td></tr>
+                                <tr><td><code>use(plugin)</code> · <code>stop()</code></td><td>Extend the context · tear everything down</td></tr>
+                                <tr><td>handler <code>ctx</code></td><td><code>event</code>, <code>target</code>, <code>element</code>, <code>signal</code>, <code>props</code>, <code>action</code>, <code>wire</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="modules" aria-labelledby="modules-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Modules</span>
+                    <h2 id="modules-title">Batteries you only pay for when you import them.</h2>
+                    <p>The core covers activation on its own: events, forms, triggers, preloading, concurrency and shadow DOM. Add a module when a feature needs it, ideally from the action that uses it. The <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md">modules guide</a> has core-only recipes and a decision table.</p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Import</th><th>What it does</th><th>brotli</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cyclewire</code></td><td>Delegation, registry, triggers, preloading, concurrency, lifecycle events, shadow DOM, plugins</td><td>4.6 kB</td></tr>
+                            <tr><td><code>cyclewire/css</code></td><td>Stylesheets that arrive with the actions that need them: <code>{ module, css }</code> entries and <code>css()</code>, shadow roots included</td><td>0.6 kB</td></tr>
+                            <tr><td><code>cyclewire/dom</code></td><td><code>html</code> templates escaped by context, inert <code>fragment()</code>, <code>swap()</code>, View Transitions, Trusted Types</td><td>1.9 kB</td></tr>
+                            <tr><td><code>cyclewire/morph</code></td><td>DOM morphing that keeps elements, focus and input: the virtual-DOM job without the virtual DOM</td><td>1.8 kB</td></tr>
+                            <tr><td><code>cyclewire/signals</code></td><td>Signals, reactive stores, <code>data-cw-bind</code>, resumed lazily from server state</td><td>2.9 kB</td></tr>
+                            <tr><td><code>cyclewire/bootstrap</code></td><td>Bootstrap 5's data API (modal, dropdown, collapse, offcanvas, tabs, alerts) without its JavaScript</td><td>2.1 kB</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="why" aria-labelledby="why-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Why</span>
+                    <h2 id="why-title">No hydration. No virtual DOM. No lock-in.</h2>
+                </div>
+                <div class="why">
+                    <article class="card">
+                        <h3>No hydration</h3>
+                        <p>The server's HTML is already correct. CycleWire never re-runs components to attach listeners; one delegated listener per event type is enough. Nothing heavy runs on load, so the first tap is never stuck behind it.</p>
+                    </article>
+                    <article class="card">
+                        <h3>No virtual DOM</h3>
+                        <p>A virtual DOM re-renders server HTML on the client just to diff it. <code>morph()</code> compares DOM to DOM instead, and <code>html</code> parses into an inert <code>&lt;template&gt;</code> and inserts a <code>DocumentFragment</code> in one go.</p>
+                    </article>
+                    <article class="card">
+                        <h3>No lock-in</h3>
+                        <p>Actions are plain ES modules. The markup is plain HTML. Remove CycleWire and your links still link and your forms still submit, because it only prevents what it knows it can handle.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="stack" aria-labelledby="stack-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <span class="kicker">Works with</span>
+                    <h2 id="stack-title">Bring your own backend. Keep your framework.</h2>
+                    <p>Recipes for each are in the <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/integrations.md">integration guide</a>, with guides for <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/frameworks.md">React, Vue and Svelte islands</a> and <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/libraries.md">popular libraries</a>. Try them in the <a href="./examples/">live examples</a>. Tested on current Chromium, Firefox and WebKit; see <a href="https://github.com/CycleChain/CycleWire/blob/main/docs/browser-support.md">browser support</a>.</p>
+                </div>
+                <ul class="chips">
+                    <li>Laravel</li><li>Rails</li><li>Django</li><li>PHP</li><li>Astro</li><li>Vite</li><li>webpack</li>
+                    <li>React islands</li><li>Vue</li><li>Svelte</li><li>Web Components</li><li>htmx</li><li>Turbo</li><li>Bootstrap</li>
+                    <li>jQuery</li><li>DataTables</li><li>Flatpickr</li><li>SweetAlert2</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="wrap">
+            <span>MIT © 2026 <a href="https://cyclechain.io">CycleChain</a> · CycleWire v1.0.0</span>
+            <nav aria-label="Project">
+                <a href="https://github.com/CycleChain/CycleWire">GitHub</a>
+                <a href="https://www.npmjs.com/package/cyclewire">npm</a>
+                <a href="https://github.com/CycleChain/CycleWire/releases">Releases</a>
+                <a href="https://github.com/CycleChain/CycleWire/blob/main/CHANGELOG.md">Changelog</a>
+                <a href="https://github.com/CycleChain/CycleWire/tree/main/docs">Docs</a>
+                <a href="./examples/">Examples</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { start } from 'cyclewire';
+
+        start({
+            shadow: true,
+            actions: {
+                like: './actions/like.js',
+                search: './actions/search.js',
+                chart: './actions/chart.js',
+                cart: './actions/cart.js',
+                board: './actions/board.js',
+                shadow: './actions/shadow.js',
+                copy: './actions/copy.js',
+                theme: './actions/theme.js',
+                network: './actions/network.js',
+                highlight: './actions/highlight.js',
+            },
+        });
+    </script>
+</body>
+</html>
