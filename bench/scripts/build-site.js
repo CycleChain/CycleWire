@@ -21,7 +21,7 @@ const REPO = 'https://github.com/CycleChain/CycleWire';
 const SOURCE = `${REPO}/blob/main/bench`;
 const PROFILES = ['mobile', 'desktop'];
 const JOURNEYS = { cart: 'Add to cart', filter: 'Category filter', search: 'Live search', quickview: 'Quick view', newsletter: 'Newsletter' };
-const OUTCOMES = { effect: 'Handled in the page', navigation: 'Handled by a page load', lost: 'Lost', duplicate: 'Handled twice', error: 'Error' };
+export const OUTCOMES = { effect: 'Handled in the page', navigation: 'Handled by a page load', lost: 'Lost', duplicate: 'Handled twice', error: 'Error' };
 
 const ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ENTITIES[char]);
@@ -50,7 +50,7 @@ const score = (value) => (value === null || value === undefined ? '–' : value.
  * The metrics shown, in order. `lower` is better for every one of them.
  * @type {Array<{ id: string, label: string, read: (summaries: any) => Summary | undefined, format: (value: number) => string, note?: string }>}
  */
-const LOAD = [
+export const LOAD = [
     { id: 'fcp', label: 'First Contentful Paint', read: (s) => s.cold.fcp, format: time },
     { id: 'lcp', label: 'Largest Contentful Paint', read: (s) => s.cold.lcp, format: time },
     { id: 'cls', label: 'Layout shift', read: (s) => s.cold.cls, format: score, note: 'CLS' },
@@ -61,13 +61,13 @@ const LOAD = [
     { id: 'html', label: 'HTML', read: (s) => s.cold['bytes.document.transfer'], format: kilobytes, note: 'on the wire' },
     { id: 'requests', label: 'Requests', read: (s) => s.cold.requests, format: plain },
 ];
-const REPEAT = [
+export const REPEAT = [
     { id: 'repeat-fcp', label: 'FCP, repeat visit', read: (s) => s.repeat.fcp, format: time },
     { id: 'repeat-bytes', label: 'Bytes, repeat visit', read: (s) => s.repeat['bytes.total.transfer'], format: kilobytes },
     { id: 'heap', label: 'JS heap', read: (s) => s.repeat['memory.heap'], format: kilobytes },
     { id: 'listeners', label: 'Event listeners', read: (s) => s.repeat['memory.listeners'], format: plain },
 ];
-const EFFECTS = Object.entries(JOURNEYS).map(([id, label]) => ({ id: `effect-${id}`, label, read: (s) => s.journeys[id]?.effect, format: time }));
+export const EFFECTS = Object.entries(JOURNEYS).map(([id, label]) => ({ id: `effect-${id}`, label, read: (s) => s.journeys[id]?.effect, format: time }));
 
 const byId = (metrics, id) => metrics.find((metric) => metric.id === id);
 
