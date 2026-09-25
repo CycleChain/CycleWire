@@ -174,6 +174,7 @@ try {
                 versions: stack.versions,
                 search: stack.manifest.search,
                 idioms: stack.manifest.idioms,
+                response: stack.manifest.response ?? null,
                 conformance: checked.get(stack.id),
                 measured: samples.has(stack.id),
                 samples: samples.get(stack.id) ?? null,

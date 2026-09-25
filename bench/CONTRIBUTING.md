@@ -2,8 +2,9 @@
 
 Corrections from the people who know a stack best are the most useful contributions
 this benchmark can get. If an app here is not built the way its documentation recommends,
-open a pull request that changes it, or an issue that explains how. Framework authors can
-also add a short response to their stack's row; it is shown next to the numbers.
+open a pull request that changes it, or an issue that explains how. Maintainers of a stack
+can also add a short response to its `bench.json` (`"response": { "text", "by", "url" }`);
+the results page shows it next to the numbers.
 
 ## What a stack must build
 

@@ -5,6 +5,7 @@
  *   /            → site/          (the landing page, so its "./dist/…" links resolve as on GitHub Pages)
  *   /dist/       → dist/
  *   /examples/   → examples/dist/ (built with `npm run examples`, laid out as on GitHub Pages)
+ *   /bench/      → the benchmark's results page, built at start from bench/results/, local runs included
  *   /fixtures/   → test/fixtures/
  *
  * Test helpers:
@@ -17,6 +18,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildSite } from '../bench/scripts/build-site.js';
 import { stamp, version } from './site.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -27,9 +29,13 @@ const option = (name, fallback) => {
 const port = Number(option('--port', process.env.PORT || 4173));
 const host = option('--host', '127.0.0.1');
 
+const benchPage = join(root, 'bench', '.cache', 'site');
+await buildSite({ out: benchPage, local: true });
+
 const mounts = [
     ['/dist/', join(root, 'dist')],
     ['/examples/', join(root, 'examples', 'dist')],
+    ['/bench/', benchPage],
     ['/fixtures/', join(root, 'test', 'fixtures')],
     ['/', join(root, 'site')],
 ];

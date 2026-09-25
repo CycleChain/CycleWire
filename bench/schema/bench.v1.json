@@ -3,28 +3,111 @@
   "$id": "https://cyclechain.github.io/CycleWire/bench/schema/bench.v1.json",
   "title": "A stack in the CycleWire benchmark: apps/<id>/bench.json",
   "type": "object",
-  "required": ["id", "name", "kind", "summary", "start", "search", "packages", "idioms"],
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "summary",
+    "start",
+    "search",
+    "packages",
+    "idioms"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "description": "The folder name under apps/.", "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
-    "name": { "description": "How the stack is named in results.", "type": "string", "minLength": 1 },
-    "kind": { "description": "control: a baseline, not a product. The rest describe what the stack is.", "enum": ["control", "library", "framework", "meta-framework"] },
-    "summary": { "description": "One or two sentences on how this stack builds the page.", "type": "string", "minLength": 1 },
-    "build": { "description": "Shell command that builds the app for production, run in its folder.", "type": "string" },
-    "start": { "description": "Shell command that starts the production server on $PORT, run in its folder.", "type": "string" },
-    "search": { "description": "live: results update as you type. submit: the search form must be sent.", "enum": ["live", "submit"] },
-    "packages": { "description": "npm packages whose installed versions results record.", "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "description": "The folder name under apps/.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "name": {
+      "description": "How the stack is named in results.",
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "description": "control: a baseline, not a product. The rest describe what the stack is.",
+      "enum": [
+        "control",
+        "library",
+        "framework",
+        "meta-framework"
+      ]
+    },
+    "summary": {
+      "description": "One or two sentences on how this stack builds the page.",
+      "type": "string",
+      "minLength": 1
+    },
+    "build": {
+      "description": "Shell command that builds the app for production, run in its folder.",
+      "type": "string"
+    },
+    "start": {
+      "description": "Shell command that starts the production server on $PORT, run in its folder.",
+      "type": "string"
+    },
+    "search": {
+      "description": "live: results update as you type. submit: the search form must be sent.",
+      "enum": [
+        "live",
+        "submit"
+      ]
+    },
+    "packages": {
+      "description": "npm packages whose installed versions results record.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
     "idioms": {
       "description": "Every choice that departs from, or picks among, the defaults, with the documentation that recommends it.",
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["choice", "docs"],
+        "required": [
+          "choice",
+          "docs"
+        ],
         "additionalProperties": false,
         "properties": {
-          "choice": { "type": "string", "minLength": 1 },
-          "docs": { "type": "string", "pattern": "^https://" }
+          "choice": {
+            "type": "string",
+            "minLength": 1
+          },
+          "docs": {
+            "type": "string",
+            "pattern": "^https://"
+          }
+        }
+      }
+    },
+    "response": {
+      "description": "A short response from the stack's maintainers, shown next to its results.",
+      "type": "object",
+      "required": [
+        "text",
+        "by"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://"
         }
       }
     }

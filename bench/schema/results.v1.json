@@ -767,6 +767,12 @@
               }
             }
           ]
+        },
+        "response": {
+          "type": [
+            "object",
+            "null"
+          ]
         }
       }
     }

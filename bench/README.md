@@ -63,7 +63,17 @@ Results validate against [`schema/results.v1.json`](schema/results.v1.json). The
 record the machine, the browser, the installed version of every stack and each raw
 sample, so any summary can be recomputed.
 
-`npm test` runs the harness's own tests.
+`npm test` runs the harness's own tests. `node scripts/report.js <results.json>` prints
+a run as Markdown tables, and `node scripts/build-site.js --local` builds the results page
+from your local runs into `.cache/site/` (the repository's `npm run dev` serves it at
+`/bench/`).
+
+## Published results
+
+The Benchmark workflow measures both profiles by hand or weekly on GitHub's runners. When
+both finish, it opens a pull request from `github-actions[bot]` that replaces the files in
+`results/`; merging it redeploys the results page at
+[cyclechain.github.io/CycleWire/bench/](https://cyclechain.github.io/CycleWire/bench/).
 
 ## Layout
 
@@ -74,7 +84,8 @@ sample, so any summary can be recomputed.
 | `runner/` | The in-page probe, journeys, visits, conformance checks and statistics |
 | `apps/` | One folder per stack |
 | `schema/` | JSON Schemas for manifests and results |
-| `scripts/` | Generators for the catalog and the golden text |
+| `scripts/` | Generators for the catalog, the golden text, the report and the results page |
+| `site/` | The results page's one script: sorting tables with CycleWire |
 | `results/` | Published results |
 
 ## Limitations

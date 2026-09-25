@@ -2,8 +2,10 @@ name: Benchmark
 
 # check:   on changes to bench/, the harness's tests, the conformance check for
 #          every stack, and one short run to prove the pipeline works.
-# measure: by hand or weekly, the full run for each profile. Results are kept
-#          as artifacts. See bench/README.md.
+# measure: by hand or weekly, the full run for each profile, kept as artifacts.
+# publish: when every profile was measured, a pull request from
+#          github-actions[bot] replaces bench/results/ with the new runs.
+#          Merging it redeploys the results page. See bench/README.md.
 
 on:
   pull_request:
@@ -102,3 +104,40 @@ jobs:
           path: bench/results/*.json
           if-no-files-found: ignore
           retention-days: 90
+
+  publish:
+    name: Propose the results
+    needs: measure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: bench-*
+          path: new-results
+          merge-multiple: true
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          branch="bench/results-${GITHUB_RUN_ID}"
+          git switch -c "$branch"
+          find bench/results -name '*.json' -delete
+          cp new-results/*.json bench/results/
+          git add -A bench/results
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "chore(bench): results from run $GITHUB_RUN_ID"
+          git push origin "$branch"
+          label=""
+          if gh label list --search bench --json name --jq '.[].name' | grep -qx bench; then label="--label bench"; fi
+          gh pr create --base main --head "$branch" $label \
+            --title "Benchmark results, $(date -u +%Y-%m-%d)" \
+            --body "Results of $RUN_URL. Merging this redeploys the results page. Check the conformance section and the failed visits in each file before merging."

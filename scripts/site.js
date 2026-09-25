@@ -5,6 +5,7 @@
  *   /               site/ (the landing page)
  *   /dist/          dist/*.min.js, their source maps and sizes.json
  *   /examples/      examples/dist/, the live examples, when built
+ *   /bench/         the benchmark's results page, from bench/results/
  *
  * The package version is stamped into every element marked `data-version`,
  * so the page never shows a stale one; the build fails if it finds none.
@@ -16,6 +17,7 @@
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { buildSite } from '../bench/scripts/build-site.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -55,6 +57,9 @@ export async function assemble(out) {
     const examples = join(root, 'examples', 'dist');
     if (await exists(examples)) await cp(examples, join(out, 'examples'), { recursive: true });
     else console.warn('examples/dist is missing, so the site has no live examples: run `npm run examples -- --production`.');
+
+    const profiles = await buildSite({ out: join(out, 'bench') });
+    if (!profiles.length) console.warn('bench/results has no published results, so /bench/ says so.');
 
     const page = join(out, 'index.html');
     const { html, count } = stamp(await readFile(page, 'utf8'), current);
