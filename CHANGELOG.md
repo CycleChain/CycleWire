@@ -6,6 +6,8 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-25
+
 ### Security
 
 - **`html` refused `javascript:` URLs only in the simplest case.** A value split across
@@ -66,5 +68,6 @@ interactive without hydration.
   SweetAlert2, DataTables and jQuery, tested in Chromium, Firefox and WebKit and live
   on GitHub Pages.
 
-[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CycleChain/CycleWire/releases/tag/v1.0.0
