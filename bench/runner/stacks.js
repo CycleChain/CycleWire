@@ -14,6 +14,9 @@ import { validateManifest } from './validate.js';
 export const APPS = fileURLToPath(new URL('../apps/', import.meta.url));
 const PROXY = fileURLToPath(new URL('../proxy/main.js', import.meta.url));
 
+/** Builds and servers run without phoning home: it changes nothing measured. */
+const NO_TELEMETRY = { NEXT_TELEMETRY_DISABLED: '1', ASTRO_TELEMETRY_DISABLED: '1', NUXT_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1' };
+
 /** Every stack with a bench.json, controls first. */
 export function available() {
     const ids = readdirSync(APPS, { withFileTypes: true }).filter((entry) => entry.isDirectory() && existsSync(join(APPS, entry.name, 'bench.json'))).map((entry) => entry.name);
@@ -66,7 +69,7 @@ export async function prepare(stack, { build = true, log = console.log } = {}) {
     }
     if (build && stack.manifest.build) {
         log(`${stack.id}: building`);
-        await run(stack.manifest.build, stack.dir, { NODE_ENV: 'production' });
+        await run(stack.manifest.build, stack.dir, { ...NO_TELEMETRY, NODE_ENV: 'production' });
     }
     for (const name of stack.manifest.packages ?? []) {
         const file = join(stack.dir, 'node_modules', name, 'package.json');
@@ -134,7 +137,7 @@ export async function start(stacks, { log = console.log } = {}) {
                 detached: process.platform !== 'win32',
                 // ORIGIN is the address the browser uses, through the proxy:
                 // servers that check the origin of form posts need it.
-                env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', HOSTNAME: '127.0.0.1', ORIGIN: `https://localhost:${listen}`, NODE_ENV: 'production' },
+                env: { ...process.env, ...NO_TELEMETRY, PORT: String(port), HOST: '127.0.0.1', HOSTNAME: '127.0.0.1', ORIGIN: `https://localhost:${listen}`, NODE_ENV: 'production' },
                 stdio: ['ignore', 'pipe', 'pipe'],
             });
             let output = '';

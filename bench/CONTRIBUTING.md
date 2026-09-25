@@ -86,7 +86,9 @@ a metric, special-casing the runner, or loading less than a real app of this kin
    `packages` whose versions to record, and `idioms`. The server runs with `PORT`,
    `HOST` and `HOSTNAME` set, `NODE_ENV=production`, and `ORIGIN` set to the address the
    browser uses (`https://localhost:<port>`); the proxy also sends `X-Forwarded-Proto`,
-   `X-Forwarded-Host` and the original `Host`.
+   `X-Forwarded-Host` and the original `Host`. Builds and servers run with the usual
+   telemetry switches off (`NEXT_TELEMETRY_DISABLED`, `ASTRO_TELEMETRY_DISABLED`,
+   `NUXT_TELEMETRY_DISABLED`, `DO_NOT_TRACK`).
 3. Run `node run.js --check --stacks=<id>` until every check passes, then
    `node run.js --stacks=static,<id> --iterations=3` to see numbers.
 4. Open a pull request. CI runs the harness's tests, the conformance check and one short run.
