@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/CycleChain/CycleWire/tree/main/docs
+    about: Guides and the complete API reference.
+  - name: Security vulnerability
+    url: https://github.com/CycleChain/CycleWire/security/advisories/new
+    about: Report privately; please do not open a public issue.
