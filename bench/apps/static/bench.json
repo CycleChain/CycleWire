@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "static",
+  "name": "Static HTML",
+  "kind": "control",
+  "summary": "The reference page with no JavaScript at all. Every interaction is a full page load: forms post and links navigate. It shows what the network and the server cost on their own.",
+  "start": "node server.js",
+  "search": "submit",
+  "packages": [],
+  "idioms": []
+}

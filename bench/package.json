@@ -1,0 +1,22 @@
+{
+  "name": "cyclewire-bench",
+  "version": "0.0.0",
+  "private": true,
+  "description": "One server-rendered product page, built with each stack and measured the same way.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "check": "node run.js --check",
+    "bench": "node run.js",
+    "serve": "node run.js --serve",
+    "golden": "node scripts/golden.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "playwright": "1.63.0",
+    "sharp": "0.35.4"
+  }
+}

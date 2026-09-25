@@ -1,0 +1,774 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyclechain.github.io/CycleWire/bench/schema/results.v1.json",
+  "title": "One run of the CycleWire benchmark",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "startedAt",
+    "finishedAt",
+    "profile",
+    "environment",
+    "config",
+    "stacks",
+    "failures"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "cyclewire-bench/results@1"
+    },
+    "id": {
+      "type": "string"
+    },
+    "startedAt": {
+      "type": "string"
+    },
+    "finishedAt": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "cpuSlowdown",
+        "network",
+        "viewport",
+        "deviceScaleFactor",
+        "input"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "cpuSlowdown": {
+          "type": "number"
+        },
+        "network": {
+          "type": "object"
+        },
+        "viewport": {
+          "type": "object"
+        },
+        "deviceScaleFactor": {
+          "type": "number"
+        },
+        "input": {
+          "type": "object"
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "runner",
+        "os",
+        "arch",
+        "cpu",
+        "cores",
+        "memoryGB",
+        "loadAverage",
+        "node",
+        "browser",
+        "playwright",
+        "commit",
+        "cpuIndex"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "runner": {
+          "enum": [
+            "local",
+            "github-hosted",
+            "self-hosted"
+          ]
+        },
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "cpu": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cores": {
+          "type": "integer"
+        },
+        "memoryGB": {
+          "type": "number"
+        },
+        "loadAverage": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "node": {
+          "type": "string"
+        },
+        "browser": {
+          "type": "string"
+        },
+        "playwright": {
+          "type": "string"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cpuIndex": {
+          "type": "number"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "required": [
+        "iterations",
+        "seed",
+        "kinds",
+        "journeys",
+        "quietMs",
+        "delivery"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "iterations": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "journeys",
+              "early",
+              "repeat"
+            ]
+          }
+        },
+        "journeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quietMs": {
+          "type": "number"
+        },
+        "delivery": {
+          "type": "object"
+        }
+      }
+    },
+    "stacks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stack"
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stack",
+          "kind",
+          "journey",
+          "iteration",
+          "message"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "stack": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "journey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "iteration": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "number": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "n",
+        "median",
+        "p25",
+        "p75",
+        "min",
+        "max",
+        "ci95"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "median": {
+          "$ref": "#/$defs/number"
+        },
+        "p25": {
+          "$ref": "#/$defs/number"
+        },
+        "p75": {
+          "$ref": "#/$defs/number"
+        },
+        "min": {
+          "$ref": "#/$defs/number"
+        },
+        "max": {
+          "$ref": "#/$defs/number"
+        },
+        "ci95": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "summaries": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/summary"
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "bucket": {
+      "type": "object",
+      "required": [
+        "transfer",
+        "decoded",
+        "count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "transfer": {
+          "type": "number"
+        },
+        "decoded": {
+          "type": "number"
+        },
+        "count": {
+          "type": "integer"
+        }
+      }
+    },
+    "load": {
+      "type": "object",
+      "required": [
+        "iteration",
+        "ttfb",
+        "fcp",
+        "lcp",
+        "cls",
+        "tbt",
+        "longTasks",
+        "settled",
+        "quiet",
+        "mainThread",
+        "protocol",
+        "requests",
+        "bytes",
+        "server"
+      ],
+      "properties": {
+        "iteration": {
+          "type": "integer"
+        },
+        "visit": {
+          "type": "string"
+        },
+        "ttfb": {
+          "$ref": "#/$defs/number"
+        },
+        "server": {
+          "$ref": "#/$defs/number"
+        },
+        "fcp": {
+          "$ref": "#/$defs/number"
+        },
+        "lcp": {
+          "$ref": "#/$defs/number"
+        },
+        "lcpElement": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cls": {
+          "$ref": "#/$defs/number"
+        },
+        "tbt": {
+          "$ref": "#/$defs/number"
+        },
+        "longTasks": {
+          "type": "integer"
+        },
+        "domContentLoaded": {
+          "$ref": "#/$defs/number"
+        },
+        "load": {
+          "$ref": "#/$defs/number"
+        },
+        "settled": {
+          "$ref": "#/$defs/number"
+        },
+        "quiet": {
+          "type": "boolean"
+        },
+        "mainThread": {
+          "type": "object",
+          "required": [
+            "task",
+            "script",
+            "layout",
+            "style"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "task": {
+              "$ref": "#/$defs/number"
+            },
+            "script": {
+              "$ref": "#/$defs/number"
+            },
+            "layout": {
+              "$ref": "#/$defs/number"
+            },
+            "style": {
+              "$ref": "#/$defs/number"
+            }
+          }
+        },
+        "protocol": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requests": {
+          "type": "integer"
+        },
+        "bytes": {
+          "type": "object",
+          "required": [
+            "total",
+            "document",
+            "script",
+            "css",
+            "image",
+            "font",
+            "data",
+            "other"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "total": {
+              "$ref": "#/$defs/bucket"
+            },
+            "document": {
+              "$ref": "#/$defs/bucket"
+            },
+            "script": {
+              "$ref": "#/$defs/bucket"
+            },
+            "css": {
+              "$ref": "#/$defs/bucket"
+            },
+            "image": {
+              "$ref": "#/$defs/bucket"
+            },
+            "font": {
+              "$ref": "#/$defs/bucket"
+            },
+            "data": {
+              "$ref": "#/$defs/bucket"
+            },
+            "other": {
+              "$ref": "#/$defs/bucket"
+            }
+          }
+        },
+        "memory": {
+          "type": "object",
+          "required": [
+            "heap",
+            "nodes",
+            "listeners"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "heap": {
+              "$ref": "#/$defs/number"
+            },
+            "nodes": {
+              "$ref": "#/$defs/number"
+            },
+            "listeners": {
+              "$ref": "#/$defs/number"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "journey": {
+      "type": "object",
+      "required": [
+        "iteration",
+        "effect",
+        "navigated",
+        "inp",
+        "requests",
+        "bytes",
+        "errors"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "iteration": {
+          "type": "integer"
+        },
+        "effect": {
+          "$ref": "#/$defs/number"
+        },
+        "navigated": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "inp": {
+          "$ref": "#/$defs/number"
+        },
+        "requests": {
+          "type": "integer"
+        },
+        "bytes": {
+          "type": "object",
+          "required": [
+            "transfer",
+            "script"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "transfer": {
+              "type": "number"
+            },
+            "script": {
+              "type": "number"
+            }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "early": {
+      "type": "object",
+      "required": [
+        "iteration",
+        "outcome",
+        "tapAt",
+        "sinceFcp",
+        "effect"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "iteration": {
+          "type": "integer"
+        },
+        "outcome": {
+          "enum": [
+            "effect",
+            "navigation",
+            "lost",
+            "duplicate",
+            "error"
+          ]
+        },
+        "fcp": {
+          "$ref": "#/$defs/number"
+        },
+        "tapAt": {
+          "$ref": "#/$defs/number"
+        },
+        "sinceFcp": {
+          "$ref": "#/$defs/number"
+        },
+        "effect": {
+          "$ref": "#/$defs/number"
+        },
+        "count": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "summary",
+        "versions",
+        "search",
+        "idioms",
+        "conformance",
+        "measured",
+        "samples",
+        "summaries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "search": {
+          "enum": [
+            "live",
+            "submit"
+          ]
+        },
+        "idioms": {
+          "type": "array"
+        },
+        "conformance": {
+          "type": "object",
+          "required": [
+            "passed",
+            "checks"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "passed": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "passed",
+                  "detail"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "passed": {
+                    "type": "boolean"
+                  },
+                  "detail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "measured": {
+          "type": "boolean"
+        },
+        "samples": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "cold",
+                "repeat",
+                "journeys",
+                "early"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "cold": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/load"
+                  }
+                },
+                "repeat": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/load"
+                  }
+                },
+                "journeys": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/journey"
+                    }
+                  }
+                },
+                "early": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/early"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "summaries": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "cold",
+                "repeat",
+                "journeys",
+                "early"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "cold": {
+                  "$ref": "#/$defs/summaries"
+                },
+                "repeat": {
+                  "$ref": "#/$defs/summaries"
+                },
+                "journeys": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "required": [
+                      "navigated",
+                      "failed"
+                    ],
+                    "properties": {
+                      "navigated": {
+                        "$ref": "#/$defs/counts"
+                      },
+                      "failed": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/summary"
+                    }
+                  }
+                },
+                "early": {
+                  "type": "object",
+                  "required": [
+                    "outcomes",
+                    "effect",
+                    "sinceFcp"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcomes": {
+                      "$ref": "#/$defs/counts"
+                    },
+                    "effect": {
+                      "$ref": "#/$defs/summary"
+                    },
+                    "sinceFcp": {
+                      "$ref": "#/$defs/summary"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

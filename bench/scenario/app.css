@@ -1,0 +1,146 @@
+/* Wirestore: the one stylesheet every stack links, served at /assets/app.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+    --ink: #1d2126;
+    --muted: #59616d;
+    --line: #e2e5ea;
+    --paper: #ffffff;
+    --wash: #f5f6f8;
+    --accent: #0f766e;
+    --accent-ink: #ffffff;
+    --radius: 12px;
+    color-scheme: light;
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--wash);
+}
+
+body { margin: 0; }
+[hidden] { display: none !important; }
+
+a { color: var(--accent); }
+button {
+    font: inherit;
+    border: 0;
+    border-radius: 999px;
+    padding: .5rem 1rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+}
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+[aria-busy="true"] { opacity: .6; cursor: progress; }
+
+input {
+    font: inherit;
+    min-width: 0;
+    border: 1px solid #c6ccd4;
+    border-radius: 999px;
+    padding: .5rem 1rem;
+    background: var(--paper);
+    color: inherit;
+}
+
+.top {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 750; font-size: 1.15rem; color: var(--ink); text-decoration: none; letter-spacing: -.01em; }
+.cart { margin: 0; font-variant-numeric: tabular-nums; }
+
+main { max-width: 72rem; margin: 0 auto; padding: 1rem; }
+
+.intro h1 { margin: .5rem 0 .25rem; font-size: clamp(1.6rem, 5vw, 2.4rem); line-height: 1.15; letter-spacing: -.02em; }
+.intro p { margin: 0 0 1rem; color: var(--muted); }
+
+.search label, .newsletter label { display: block; font-weight: 600; margin-bottom: .25rem; }
+.search__row, .newsletter__row { display: flex; gap: .5rem; }
+.search__row input, .newsletter__row input { flex: 1; }
+
+.categories {
+    display: flex;
+    gap: .5rem;
+    margin: 1rem 0 .5rem;
+    overflow-x: auto;
+    padding-bottom: .25rem;
+}
+.categories a {
+    flex: none;
+    padding: .35rem .85rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    text-decoration: none;
+}
+.categories a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.count { margin: .5rem 0 1rem; color: var(--muted); }
+
+.grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; background: var(--line); }
+.card h3 { margin: .6rem .75rem 0; font-size: 1rem; line-height: 1.3; }
+.meta { margin: .15rem .75rem 0; color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; gap: .5rem; }
+.price { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.card .actions { margin-top: auto; padding: .75rem; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.actions form { margin: 0; }
+.quick { font-size: .9rem; }
+
+.newsletter {
+    margin: 2rem 0 1rem;
+    padding: 1.25rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+.newsletter h2 { margin: 0; font-size: 1.25rem; }
+.newsletter > p { margin: .25rem 0 1rem; color: var(--muted); }
+#newsletter-status { margin: .75rem 0 0; font-weight: 600; min-height: 1.5em; }
+
+dialog {
+    width: min(40rem, calc(100vw - 2rem));
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgb(0 0 0 / .25);
+}
+dialog:not([open]) { display: none; }
+dialog::backdrop { background: rgb(15 20 25 / .45); }
+.quick-view { display: grid; grid-template-columns: 1fr; }
+.quick-view img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; }
+.quick-view__body { padding: 1rem 1.25rem 1.25rem; }
+.quick-view__body h2 { margin: 0; font-size: 1.35rem; }
+.quick-view__body .meta { margin: .25rem 0 .75rem; }
+.quick-view__body .actions { display: flex; gap: .5rem; }
+.quick-view__body form[method="dialog"] button { background: var(--wash); color: var(--ink); }
+@media (min-width: 40rem) {
+    .quick-view { grid-template-columns: 1fr 1fr; }
+    .quick-view img { height: 100%; object-fit: cover; }
+}
+
+.bottom { padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem; }

@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "cyclewire",
+  "name": "CycleWire",
+  "kind": "library",
+  "summary": "The reference page activated by CycleWire: the 4.7 kB core loads up front, and each interaction's code loads when someone reaches for it. Nothing hydrates.",
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "cyclewire"
+  ],
+  "idioms": [
+    {
+      "choice": "The core loads as a module in <head>, with a modulepreload link, as the performance guide recommends.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#load-cyclewire-early"
+    },
+    {
+      "choice": "Vite bundles the page's script, and fromGlob(import.meta.glob('./actions/*.js')) registers every action as its own chunk. Vite preloads a chunk's dependencies when it is imported.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
+    },
+    {
+      "choice": "The server writes the entry's <script> and <link rel=\"modulepreload\"> tags from Vite's manifest.",
+      "docs": "https://vite.dev/guide/backend-integration"
+    },
+    {
+      "choice": "Add to cart is preloaded when the browser is idle (data-cw-preload=\"idle\"), since most visitors use it; everything else loads on intent, the default.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#choose-when-to-fetch"
+    },
+    {
+      "choice": "The cart header is bound to a store the server serializes (data-cw-store, data-cw-bind); cyclewire/signals arrives with the cart action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#data-cw-store"
+    },
+    {
+      "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#import-it-from-the-action-that-needs-it"
+    }
+  ]
+}

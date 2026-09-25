@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "vanilla",
+  "name": "Vanilla JS",
+  "kind": "control",
+  "summary": "The reference page plus one small, hand-written module: event delegation, fetch and DOM updates, no library. It stands for the least JavaScript these interactions need.",
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [],
+  "idioms": [
+    {
+      "choice": "The module loads in <head> as type=module, so it runs after parsing without blocking it.",
+      "docs": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#module"
+    },
+    {
+      "choice": "Search and category filters hide and show the cards the server rendered; the quick view fetches the product's details as JSON when opened.",
+      "docs": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
+    }
+  ]
+}

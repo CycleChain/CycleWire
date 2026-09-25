@@ -1,0 +1,104 @@
+name: Benchmark
+
+# check:   on changes to bench/, the harness's tests, the conformance check for
+#          every stack, and one short run to prove the pipeline works.
+# measure: by hand or weekly, the full run for each profile. Results are kept
+#          as artifacts. See bench/README.md.
+
+on:
+  pull_request:
+    paths: ['bench/**', '.github/workflows/bench.yml']
+  push:
+    branches: [main]
+    paths: ['bench/**', '.github/workflows/bench.yml']
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Profile
+        type: choice
+        options: [both, mobile, desktop]
+        default: both
+      iterations:
+        description: Iterations per stack and visit
+        default: '15'
+      stacks:
+        description: Stacks, comma-separated (empty for all)
+        default: ''
+  schedule:
+    - cron: '17 3 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bench-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: bench
+
+jobs:
+  check:
+    name: Conformance and a short run
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            bench/package-lock.json
+            bench/apps/*/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: node run.js --check
+      - name: One iteration
+        run: node run.js --iterations=1 --skip-build --out=results/check.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench-check
+          path: bench/results/check.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  measure:
+    name: Measure (${{ matrix.profile }})
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ${{ vars.BENCH_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: ${{ fromJSON((inputs.profile == 'mobile' && '["mobile"]') || (inputs.profile == 'desktop' && '["desktop"]') || '["mobile","desktop"]') }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            bench/package-lock.json
+            bench/apps/*/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Measure
+        env:
+          PROFILE: ${{ matrix.profile }}
+          ITERATIONS: ${{ inputs.iterations || '15' }}
+          STACKS: ${{ inputs.stacks }}
+        run: |
+          out="results/$(date -u +%Y-%m-%d)-$PROFILE.json"
+          node run.js --profile="$PROFILE" --iterations="$ITERATIONS" ${STACKS:+--stacks="$STACKS"} --out="$out"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench-${{ matrix.profile }}
+          path: bench/results/*.json
+          if-no-files-found: ignore
+          retention-days: 90

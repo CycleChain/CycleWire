@@ -1,0 +1,952 @@
+[
+  {
+    "id": "p01",
+    "name": "Pocket Radio",
+    "category": "audio",
+    "price": 23100,
+    "description": "A pocket radio with physical dials instead of menus. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 1,
+      "light": [
+        0.42,
+        0.58
+      ],
+      "seed": 935483
+    }
+  },
+  {
+    "id": "p02",
+    "name": "Brass Wall Sconce",
+    "category": "lighting",
+    "price": 4500,
+    "description": "A brass wall sconce with an arm that reaches across a desk. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 2,
+      "light": [
+        0.39,
+        0.58
+      ],
+      "seed": 676467
+    }
+  },
+  {
+    "id": "p03",
+    "name": "Acacia Salad Servers",
+    "category": "kitchen",
+    "price": 8200,
+    "description": "An acacia salad servers with a glaze that can go in the dishwasher. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 1,
+      "light": [
+        0.51,
+        0.35
+      ],
+      "seed": 668256
+    }
+  },
+  {
+    "id": "p04",
+    "name": "Cane Lounge Chair",
+    "category": "furniture",
+    "price": 41700,
+    "description": "A cane lounge chair with rounded edges and a scratch-resistant top. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 0,
+      "light": [
+        0.08,
+        0.57
+      ],
+      "seed": 926928
+    }
+  },
+  {
+    "id": "p05",
+    "name": "Linen Floor Lamp",
+    "category": "lighting",
+    "price": 15900,
+    "description": "A linen floor lamp with a linen shade that softens the light. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 0,
+      "light": [
+        0.62,
+        0.23
+      ],
+      "seed": 114502
+    }
+  },
+  {
+    "id": "p06",
+    "name": "Cedar Bird Feeder",
+    "category": "garden",
+    "price": 7150,
+    "description": "A cedar bird feeder with a roof that keeps the seed dry. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 0,
+      "light": [
+        0.8,
+        0.45
+      ],
+      "seed": 884316
+    }
+  },
+  {
+    "id": "p07",
+    "name": "Brass Fountain Pen",
+    "category": "stationery",
+    "price": 4000,
+    "description": "A brass fountain pen with compartments sized for what you actually use. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 2,
+      "light": [
+        0.55,
+        0.51
+      ],
+      "seed": 393958
+    }
+  },
+  {
+    "id": "p08",
+    "name": "Maple Soundbar",
+    "category": "audio",
+    "price": 20800,
+    "description": "A maple soundbar with twenty hours of playback on one charge. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 1,
+      "light": [
+        0.12,
+        0.33
+      ],
+      "seed": 110202
+    }
+  },
+  {
+    "id": "p09",
+    "name": "Olive Wood Cutting Board",
+    "category": "kitchen",
+    "price": 7750,
+    "description": "An olive wood cutting board with a full-tang blade forged from one bar of steel. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 2,
+      "light": [
+        0.2,
+        0.14
+      ],
+      "seed": 320487
+    }
+  },
+  {
+    "id": "p10",
+    "name": "Steel Clip Lamp",
+    "category": "lighting",
+    "price": 8050,
+    "description": "A steel clip lamp with a frosted diffuser with no glare. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 3,
+      "light": [
+        0.77,
+        0.17
+      ],
+      "seed": 274095
+    }
+  },
+  {
+    "id": "p11",
+    "name": "Oak Turntable",
+    "category": "audio",
+    "price": 10350,
+    "description": "An oak turntable with physical dials instead of menus. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 2,
+      "light": [
+        0.13,
+        0.49
+      ],
+      "seed": 539508
+    }
+  },
+  {
+    "id": "p12",
+    "name": "Birch Coffee Table",
+    "category": "furniture",
+    "price": 40550,
+    "description": "A birch coffee table with rounded edges and a scratch-resistant top. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 0,
+      "light": [
+        0.24,
+        0.5
+      ],
+      "seed": 915409
+    }
+  },
+  {
+    "id": "p13",
+    "name": "Bamboo Letter Tray",
+    "category": "stationery",
+    "price": 3850,
+    "description": "A bamboo letter tray with compartments sized for what you actually use. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 3,
+      "light": [
+        0.01,
+        0.6
+      ],
+      "seed": 547921
+    }
+  },
+  {
+    "id": "p14",
+    "name": "Rattan Pendant Light",
+    "category": "lighting",
+    "price": 10100,
+    "description": "A rattan pendant light with a linen shade that softens the light. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 3,
+      "light": [
+        0.3,
+        0.55
+      ],
+      "seed": 80378
+    }
+  },
+  {
+    "id": "p15",
+    "name": "Waffle Bath Towel",
+    "category": "textiles",
+    "price": 3400,
+    "description": "A waffle bath towel with a stonewashed finish that is soft from day one. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 3,
+      "light": [
+        0.89,
+        0.43
+      ],
+      "seed": 169554
+    }
+  },
+  {
+    "id": "p16",
+    "name": "Canvas Apron",
+    "category": "textiles",
+    "price": 3300,
+    "description": "A canvas apron with a loose weave that breathes in summer. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 0,
+      "light": [
+        0.01,
+        0.18
+      ],
+      "seed": 12239
+    }
+  },
+  {
+    "id": "p17",
+    "name": "Steel Plant Stand",
+    "category": "furniture",
+    "price": 26500,
+    "description": "A steel plant stand with a low profile that suits small rooms. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 1,
+      "light": [
+        0.99,
+        0.51
+      ],
+      "seed": 224600
+    }
+  },
+  {
+    "id": "p18",
+    "name": "Lambswool Throw",
+    "category": "textiles",
+    "price": 14150,
+    "description": "A lambswool throw with hidden zips and generous seams. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 2,
+      "light": [
+        0.75,
+        0.08
+      ],
+      "seed": 336318
+    }
+  },
+  {
+    "id": "p19",
+    "name": "Copper Trowel",
+    "category": "garden",
+    "price": 5700,
+    "description": "A copper trowel with a coated frame that will not rust. Ships in recycled packaging.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 2,
+      "light": [
+        0.5,
+        0.26
+      ],
+      "seed": 54179
+    }
+  },
+  {
+    "id": "p20",
+    "name": "Ceramic Table Lamp",
+    "category": "lighting",
+    "price": 6600,
+    "description": "A ceramic table lamp with a linen shade that softens the light. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 3,
+      "light": [
+        0.57,
+        0
+      ],
+      "seed": 203828
+    }
+  },
+  {
+    "id": "p21",
+    "name": "Linen Sketchbook",
+    "category": "stationery",
+    "price": 2000,
+    "description": "A linen sketchbook with a steel nib that writes wet and smooth. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 2,
+      "light": [
+        0.83,
+        0.53
+      ],
+      "seed": 947111
+    }
+  },
+  {
+    "id": "p22",
+    "name": "Paper String Lights",
+    "category": "lighting",
+    "price": 8000,
+    "description": "A paper string lights with an arm that reaches across a desk. Ships in recycled packaging.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 3,
+      "light": [
+        0.6,
+        0.52
+      ],
+      "seed": 767707
+    }
+  },
+  {
+    "id": "p23",
+    "name": "Linen Table Runner",
+    "category": "textiles",
+    "price": 8350,
+    "description": "A linen table runner with a stonewashed finish that is soft from day one. Ships in recycled packaging.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 1,
+      "light": [
+        0.68,
+        0.42
+      ],
+      "seed": 314539
+    }
+  },
+  {
+    "id": "p24",
+    "name": "Galvanized Watering Can",
+    "category": "garden",
+    "price": 4400,
+    "description": "A galvanized watering can with a coated frame that will not rust. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 1,
+      "light": [
+        0.4,
+        0.55
+      ],
+      "seed": 280430
+    }
+  },
+  {
+    "id": "p25",
+    "name": "Oak Side Table",
+    "category": "furniture",
+    "price": 28050,
+    "description": "An oak side table with rounded edges and a scratch-resistant top. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 3,
+      "light": [
+        0.77,
+        0.35
+      ],
+      "seed": 673249
+    }
+  },
+  {
+    "id": "p26",
+    "name": "Zinc Hose Reel",
+    "category": "garden",
+    "price": 6000,
+    "description": "A zinc hose reel with a coated frame that will not rust. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 0,
+      "light": [
+        0.2,
+        0.13
+      ],
+      "seed": 153830
+    }
+  },
+  {
+    "id": "p27",
+    "name": "Jute Rug",
+    "category": "textiles",
+    "price": 7950,
+    "description": "A jute rug with hidden zips and generous seams. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 3,
+      "light": [
+        0.19,
+        0.58
+      ],
+      "seed": 149169
+    }
+  },
+  {
+    "id": "p28",
+    "name": "Cork Desk Organizer",
+    "category": "stationery",
+    "price": 4250,
+    "description": "A cork desk organizer with lay-flat binding and heavy paper. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 3,
+      "light": [
+        0.81,
+        0.38
+      ],
+      "seed": 314799
+    }
+  },
+  {
+    "id": "p29",
+    "name": "Pine Bench",
+    "category": "furniture",
+    "price": 6600,
+    "description": "A pine bench with a hidden shelf for the things you reach for. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 3,
+      "light": [
+        0.79,
+        0.02
+      ],
+      "seed": 953245
+    }
+  },
+  {
+    "id": "p30",
+    "name": "Walnut Desk Lamp",
+    "category": "lighting",
+    "price": 10750,
+    "description": "A walnut desk lamp with a linen shade that softens the light. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 2,
+      "light": [
+        0.15,
+        0.13
+      ],
+      "seed": 682859
+    }
+  },
+  {
+    "id": "p31",
+    "name": "Aluminium Headphones",
+    "category": "audio",
+    "price": 16450,
+    "description": "An aluminium headphones with pairing that remembers four devices. Ships in recycled packaging.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 0,
+      "light": [
+        0.68,
+        0.52
+      ],
+      "seed": 771787
+    }
+  },
+  {
+    "id": "p32",
+    "name": "Leather Garden Gloves",
+    "category": "garden",
+    "price": 6350,
+    "description": "A leather garden gloves with a long spout that reaches the back of a border. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 2,
+      "light": [
+        0.19,
+        0.07
+      ],
+      "seed": 448641
+    }
+  },
+  {
+    "id": "p33",
+    "name": "Walnut Stool",
+    "category": "furniture",
+    "price": 6500,
+    "description": "A walnut stool with a hidden shelf for the things you reach for. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 3,
+      "light": [
+        0.23,
+        0.36
+      ],
+      "seed": 551894
+    }
+  },
+  {
+    "id": "p34",
+    "name": "Kraft Notebook",
+    "category": "stationery",
+    "price": 6200,
+    "description": "A kraft notebook with compartments sized for what you actually use. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 2,
+      "light": [
+        0.06,
+        0.23
+      ],
+      "seed": 81355
+    }
+  },
+  {
+    "id": "p35",
+    "name": "Cedar Pencil Set",
+    "category": "stationery",
+    "price": 8800,
+    "description": "A cedar pencil set with dotted pages for lists and sketches. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 2,
+      "light": [
+        0.59,
+        0.43
+      ],
+      "seed": 949894
+    }
+  },
+  {
+    "id": "p36",
+    "name": "Wireless Earbuds",
+    "category": "audio",
+    "price": 31500,
+    "description": "A wireless earbuds with physical dials instead of menus. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 3,
+      "light": [
+        0.94,
+        0.02
+      ],
+      "seed": 153901
+    }
+  },
+  {
+    "id": "p37",
+    "name": "Steel Chef's Knife",
+    "category": "kitchen",
+    "price": 5100,
+    "description": "A steel chef's knife with a seasoned surface that only gets better. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 0,
+      "light": [
+        0.6,
+        0.56
+      ],
+      "seed": 48995
+    }
+  },
+  {
+    "id": "p38",
+    "name": "Walnut Speaker",
+    "category": "audio",
+    "price": 32250,
+    "description": "A walnut speaker with twenty hours of playback on one charge. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 2,
+      "light": [
+        0.13,
+        0.21
+      ],
+      "seed": 670484
+    }
+  },
+  {
+    "id": "p39",
+    "name": "Leather Planner",
+    "category": "stationery",
+    "price": 6750,
+    "description": "A leather planner with barrels that sharpen cleanly. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#dfe3ec",
+        "#3f5376"
+      ],
+      "shape": 2,
+      "light": [
+        0.7,
+        0.3
+      ],
+      "seed": 124818
+    }
+  },
+  {
+    "id": "p40",
+    "name": "Birch Record Crate",
+    "category": "audio",
+    "price": 29550,
+    "description": "A birch record crate with physical dials instead of menus. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#d8d8d8",
+        "#2f3440"
+      ],
+      "shape": 2,
+      "light": [
+        0.18,
+        0.09
+      ],
+      "seed": 593149
+    }
+  },
+  {
+    "id": "p41",
+    "name": "Copper Lantern",
+    "category": "lighting",
+    "price": 13350,
+    "description": "A copper lantern with an arm that reaches across a desk. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#f4d9a8",
+        "#c9853f"
+      ],
+      "shape": 3,
+      "light": [
+        0.18,
+        0.58
+      ],
+      "seed": 830991
+    }
+  },
+  {
+    "id": "p42",
+    "name": "Cotton Duvet Cover",
+    "category": "textiles",
+    "price": 5950,
+    "description": "A cotton duvet cover with a loose weave that breathes in summer. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 2,
+      "light": [
+        0.31,
+        0.58
+      ],
+      "seed": 490685
+    }
+  },
+  {
+    "id": "p43",
+    "name": "Steel Pruning Shears",
+    "category": "garden",
+    "price": 1500,
+    "description": "A steel pruning shears with a grip that stays dry in the rain. Arrives ready to use.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 1,
+      "light": [
+        0.26,
+        0.58
+      ],
+      "seed": 650790
+    }
+  },
+  {
+    "id": "p44",
+    "name": "Velvet Cushion Cover",
+    "category": "textiles",
+    "price": 7800,
+    "description": "A velvet cushion cover with a loose weave that breathes in summer. Made in a small workshop and checked by hand.",
+    "art": {
+      "colors": [
+        "#ead6d0",
+        "#a45d52"
+      ],
+      "shape": 0,
+      "light": [
+        0.35,
+        0.04
+      ],
+      "seed": 448393
+    }
+  },
+  {
+    "id": "p45",
+    "name": "Ash Bookshelf",
+    "category": "furniture",
+    "price": 12300,
+    "description": "An ash bookshelf with a low profile that suits small rooms. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#d9c3a5",
+        "#7a5534"
+      ],
+      "shape": 2,
+      "light": [
+        0.29,
+        0.57
+      ],
+      "seed": 899060
+    }
+  },
+  {
+    "id": "p46",
+    "name": "Stoneware Teapot",
+    "category": "kitchen",
+    "price": 3250,
+    "description": "A stoneware teapot with sizes that nest in one cupboard. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 0,
+      "light": [
+        0.4,
+        0.22
+      ],
+      "seed": 913056
+    }
+  },
+  {
+    "id": "p47",
+    "name": "Cast Iron Frying Pan",
+    "category": "kitchen",
+    "price": 3300,
+    "description": "A cast iron frying pan with a groove that keeps juices off the counter. Ships in recycled packaging.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 3,
+      "light": [
+        0.09,
+        0.17
+      ],
+      "seed": 39941
+    }
+  },
+  {
+    "id": "p48",
+    "name": "Enamel Mixing Bowl",
+    "category": "kitchen",
+    "price": 2050,
+    "description": "An enamel mixing bowl with a full-tang blade forged from one bar of steel. Each piece varies slightly.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 0,
+      "light": [
+        0.82,
+        0.59
+      ],
+      "seed": 108889
+    }
+  },
+  {
+    "id": "p49",
+    "name": "Glass Pour-Over Set",
+    "category": "kitchen",
+    "price": 11050,
+    "description": "A glass pour-over set with a glaze that can go in the dishwasher. Designed to be repaired, not replaced.",
+    "art": {
+      "colors": [
+        "#e3e7df",
+        "#5f7d6a"
+      ],
+      "shape": 1,
+      "light": [
+        0.25,
+        0.29
+      ],
+      "seed": 228547
+    }
+  },
+  {
+    "id": "p50",
+    "name": "Terracotta Planter",
+    "category": "garden",
+    "price": 3500,
+    "description": "A terracotta planter with blades that stay sharp through a season. Backed by a five-year guarantee.",
+    "art": {
+      "colors": [
+        "#dbe7c9",
+        "#557a35"
+      ],
+      "shape": 0,
+      "light": [
+        0.63,
+        0.21
+      ],
+      "seed": 65198
+    }
+  }
+]
