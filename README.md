@@ -338,7 +338,8 @@ Minified, measured by `npm run size` and enforced in CI:
 - Markup can only reach code through names you register. There is no `eval`, no
   `new Function`, and no URL is ever read from markup.
 - `html` escapes by context, refuses positions escaping cannot protect, and rejects
-  `javascript:` URLs.
+  `javascript:` URLs however the attribute value is put together.
+- Nothing inside `data-cw-ignore` activates: no actions, triggers, preloads or bindings.
 - Parsed fragments stay inert until they are inserted, and inserted `<script>` elements
   never run.
 - The library works under strict CSP and Trusted Types.

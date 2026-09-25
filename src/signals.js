@@ -15,6 +15,11 @@
 
 const KEY = Symbol.for('cyclewire.signals');
 
+// Attributes whose value the browser can load or run as a URL (SVG animations included).
+// A `;` starts a new item in SVG's `values`, so every item is checked.
+const URL_ATTRS = /^(?:href|src|action|formaction|poster|cite|background|ping|codebase|data|xlink:href|to|from|by|values)$/i;
+const UNSAFE_URL = /^(?:javascript|vbscript):/i;
+
 /**
  * @template T
  * @typedef {object} ReadonlySignal
@@ -446,6 +451,18 @@ function create() {
     let editing = null;
 
     /**
+     * Bindings, scopes and store seeds inside data-cw-ignore stay inert, like
+     * actions: user content must not be able to bind to the page's state.
+     * @param {Node | null} node
+     */
+    const ignored = (node) => {
+        for (let current = /** @type {any} */ (node); current; current = current.parentNode || current.host) {
+            if (current.nodeType === 1 && current.hasAttribute(attr('ignore'))) return true;
+        }
+        return false;
+    };
+
+    /**
      * `text: count; class.active: open; attr.aria-expanded: !collapsed; text: $cart.total`
      * @param {string} source
      * @returns {Binding[]}
@@ -525,7 +542,7 @@ function create() {
     function store(name, init) {
         let state = stores.get(name);
         if (!state) {
-            const script = document.querySelector(`script[type="application/json"][${attr('store')}="${CSS.escape(name)}"]`);
+            const script = [...document.querySelectorAll(`script[type="application/json"][${attr('store')}="${CSS.escape(name)}"]`)].find((el) => !ignored(el)) || null;
             state = reactive(seed(script, script && script.textContent, `${attr('store')}="${name}"`));
             stores.set(name, state);
             if (init) define(state, init);
@@ -584,7 +601,11 @@ function create() {
                 else el.removeAttribute(name);
             } else {
                 const text = value === true ? (name.startsWith('aria-') ? 'true' : '') : String(value);
-                if (el.getAttribute(name) !== text) el.setAttribute(name, text);
+                // State is data. A binding never turns it into code: no event handlers, no
+                // srcdoc, no script URLs.
+                if (/^on|^srcdoc$/i.test(name) || (URL_ATTRS.test(name) && text.split(';').some((url) => UNSAFE_URL.test(url.replace(/[\x00-\x20\x7f]/g, ''))))) {
+                    if (__DEV__) console.warn(`[CycleWire] Refusing to bind ${name} to ${JSON.stringify(text.slice(0, 40))}.`, el);
+                } else if (el.getAttribute(name) !== text) el.setAttribute(name, text);
             }
         } else if (directive.startsWith('style.')) {
             node.style.setProperty(directive.slice(6), value == null || value === false ? '' : String(value));
@@ -598,6 +619,7 @@ function create() {
      * @param {Element} el @param {string} which
      */
     function bind(el, which) {
+        if (ignored(el)) return;
         const bindings = parse(el.getAttribute(attr('bind')) || '');
         let done = bound.get(el);
         if (!done) bound.set(el, (done = new Set()));
@@ -623,7 +645,7 @@ function create() {
     function onInput(event) {
         const el = /** @type {HTMLInputElement} */ (event.composedPath()[0]);
         const source = el && el.getAttribute?.(attr('bind'));
-        if (!source) return;
+        if (!source || ignored(el)) return;
         const textual = !/^(?:checkbox|radio|file|select-one|select-multiple)$/.test(el.type);
         const number = (el.type === 'number' || el.type === 'range') && !Number.isNaN(el.valueAsNumber);
         // Read before the scope wakes up: its first render must not clobber what was typed.

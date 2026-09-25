@@ -21,8 +21,11 @@ rendered without sanitization, they can add `data-cw-*` attributes that call act
 registered. `load` and `visible` triggers even run without a click. Treat every export of
 an action module as reachable from markup (`module#export`) and defend in depth:
 
-1. **Wrap user-generated content in `data-cw-ignore`.** The search for a binding stops at
-   that element, so nothing inside it can bind:
+1. **Wrap user-generated content in `data-cw-ignore`.** Nothing inside it activates, even
+   an element that carries its own attributes: no event bindings, no `load` or `visible`
+   triggers, no preloads, and with signals no bindings, no two-way inputs and no store
+   seeds. Clicks inside it do not reach an outer binding either. This holds across shadow
+   roots.
 
    ```html
    <article class="comment" data-cw-ignore>{{ comment.html }}</article>
@@ -45,8 +48,11 @@ an action module as reachable from markup (`module#export`) and defend in depth:
 - escapes text and quoted attribute values,
 - **throws** for interpolations in tag or attribute names, unquoted values, `on*` and
   `srcdoc` attributes, comments, and raw-text elements such as `<script>` and `<style>`,
-- refuses `javascript:` and `vbscript:` URLs in URL attributes, even disguised with case,
-  whitespace or control characters,
+- refuses `javascript:` and `vbscript:` URLs in URL attributes, checking the whole value
+  as the browser will read it: fixed text and every interpolation together, even
+  disguised with case, whitespace, control characters or character references,
+- refuses templates that end inside a tag, a comment or a raw-text element, which would
+  change the meaning of markup they are nested into,
 - recognises `SafeHTML` by a symbol brand, so a plain object from JSON can never pass as
   markup.
 

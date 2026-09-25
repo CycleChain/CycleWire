@@ -86,7 +86,7 @@ are derived values, are always installed.
 | `checked: path` | A checkbox's checked state. **Two-way** |
 | `show: path` / `hide: path` | Toggle the `hidden` attribute |
 | `class.<name>: path` | Toggle a class |
-| `attr.<name>: path` | Set an attribute. `false`/`null` removes it, `true` sets it empty, and `aria-*` get `"true"`/`"false"` |
+| `attr.<name>: path` | Set an attribute. `false`/`null` removes it, `true` sets it empty, and `aria-*` get `"true"`/`"false"`. State is data, never code: event handlers (`on*`), `srcdoc` and `javascript:` URLs are refused |
 | `style.<property>: path` | Set a CSS property (kebab-case, custom properties welcome) |
 
 Expressions are deliberately minimal: a dotted path (`user.name`, `items.length`), an

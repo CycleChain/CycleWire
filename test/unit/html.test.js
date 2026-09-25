@@ -75,6 +75,49 @@ test('allows ordinary URLs, and script-looking text after a static prefix', () =
     assert.equal(markup(html`<img src="${'data:image/png;base64,AAAA'}">`), '<img src="data:image/png;base64,AAAA">');
 });
 
+test('refuses a script URL however the value is put together', () => {
+    const cases = [
+        () => html`<a href="${'java'}${'script:alert(1)'}">x</a>`,
+        () => html`<a href="${''}${'javascript:alert(1)'}">x</a>`,
+        () => html`<a href="${'javascript'}:${'alert(1)'}">x</a>`,
+        () => html`<a href="${['java', 'script:alert(1)']}">x</a>`,
+        () => html`<a href="${html`${'javascript:alert(1)'}`}">x</a>`,
+        () => html`<a href="${html.raw('javascript:alert(1)')}">x</a>`,
+        () => html`<a href=" ${'javascript:alert(1)'}">x</a>`,
+        () => html`<a href="javascript:${'alert(1)'}">x</a>`,
+        () => html`<a href="&#106;avascript:${'alert(1)'}">x</a>`,
+        () => html`<a href="javascript&colon;${'alert(1)'}">x</a>`,
+        () => html`<svg><set attributeName="href" to="${'javascript:alert(1)'}"/></svg>`,
+        () => html`<svg><animate attributeName="href" values="${'/a'};${'javascript:alert(1)'}"/></svg>`,
+    ];
+    for (const render of cases) assert.throws(render, /refusing the URL/, String(render));
+});
+
+test('checks each URL attribute on its own', () => {
+    assert.equal(markup(html`<a href="${'/a'}" ping="${'/b'}">x</a>`), '<a href="/a" ping="/b">x</a>');
+    assert.throws(() => html`<a href="${'/a'}" ping="${'javascript:x'}">x</a>`, /refusing the URL/);
+    assert.equal(markup(html`<a href="${'https://example.com'}/p?q=${'javascript:x'}">x</a>`), '<a href="https://example.com/p?q=javascript:x">x</a>');
+    assert.equal(markup(html`<svg><animate values="${'0'};${'1'}"/></svg>`), '<svg><animate values="0;1"/></svg>');
+});
+
+test('refuses a template that ends inside a tag, a comment or a raw-text element', () => {
+    // Nested into another template, an open tag would change what the outer interpolations mean.
+    assert.throws(() => html`<a href="${'/x'}`, /must not end inside/);
+    assert.throws(() => html`<a class="x"`, /must not end inside/);
+    assert.throws(() => html`<script>`, /must not end inside/);
+    assert.throws(() => html`<!-- open`, /must not end inside/);
+    assert.throws(() => html`<?${'x'}>`, /tag or attribute name/);
+    assert.equal(markup(html`<div><p>${'open'}`), '<div><p>open');
+});
+
+test('a plain array of strings is analyzed on every call', () => {
+    // Tagged templates pass frozen arrays; a plain one could change after its first use.
+    const strings = ['<a href="/', '">x</a>'];
+    assert.equal(markup(html(strings, 'safe')), '<a href="/safe">x</a>');
+    strings[0] = '<a href="';
+    assert.throws(() => html(strings, 'javascript:alert(1)'), /refusing the URL/);
+});
+
 test('the context analysis is cached per template', () => {
     const render = (value) => html`<p class="${value}">${value}</p>`;
     assert.equal(markup(render('a')), '<p class="a">a</p>');

@@ -29,28 +29,33 @@ const isDisabled = (el) => el.matches(':disabled') || el.getAttribute('aria-disa
 
 /**
  * The innermost element bound to this event type, `false` when that element
- * is disabled (the event is swallowed), or null. Stops at the listener's root
- * and at `data-cw-ignore`.
+ * is disabled (the event is swallowed), or null. Stops at the listener's root.
+ * Nothing inside `data-cw-ignore` binds, not even an element that carries its
+ * own action, so the whole path up to the root is checked.
  * @param {Event} event @param {Node} root @param {string} type
  * @returns {[Element, string] | false | null}
  */
 function resolve(event, root, type) {
     const path = event.composedPath();
     const on = attrs.on + type;
-    const end = NON_BUBBLING.has(type) ? Math.min(path.length, 1) : path.length;
-    for (let i = 0; i < end; i++) {
+    // A non-bubbling event can only run a binding on its own target.
+    const own = NON_BUBBLING.has(type);
+    /** @type {[Element, string] | false | null} */
+    let found = null;
+    for (let i = 0; i < path.length; i++) {
         const node = /** @type {Node} */ (path[i]);
         if (node === root) break;
         if (node.nodeType !== 1) continue;
         const el = /** @type {Element} */ (node);
         if (el.hasAttribute(attrs.ignore)) return null;
+        if (found !== null || (own && i)) continue;
         let action = el.getAttribute(on);
         if (action === null && el.hasAttribute(attrs.action) && !el.hasAttribute(attrs.trigger) && defaultEvent(el) === type) {
             action = el.getAttribute(attrs.action);
         }
-        if (action && (action = action.trim())) return isDisabled(el) ? false : [el, action];
+        if (action && (action = action.trim())) found = isDisabled(el) ? false : [el, action];
     }
-    return null;
+    return found;
 }
 
 /** @param {Element} el @param {string} type */
@@ -100,16 +105,23 @@ function onEvent(event, root, type) {
 
 /** Preloads the modules bound on the element the user is heading for. */
 function onIntent(/** @type {Event} */ event) {
+    /** @type {string[] | null} */
+    let names = null;
+    let mode = null;
     for (const node of event.composedPath()) {
         if (/** @type {Node} */ (node).nodeType !== 1) continue;
         const el = /** @type {Element} */ (node);
-        const names = actionsOf(el, attrs);
-        if (!names.length) continue;
-        const mode = el.getAttribute(attrs.preload);
-        if ((!mode || mode === 'intent') && !saveData()) {
-            for (const name of names) registry.preload(splitName(name)[0]);
+        // Nothing inside data-cw-ignore is preloaded either.
+        if (el.hasAttribute(attrs.ignore)) return;
+        if (names) continue;
+        const bound = actionsOf(el, attrs);
+        if (bound.length) {
+            names = bound;
+            mode = el.getAttribute(attrs.preload);
         }
-        return;
+    }
+    if (names && (!mode || mode === 'intent') && !saveData()) {
+        for (const name of names) registry.preload(splitName(name)[0]);
     }
 }
 

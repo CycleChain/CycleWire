@@ -134,8 +134,10 @@ flight:
 
 ### `data-cw-ignore`
 
-Stops the search for a binding at this element. Put it around user-generated content so
-injected `data-cw-*` attributes inside it do nothing. See [security](security.md).
+Nothing inside this element activates: event bindings (even on elements inside it),
+`load` and `visible` triggers, preloads, and signals bindings. Events from inside it do
+not reach an outer binding either. Put it around user-generated content so injected
+`data-cw-*` attributes do nothing. See [security](security.md).
 
 ### Disabled elements
 

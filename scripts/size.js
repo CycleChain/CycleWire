@@ -11,9 +11,9 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 const budgets = {
     'cyclewire.min.js': { brotli: 4864, gzip: 5376 },
     'css.min.js': { brotli: 768 },
-    'dom.min.js': { brotli: 2048 },
+    'dom.min.js': { brotli: 2304 },
     'morph.min.js': { brotli: 2048 },
-    'signals.min.js': { brotli: 3072 },
+    'signals.min.js': { brotli: 3200 },
     'bootstrap.min.js': { brotli: 2304 },
     'cyclewire.global.min.js': { brotli: 5120 },
     'cyclewire.full.global.min.js': { brotli: 12800 },

@@ -94,6 +94,40 @@ test.describe('cyclewire/signals', () => {
         await expect(page.locator('#inner')).toHaveText('2');
     });
 
+    test('bindings and store seeds inside data-cw-ignore stay inert', async ({ page }) => {
+        await bootSignals(page, `
+            <div data-cw-ignore>
+                <script type="application/json" data-cw-store="cart">{"items": [{"sku": "fake", "price": 999}]}</script>
+                <span id="ugc" data-cw-bind="text: $cart.count">ugc</span>
+                <input id="ugc-input" data-cw-bind="value: $cart.note">
+            </div>
+            <script type="application/json" data-cw-store="cart">{"items": []}</script>
+            <span id="badge" data-cw-bind="text: $cart.count">0</span>
+            <button id="add" data-cw-action="state#add" data-cw-props='{"sku": "w1", "price": 12}'>Add</button>`);
+        await page.click('#add');
+        // The page's own seed was used, not the injected one.
+        await expect(page.locator('#badge')).toHaveText('1');
+        await expect(page.locator('#ugc')).toHaveText('ugc');
+        await page.fill('#ugc-input', 'hello');
+        expect(await page.evaluate(() => window.CWX.signals.store('cart').note)).toBeUndefined();
+    });
+
+    test('attr bindings never write event handlers or script URLs', async ({ page }) => {
+        await bootSignals(page, `
+            <section data-cw-state='{"code": "window.__pwned = true", "url": "javascript:window.__pwned = true", "safe": "/ok"}'>
+                <a id="link" href="/start" data-cw-bind="attr.onclick: code; attr.href: url; attr.title: safe">link</a>
+                <a id="ok" data-cw-bind="attr.href: safe">ok</a>
+            </section>`);
+        await page.evaluate(() => window.CWX.signals.stateOf(document.getElementById('link')));
+        await expect(page.locator('#ok')).toHaveAttribute('href', '/ok');
+        await expect(page.locator('#link')).toHaveAttribute('title', '/ok');
+        await expect(page.locator('#link')).toHaveAttribute('href', '/start');
+        expect(await page.locator('#link').getAttribute('onclick')).toBeNull();
+        const warned = await page.evaluate(() => window.__warnings);
+        expect(warned.some((line) => line.includes('Refusing to bind onclick'))).toBe(true);
+        expect(warned.some((line) => line.includes('Refusing to bind href'))).toBe(true);
+    });
+
     test('bindings stop following elements removed from the page', async ({ page }) => {
         await bootSignals(page, `
             <section id="s" data-cw-state='{"count": 0}'>

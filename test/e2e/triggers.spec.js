@@ -75,6 +75,28 @@ test.describe('triggers', () => {
         await expect.poll(() => entries(page)).toEqual(['run:p']);
     });
 
+    test('triggers and scheduled preloads inside data-cw-ignore never activate', async ({ page }) => {
+        await boot(page, {
+            html: `<div data-cw-ignore>
+                     <div id="t1" data-cw-action="log" data-cw-trigger="load"></div>
+                     <div id="t2" data-cw-action="log" data-cw-trigger="visible"></div>
+                     <div id="p1" data-cw-action="evaluated" data-cw-preload="load"></div>
+                     <div id="host"></div>
+                   </div>
+                   <div id="ok" data-cw-action="log#second" data-cw-trigger="load"></div>`,
+        });
+        await page.evaluate(() => {
+            // A shadow root inside ignored content is ignored too.
+            const root = document.getElementById('host').attachShadow({ mode: 'open' });
+            root.innerHTML = '<div id="inner" data-cw-action="log" data-cw-trigger="load"></div>';
+            window.CW.observe(root);
+        });
+        await expect.poll(() => entries(page)).toEqual(['second:ok']);
+        await page.waitForTimeout(300);
+        expect(await entries(page)).toEqual(['second:ok']);
+        expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+    });
+
     test('scan() activates a subtree when mutation watching is off', async ({ page }) => {
         await boot(page, { options: { mutations: false }, html: '<section id="s"></section>' });
         await page.evaluate(() => {

@@ -43,16 +43,25 @@ const ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '
  */
 export const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (c) => ENTITIES[c]);
 
-// Where an interpolation lands. Anything else throws.
+// Where an interpolation lands. Anything else throws. Interpolations in URL
+// attributes get a UrlSlot instead, so the whole value can be checked.
 const TEXT = 0;
 const VALUE = 1;
-const URL_VALUE = 2;
 
-const URL_ATTRS = /^(?:href|src|action|formaction|poster|cite|background|ping|codebase|data|xlink:href)$/i;
+// SVG animations (to, from, by, values) can set href as well.
+const URL_ATTRS = /^(?:href|src|action|formaction|poster|cite|background|ping|codebase|data|xlink:href|to|from|by|values)$/i;
 const RAW_TEXT = /^(?:script|style|xmp|iframe|noembed|noframes|noscript|plaintext)$/i;
 const UNSAFE_URL = /^(?:javascript|vbscript):/i;
 
-/** @type {WeakMap<TemplateStringsArray, number[]>} */
+/**
+ * An interpolation inside a URL attribute: the fixed text before it (since the
+ * opening quote, or since the previous interpolation) and, for the last one,
+ * the fixed text up to the closing quote.
+ * @typedef {{ first: boolean, before: string, after?: string, list: boolean }} UrlSlot
+ */
+/** @typedef {number | UrlSlot} Slot */
+
+/** @type {WeakMap<TemplateStringsArray, Slot[]>} */
 const cache = new WeakMap();
 
 /** @param {string} where */
@@ -62,21 +71,26 @@ const unsafe = (where) => new TypeError(`[CycleWire] html: an interpolation ${wh
  * Works out, once per template, where each interpolation sits. Throws for
  * positions escaping cannot protect: tag and attribute names, unquoted and
  * event-handler attribute values, comments, and raw-text elements such as
- * <script> and <style>.
+ * <script> and <style>. A template must also end outside any tag, comment or
+ * raw-text element: nested into another template, an open one would change
+ * what the outer template's interpolations mean.
  * @param {TemplateStringsArray} strings
- * @returns {number[]}
+ * @returns {Slot[]}
  */
 function analyze(strings) {
     const known = cache.get(strings);
     if (known) return known;
-    /** @type {number[]} */
-    const contexts = [];
+    /** @type {Slot[]} */
+    const slots = [];
     // text | tag | attr | after-attr | before-value | value | unquoted | comment | raw | end-tag
     let state = 'text';
     let tag = '';
     let attr = '';
     let quote = '';
-    let valueStart = false;
+    // The fixed text of the attribute value being read since its quote or the last interpolation.
+    let text = '';
+    /** @type {UrlSlot | null} */
+    let url = null;
     for (let i = 0; i < strings.length; i++) {
         const s = strings[i];
         for (let j = 0; j < s.length; j++) {
@@ -91,7 +105,7 @@ function analyze(strings) {
                         // A "<" right before an interpolation would let the value become a tag name.
                         state = 'tag';
                         tag = '';
-                    } else if (s[j + 1] === '/' || s[j + 1] === '!') state = 'end-tag';
+                    } else if (s[j + 1] === '/' || s[j + 1] === '!' || s[j + 1] === '?') state = 'end-tag';
                     break;
                 case 'tag':
                     if (/[\s/>]/.test(c)) {
@@ -124,13 +138,16 @@ function analyze(strings) {
                     if (c === '"' || c === "'") {
                         state = 'value';
                         quote = c;
-                        valueStart = true;
+                        text = '';
+                        url = null;
                     } else if (c === '>') state = RAW_TEXT.test(tag) ? 'raw' : 'text';
                     else if (!/\s/.test(c)) state = 'unquoted';
                     break;
                 case 'value':
-                    if (c === quote) state = 'attrs';
-                    else valueStart = false;
+                    if (c === quote) {
+                        state = 'attrs';
+                        if (url) url.after = text;
+                    } else text += c;
                     break;
                 case 'unquoted':
                     if (/\s/.test(c)) state = 'attrs';
@@ -151,34 +168,66 @@ function analyze(strings) {
             }
         }
         if (i === strings.length - 1) break;
-        if (state === 'text') contexts.push(TEXT);
+        if (state === 'text') slots.push(TEXT);
         else if (state === 'value') {
             if (/^on/i.test(attr) || /^srcdoc$/i.test(attr)) throw unsafe(`in the ${attr} attribute`);
-            contexts.push(valueStart && URL_ATTRS.test(attr) ? URL_VALUE : VALUE);
-            valueStart = false;
+            if (URL_ATTRS.test(attr)) {
+                slots.push((url = { first: !url, before: text, list: /^values$/i.test(attr) }));
+                text = '';
+            } else slots.push(VALUE);
         } else if (state === 'raw') throw unsafe(`inside <${tag}>`);
         else if (state === 'comment') throw unsafe('inside a comment');
         else if (state === 'before-value' || state === 'unquoted') throw unsafe(`in the unquoted value of ${attr}`);
         else throw unsafe('in a tag or attribute name');
     }
-    cache.set(strings, contexts);
-    return contexts;
+    if (state !== 'text') throw new TypeError('[CycleWire] html: a template must not end inside a tag, a comment or a raw-text element');
+    // Tagged templates pass frozen arrays; anything else could change after the analysis.
+    if (Object.isFrozen(strings)) cache.set(strings, slots);
+    return slots;
 }
 
 /**
  * @param {unknown} value
- * @param {number} context
+ * @param {Slot} slot
  * @returns {string}
  */
-function render(value, context) {
+function render(value, slot) {
     if (value == null || value === false) return '';
-    if (Array.isArray(value)) return value.map((item) => render(item, context)).join('');
-    if (isSafeHTML(value)) return context === TEXT ? value.markup : escapeHTML(value.markup);
-    const text = String(value);
-    if (context === URL_VALUE && UNSAFE_URL.test(text.replace(/[\x00-\x20\x7f]/g, ''))) {
-        throw new TypeError(`[CycleWire] html: refusing the URL ${JSON.stringify(text.slice(0, 40))}`);
+    if (Array.isArray(value)) return value.map((item) => render(item, slot)).join('');
+    if (isSafeHTML(value)) return slot === TEXT ? value.markup : escapeHTML(value.markup);
+    return escapeHTML(value);
+}
+
+/**
+ * The text an interpolation becomes once the browser decodes the attribute.
+ * @param {unknown} value
+ * @returns {string}
+ */
+const plain = (value) =>
+    value == null || value === false ? '' : Array.isArray(value) ? value.map(plain).join('') : isSafeHTML(value) ? value.markup : String(value);
+
+/**
+ * Decodes the character references in fixed template text: the browser does
+ * too, before it reads the URL.
+ * @param {string} text
+ */
+const decode = (text) =>
+    text.replace(/&(?:#(x?)([\da-f]+)|(colon|tab|newline));?/gi, (_, hex, digits, name) => {
+        if (name) return /** @type {Record<string, string>} */ ({ colon: ':', tab: '\t', newline: '\n' })[name.toLowerCase()];
+        const code = parseInt(digits, hex ? 16 : 10);
+        return code > 0 && code < 0x110000 ? String.fromCodePoint(code) : '\ufffd';
+    });
+
+/**
+ * Refuses a whole attribute value that the browser would run as script.
+ * @param {string} value @param {boolean} list  `values` holds a `;`-separated list
+ */
+function check(value, list) {
+    for (const url of list ? value.split(';') : [value]) {
+        if (UNSAFE_URL.test(url.replace(/[\x00-\x20\x7f]/g, ''))) {
+            throw new TypeError(`[CycleWire] html: refusing the URL ${JSON.stringify(url.trim().slice(0, 40))}`);
+        }
     }
-    return escapeHTML(text);
 }
 
 /**
@@ -196,9 +245,18 @@ export const html = /* @__PURE__ */ Object.assign(
      * @returns {SafeHTML}
      */
     (strings, ...values) => {
-        const contexts = analyze(strings);
+        const slots = analyze(strings);
         let markup = strings[0];
-        for (let i = 0; i < values.length; i++) markup += render(values[i], contexts[i]) + strings[i + 1];
+        // The value of the URL attribute being assembled, as the browser will read it.
+        let url = '';
+        for (let i = 0; i < values.length; i++) {
+            const slot = slots[i];
+            if (typeof slot === 'object') {
+                url = (slot.first ? '' : url) + decode(slot.before) + plain(values[i]);
+                if (slot.after != null) check(url + decode(slot.after), slot.list);
+            }
+            markup += render(values[i], slot) + strings[i + 1];
+        }
         return new SafeHTML(markup);
     },
     {

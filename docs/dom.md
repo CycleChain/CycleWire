@@ -33,9 +33,16 @@ It **throws** when an interpolation sits where escaping cannot protect it:
 | Event handler or `srcdoc` value | `<button onclick="${code}">` |
 | Inside `<script>`, `<style>` or a comment | `<script>${data}</script>` |
 
-In URL attributes (`href`, `src`, `action`, `formaction`, …) a value that begins with
-`javascript:` or `vbscript:` is refused, even when disguised with case, spaces or
-control characters.
+In URL attributes (`href`, `src`, `action`, `formaction`, …, and SVG's animation
+attributes `to`, `from`, `by` and `values`) a value that would run as script is refused.
+The check reads the whole attribute as the browser will: fixed text and every
+interpolation together, arrays and nested `html` included, with case, spaces, control
+characters and character references undone. `href="${scheme}${rest}"` cannot assemble a
+`javascript:` URL, while `href="/search?q=${query}"` stays fine for any query.
+
+A template must also end outside any tag, comment or raw-text element: `html\`<a href="\``
+throws. Nested into another template, an open tag would change what the outer
+template's interpolations mean.
 
 The analysis runs once per template (per call site) and is cached.
 

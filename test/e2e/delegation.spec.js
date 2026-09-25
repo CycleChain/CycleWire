@@ -107,6 +107,22 @@ test.describe('delegation', () => {
         await expectLog(page, [{ fn: 'second', el: 'outer', type: 'click', target: 'plain' }]);
     });
 
+    test('nothing inside data-cw-ignore binds, even an element with its own action', async ({ page }) => {
+        // Injected user content: its own bindings must stay inert.
+        await boot(page, {
+            html: `<article data-cw-ignore>
+                     <button id="injected" data-cw-action="log">injected</button>
+                     <details id="d" data-cw-action="log#second"><summary id="s">more</summary>hidden</details>
+                   </article>
+                   <button id="real" data-cw-action="log">real</button>`,
+        });
+        await page.click('#injected');
+        await page.click('#s');
+        await expect(page.locator('#d')).toHaveAttribute('open', '');
+        await page.click('#real');
+        await expectLog(page, [{ fn: 'run', el: 'real', type: 'click', target: 'real', props: null }]);
+    });
+
     test('an unregistered name is left to the browser, with a development warning', async ({ page }) => {
         await boot(page, { html: '<a id="a" href="#later" data-cw-action="nope">x</a>' });
         await page.click('#a');

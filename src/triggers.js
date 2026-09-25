@@ -1,4 +1,4 @@
-import { actionsOf, splitName } from './attrs.js';
+import { actionsOf, ignored, splitName } from './attrs.js';
 import { attach, detach } from './delegate.js';
 import * as registry from './registry.js';
 import { abortDetached, announce, dispatch } from './runner.js';
@@ -107,6 +107,8 @@ function fire(el, action) {
 
 /** @param {Element} el */
 function setup(el) {
+    // Triggers and preloads inside data-cw-ignore never activate: injected markup must not run code.
+    if (ignored(el, attrs)) return;
     const current = generation;
     const trigger = el.getAttribute(attrs.trigger);
     if (trigger && !activated.has(el)) {

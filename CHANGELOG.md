@@ -6,6 +6,26 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- **`html` refused `javascript:` URLs only in the simplest case.** A value split across
+  interpolations (`href="${a}${b}"`), passed as an array or as nested `html`, preceded by
+  fixed text such as a space, or set through SVG animation attributes (`to`, `from`, `by`,
+  `values`) could still produce a script URL. The whole attribute value is now checked as
+  the browser reads it, and templates that end inside a tag, a comment or a raw-text
+  element are refused.
+- **`data-cw-ignore` only stopped event handling from reaching outer bindings.** Elements
+  inside it that carried their own bindings still ran, and `load`/`visible` triggers,
+  preloads and signals bindings inside it still activated. Nothing inside it activates
+  now, across shadow roots too.
+- **Signals `attr.*` bindings could write event handlers, `srcdoc` and script URLs.**
+  They are refused now, with a warning in the development build.
+
+### Changed
+
+- Size budgets: `dom.min.js` 2304 B and `signals.min.js` 3200 B (brotli), for the checks
+  above.
+
 ## [1.0.0] - 2026-09-25
 
 First public release: a zero-dependency engine that makes server-rendered HTML

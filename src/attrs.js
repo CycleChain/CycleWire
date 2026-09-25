@@ -98,6 +98,19 @@ export function splitName(name) {
 }
 
 /**
+ * Whether an element sits inside `data-cw-ignore` (itself included), across
+ * shadow roots. Nothing in there activates: no actions, triggers or preloads.
+ * @param {Element} el
+ * @param {Attrs} attrs
+ */
+export function ignored(el, attrs) {
+    for (let node = /** @type {any} */ (el); node; node = node.parentNode || node.host) {
+        if (node.nodeType === 1 && node.hasAttribute(attrs.ignore)) return true;
+    }
+    return false;
+}
+
+/**
  * Every action name bound on an element, through `data-cw-action` or any
  * `data-cw-on-<event>` attribute.
  * @param {Element} el

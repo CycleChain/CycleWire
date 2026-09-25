@@ -58,6 +58,14 @@ test.describe('registry and preloading', () => {
         await expectLog(page, [['evaluated'], ['run']]);
     });
 
+    test('hovering inside data-cw-ignore preloads nothing', async ({ page }) => {
+        await boot(page, { html: '<div data-cw-ignore><button id="b" data-cw-action="evaluated">go</button></div>' });
+        await page.hover('#b');
+        await page.waitForTimeout(300);
+        expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+        expect(await log(page)).toEqual([]);
+    });
+
     test('loader functions are imported on intent', async ({ page }) => {
         await boot(page, { actions: {}, html: '<button id="b" data-cw-action="fn">go</button>' });
         await page.evaluate(() => window.CW.register({ fn: () => import('/fixtures/actions/evaluated.js') }));
