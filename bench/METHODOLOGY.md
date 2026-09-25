@@ -68,8 +68,9 @@ A stack's numbers are recorded only if it passes every check in
 | `journey-*` | Each of the five interactions produces its result, after which the page's text equals the golden text for that state |
 
 Visible text is every rendered text node outside `<script>`, `<style>` and `<template>`,
-compared with whitespace removed, so markup may differ as long as what people read is
-the same. The golden text is read from the `static` stack
+leaving out text that is visually hidden for screen readers (a box of at most 1×1 px that
+clips its content, such as a router's live-region announcer), compared with whitespace
+removed, so markup may differ as long as what people read is the same. The golden text is read from the `static` stack
 ([`scripts/golden.js`](scripts/golden.js)).
 
 ## 4. Profiles

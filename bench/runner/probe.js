@@ -188,9 +188,24 @@ export function probe() {
     bench.quiet = (ms) => document.readyState === 'complete' && performance.now() - bench.lastLongTaskEnd >= ms;
 
     /**
+     * Whether an element is visually hidden: inside a box of at most 1×1 px
+     * that clips its content, the usual way to keep text for screen readers
+     * only (route announcers, for example).
+     */
+    function visuallyHidden(el) {
+        for (let node = el; node && node !== document.body; node = node.parentElement) {
+            const { width, height } = node.getBoundingClientRect();
+            if (width > 1 || height > 1) continue;
+            const style = getComputedStyle(node);
+            if (style.overflow === 'hidden' || style.clipPath !== 'none' || style.clip !== 'auto') return true;
+        }
+        return false;
+    }
+
+    /**
      * Visible text in document order: every text node whose element is
-     * rendered and visible, outside <script>, <style>, <template> and the
-     * excluded selector, with whitespace collapsed.
+     * rendered, visible and not visually hidden, outside <script>, <style>,
+     * <template> and the excluded selector, with whitespace collapsed.
      */
     function textOf(root, exclude) {
         const parts = [];
@@ -199,7 +214,7 @@ export function probe() {
             const parent = node.parentElement;
             if (!parent || parent.closest('script, style, template, noscript')) continue;
             if (exclude && parent.closest(exclude)) continue;
-            if (!visible(parent)) continue;
+            if (!visible(parent) || visuallyHidden(parent)) continue;
             const value = node.data.replace(/\s+/g, ' ').trim();
             if (value) parts.push(value);
         }
