@@ -36,7 +36,8 @@ for (const [file, budget] of Object.entries(budgets)) {
             },
         }).length,
     };
-    report.files[file] = size;
+    // label feeds the README's size badge, read live from the deployed sizes.json.
+    report.files[file] = { ...size, label: `${(size.brotli / 1000).toFixed(1)} kB` };
 
     const over = Object.entries(budget).filter(([kind, limit]) => size[kind] > limit);
     if (over.length) failed = true;

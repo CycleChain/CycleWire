@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/cyclewire.svg?style=flat-square)](https://www.npmjs.com/package/cyclewire)
 [![CI](https://img.shields.io/github/actions/workflow/status/CycleChain/CycleWire/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/CycleChain/CycleWire/actions/workflows/ci.yml)
-[![Core size](https://img.shields.io/badge/core-4.6%20kB%20brotli-5b5bd6?style=flat-square)](#-size)
+[![Core size](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcyclechain.github.io%2FCycleWire%2Fdist%2Fsizes.json&query=%24.files%5B%27cyclewire.min.js%27%5D.label&label=core&suffix=%20brotli&color=5b5bd6&style=flat-square)](#-size)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-2ea44f?style=flat-square)](package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg?style=flat-square)](LICENSE)
 
