@@ -75,9 +75,11 @@ from your local runs into `.cache/site/` (the repository's `npm run dev` serves 
 
 ## Published results
 
-The Benchmark workflow measures both profiles by hand or weekly on GitHub's runners. When
-both finish, it opens a pull request from `github-actions[bot]` that replaces the files in
-`results/`; merging it redeploys the results page at
+The Benchmark workflow measures both profiles by hand or weekly on GitHub's runners, and
+keeps each run as an artifact (results are saved after every iteration, so a run that is
+stopped keeps what it measured). With the repository variable `BENCH_PUBLISH` set to
+`true`, it also opens a pull request from `github-actions[bot]` that replaces the files in
+`results/`. Merging new results redeploys the results page at
 [cyclechain.github.io/CycleWire/bench/](https://cyclechain.github.io/CycleWire/bench/).
 
 ## Layout

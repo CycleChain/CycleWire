@@ -13,7 +13,7 @@
  * Options: --kinds=journeys,early,repeat  --journeys=cart,filter,search,quickview,newsletter
  *          --seed=1  --out=<file>  --channel=chrome  --headed  --skip-build  --skip-conformance
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -141,31 +141,18 @@ try {
         log(`Warming up ${measured.length} stack(s)`);
         for (const task of tasks) await runTask(task, -1).catch((error) => log(`${task.stack.id}: warm-up ${task.kind} failed: ${error.message}`));
 
-        const random = prng(seed);
-        const measuring = Date.now();
-        for (let iteration = 0; iteration < iterations; iteration++) {
-            const began = Date.now();
-            for (const task of shuffle(tasks, random)) {
-                try {
-                    await runTask(task, iteration);
-                } catch (error) {
-                    failures.push({ stack: task.stack.id, kind: task.kind, journey: task.journey ?? null, iteration, message: String(error.message).slice(0, 500) });
-                    log(`${task.stack.id}: ${task.kind}${task.journey ? ` ${task.journey}` : ''} failed: ${error.message.split('\n')[0]}`);
-                }
-            }
-            const each = (Date.now() - measuring) / (iteration + 1);
-            log(`Iteration ${iteration + 1}/${iterations} took ${Math.round((Date.now() - began) / 1000)}s; about ${Math.round((each * (iterations - iteration - 1)) / 60000)} min left`);
-        }
+        const out = args.out ?? `${ROOT}/results/${startedAt.toISOString().slice(0, 10)}-${profile.id}.local.json`;
+        await mkdir(dirname(out), { recursive: true });
 
-        const finishedAt = new Date();
-        const results = {
+        /** The results after `completed` iterations: a run cut short still leaves a valid file. */
+        const results = (completed) => ({
             schema: 'cyclewire-bench/results@1',
             id: `${startedAt.toISOString().slice(0, 19).replace(/:/g, '-')}Z-${profile.id}`,
             startedAt: startedAt.toISOString(),
-            finishedAt: finishedAt.toISOString(),
+            finishedAt: new Date().toISOString(),
             profile: describe(profile),
             environment: environmentInfo,
-            config: { iterations, seed, kinds, journeys, quietMs: QUIET_MS, delivery: POLICY },
+            config: { iterations: completed, planned: iterations, seed, kinds, journeys, quietMs: QUIET_MS, delivery: POLICY },
             stacks: stacks.map((stack) => ({
                 id: stack.id,
                 name: stack.manifest.name,
@@ -181,15 +168,37 @@ try {
                 summaries: samples.has(stack.id) ? summarizeSamples(samples.get(stack.id), seed) : null,
             })),
             failures,
+        });
+        const save = async (value) => {
+            await writeFile(`${out}.tmp`, `${JSON.stringify(value, null, 2)}\n`);
+            await rename(`${out}.tmp`, out);
         };
-        const problems = validate(results);
+
+        const random = prng(seed);
+        const measuring = Date.now();
+        for (let iteration = 0; iteration < iterations; iteration++) {
+            const began = Date.now();
+            for (const task of shuffle(tasks, random)) {
+                try {
+                    await runTask(task, iteration);
+                } catch (error) {
+                    failures.push({ stack: task.stack.id, kind: task.kind, journey: task.journey ?? null, iteration, message: String(error.message).slice(0, 500) });
+                    log(`${task.stack.id}: ${task.kind}${task.journey ? ` ${task.journey}` : ''} failed: ${error.message.split('\n')[0]}`);
+                }
+            }
+            // Saved after every iteration, so a run that is stopped keeps what it measured.
+            if (iteration < iterations - 1) await save(results(iteration + 1));
+            const each = (Date.now() - measuring) / (iteration + 1);
+            log(`Iteration ${iteration + 1}/${iterations} took ${Math.round((Date.now() - began) / 1000)}s; about ${Math.round((each * (iterations - iteration - 1)) / 60000)} min left`);
+        }
+
+        const final = results(iterations);
+        const problems = validate(final);
         if (problems.length) {
             log(`The results do not match schema/results.v1.json:\n${problems.join('\n')}`);
             exitCode = 1;
         }
-        const out = args.out ?? `${ROOT}/results/${startedAt.toISOString().slice(0, 10)}-${profile.id}.local.json`;
-        await mkdir(dirname(out), { recursive: true });
-        await writeFile(out, `${JSON.stringify(results, null, 2)}\n`);
+        await save(final);
         log(`Wrote ${relative(process.cwd(), out)}${failures.length ? ` (${failures.length} failed visits)` : ''}`);
     }
 } finally {

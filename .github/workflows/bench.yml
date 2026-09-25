@@ -4,9 +4,11 @@ name: Benchmark
 #          every stack, and a short run (one journey and the early tap) to prove
 #          the pipeline works.
 # measure: by hand or weekly, the full run for each profile, kept as artifacts.
-# publish: when every profile was measured, a pull request from
-#          github-actions[bot] replaces bench/results/ with the new runs.
-#          Merging it redeploys the results page. See bench/README.md.
+# publish: when every profile was measured and the repository variable
+#          BENCH_PUBLISH is 'true', a pull request from github-actions[bot]
+#          replaces bench/results/ with the new runs; merging it redeploys the
+#          results page. It needs "Allow GitHub Actions to create and approve
+#          pull requests" in the repository settings. See bench/README.md.
 
 on:
   pull_request:
@@ -74,7 +76,7 @@ jobs:
     name: Measure (${{ matrix.profile }})
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ${{ vars.BENCH_RUNNER || 'ubuntu-latest' }}
-    timeout-minutes: 330
+    timeout-minutes: 350
     strategy:
       fail-fast: false
       matrix:
@@ -91,6 +93,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Measure
+        # Shorter than the job, so the results saved after each iteration are
+        # still uploaded when a run is too slow to finish.
+        timeout-minutes: 320
         env:
           PROFILE: ${{ matrix.profile }}
           ITERATIONS: ${{ inputs.iterations || '15' }}
@@ -109,6 +114,7 @@ jobs:
   publish:
     name: Propose the results
     needs: measure
+    if: vars.BENCH_PUBLISH == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

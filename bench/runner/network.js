@@ -19,6 +19,7 @@ export const CATEGORIES = ['document', 'script', 'css', 'image', 'font', 'data',
  * @property {string} method
  * @property {string} type CDP resource type
  * @property {number} sent wall clock ms
+ * @property {string} loader CDP loaderId: the document the request belongs to
  * @property {number} sentAt CDP timestamp (s) when the request was sent
  * @property {number | null} responseAt CDP timestamp (s) when the response headers arrived
  * @property {number | null} status
@@ -40,8 +41,8 @@ export async function recordNetwork(cdp) {
     const log = { requests, inflight: 0, lastActivity: Date.now() };
     const touch = () => { log.lastActivity = Date.now(); };
 
-    const open = (id, request, type, timestamp) => {
-        const entry = { id, url: request.url, method: request.method, type: type ?? 'Other', sent: Date.now(), sentAt: timestamp, responseAt: null, status: null, mime: null, protocol: null, cached: false, transfer: 0, decoded: 0, done: false, failed: false };
+    const open = (id, request, type, timestamp, loader) => {
+        const entry = { id, url: request.url, method: request.method, type: type ?? 'Other', loader, sent: Date.now(), sentAt: timestamp, responseAt: null, status: null, mime: null, protocol: null, cached: false, transfer: 0, decoded: 0, done: false, failed: false };
         byId.set(id, entry);
         requests.push(entry);
         log.inflight++;
@@ -65,7 +66,17 @@ export async function recordNetwork(cdp) {
             previous.transfer = event.redirectResponse.encodedDataLength ?? 0;
             close(previous);
         }
-        open(event.requestId, event.request, event.type, event.timestamp);
+        if (event.type === 'Document') {
+            // A navigation cancels what the page being left was still loading,
+            // and Chrome does not always report it: count those as failed.
+            for (const entry of requests) {
+                if (!entry.done && entry.loader !== event.loaderId) {
+                    entry.failed = true;
+                    close(entry);
+                }
+            }
+        }
+        open(event.requestId, event.request, event.type, event.timestamp, event.loaderId);
     });
     cdp.on('Network.requestServedFromCache', (event) => {
         const entry = byId.get(event.requestId);

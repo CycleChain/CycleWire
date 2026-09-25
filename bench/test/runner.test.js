@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { sameText } from '../runner/conformance.js';
 import { blockingTime } from '../runner/measure.js';
-import { bytes } from '../runner/network.js';
+import { EventEmitter } from 'node:events';
+import { bytes, recordNetwork } from '../runner/network.js';
 import { PROFILES, contextOptions, describe, networkConditions } from '../runner/profiles.js';
 import { quantile, summarize, tally } from '../runner/stats.js';
 import { summarizeSamples } from '../runner/summary.js';
@@ -72,4 +73,22 @@ test('sample summaries cover every metric and count outcomes', () => {
     assert.equal(summary.journeys.cart.failed, 1);
     assert.deepEqual(summary.journeys.cart.navigated, { false: 1, null: 1 });
     assert.deepEqual(summary.early.outcomes, { effect: 1, lost: 1 });
+});
+
+test('a navigation cancels what the page being left was still loading', async () => {
+    const cdp = Object.assign(new EventEmitter(), { send: async () => ({}) });
+    const network = await recordNetwork(cdp);
+    const sent = (id, type, loaderId) => cdp.emit('Network.requestWillBeSent', { requestId: id, type, loaderId, timestamp: 1, request: { url: `https://localhost/${id}`, method: 'GET' } });
+    sent('page', 'Document', 'first');
+    cdp.emit('Network.loadingFinished', { requestId: 'page', encodedDataLength: 100 });
+    sent('image', 'Image', 'first');
+    cdp.emit('Network.responseReceived', { requestId: 'image', type: 'Image', timestamp: 2, response: { status: 200 } });
+    assert.equal(network.inflight, 1);
+    // A form post navigates: Chrome may never finish or fail the image.
+    sent('post', 'Document', 'second');
+    assert.equal(network.inflight, 1);
+    assert.equal(network.requests.find((request) => request.id === 'image').failed, true);
+    cdp.emit('Network.loadingFinished', { requestId: 'post', encodedDataLength: 50 });
+    assert.equal(network.inflight, 0);
+    assert.equal(bytes(network.requests).total.count, 2);
 });

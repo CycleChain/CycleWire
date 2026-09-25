@@ -147,6 +147,12 @@
       "properties": {
         "iterations": {
           "type": "integer",
+          "minimum": 1,
+          "description": "Iterations completed."
+        },
+        "planned": {
+          "description": "Iterations asked for; more than `iterations` when the run was stopped early.",
+          "type": "integer",
           "minimum": 1
         },
         "seed": {
