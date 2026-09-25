@@ -1,0 +1,75 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "alpine",
+  "name": "Alpine.js",
+  "kind": "library",
+  "summary": "The reference page with Alpine's directives written into the server's markup. One module, Alpine bundled with the page's stores and components, loads up front and starts Alpine over the server-rendered HTML; stores hold the cart and the filters, and the cart, the quick view and the newsletter call the shared JSON API.",
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "alpinejs"
+  ],
+  "idioms": [
+    {
+      "choice": "Alpine is installed from npm and imported into the page's bundle (\"As a module\", which the installation guide calls the more robust approach) rather than loaded as the script-tag build: the page has its own stores and components, and its code imports the scenario's helpers, so it needs a build step anyway. Everything is registered between importing Alpine and the single Alpine.start() call, as the guide requires, and window.Alpine is set as in the guide's snippet.",
+      "docs": "https://alpinejs.dev/essentials/installation#as-a-module"
+    },
+    {
+      "choice": "Alpine leaves the bundler open. Vite bundles and minifies Alpine with the page's code into one module, and the Node server writes its <script type=\"module\"> tag into <head> from Vite's manifest, as Vite's backend integration describes. A module script is deferred, like the defer attribute that the script-tag installation asks for.",
+      "docs": "https://vite.dev/guide/backend-integration"
+    },
+    {
+      "choice": "Vite's modulepreload polyfill is turned off (build.modulePreload.polyfill: false), the alternative the backend integration guide gives to importing it: the build is one chunk, and the page has no <link rel=\"modulepreload\"> for it to handle.",
+      "docs": "https://vite.dev/config/build-options#build-modulepreload"
+    },
+    {
+      "choice": "The page is the app's own server template (page.js), rendered per request by the scenario's small Node page server, which also takes the form posts made without JavaScript. It copies the reference markup, ids and text, and writes Alpine's directives into it. The reference render has no attribute hooks on the product cards (x-show), the result count and the newsletter status (x-text) or the dialog's contents, so the app does not use it.",
+      "docs": "https://alpinejs.dev/"
+    },
+    {
+      "choice": "The cart and the filters, which several parts of the page share, are global stores (Alpine.store) registered from the bundle before Alpine.start(). They start from JSON that the server renders into the page (the cart it read from the cookie, the category, and the products it rendered a card for), so every binding starts on the text the server rendered.",
+      "docs": "https://alpinejs.dev/globals/alpine-store#registering-a-store"
+    },
+    {
+      "choice": "Parts of the page that only read or change store state (the header's cart line, the search form, the category links, the result count and the product list) are data-less components, each with a bare x-data, rather than one component around the whole page.",
+      "docs": "https://alpinejs.dev/directives/data#data-less-components"
+    },
+    {
+      "choice": "The newsletter form and the quick view dialog are components registered with Alpine.data from the bundle. The server passes their starting state as initial parameters (x-data=\"newsletter(...)\"), written as JSON and escaped for the attribute.",
+      "docs": "https://alpinejs.dev/globals/alpine-data#initial-parameters"
+    },
+    {
+      "choice": "Search and category filters run in the browser over the cards the server rendered, like the docs' search input: the search box is bound to the filters store with x-model, each card has x-show, and the result count is a getter. Nothing is fetched, so there is no debounce and results change on every key.",
+      "docs": "https://alpinejs.dev/start-here#building-a-search-input"
+    },
+    {
+      "choice": "The search box uses x-model.fill, so the query starts from the box's value: the one the server rendered, or what someone typed before the script arrived, which plain x-model would overwrite with the store's value.",
+      "docs": "https://alpinejs.dev/directives/model#fill"
+    },
+    {
+      "choice": "Cards that the server filters out carry style=\"display: none\" instead of the reference's hidden attribute, because x-show hides and shows with the inline display property and leaves the attribute alone.",
+      "docs": "https://alpinejs.dev/essentials/templating#x-show"
+    },
+    {
+      "choice": "No x-cloak: the server renders every element in the state that Alpine starts from, so nothing flickers while Alpine loads. x-cloak would also need an [x-cloak] rule, which the shared stylesheet does not have.",
+      "docs": "https://alpinejs.dev/directives/cloak"
+    },
+    {
+      "choice": "Forms and links keep their action and href, so the page works without JavaScript and before Alpine starts; Alpine takes them over with @submit.prevent and @click.prevent.",
+      "docs": "https://alpinejs.dev/directives/on#prevent"
+    },
+    {
+      "choice": "Add to cart, the quick view and the newsletter call the shared JSON API with fetch, from async store and component methods.",
+      "docs": "https://alpinejs.dev/advanced/async"
+    },
+    {
+      "choice": "A card's Quick view link dispatches a quick-view event with $dispatch; the dialog component listens with @quick-view.window, fetches the product, sets it for its x-text bindings and opens with showModal(). It opens right after the product is set, without $nextTick: Alpine applies the bindings in a microtask, before the next frame is painted, so the dialog never shows the previous product.",
+      "docs": "https://alpinejs.dev/magics/dispatch#dispatching-to-components"
+    },
+    {
+      "choice": "The newsletter component reads the address through x-ref when the form is sent, rather than binding it with x-model, since nothing else needs it.",
+      "docs": "https://alpinejs.dev/directives/ref"
+    }
+  ]
+}
