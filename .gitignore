@@ -1,0 +1,10 @@
+node_modules/
+dist/
+types/
+test-results/
+playwright-report/
+blob-report/
+_site/
+*.tgz
+*.log
+.DS_Store

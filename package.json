@@ -1,0 +1,105 @@
+{
+  "name": "cyclewire",
+  "version": "1.0.0",
+  "description": "Zero-initial-JS selective activation engine. Turn server-rendered HTML into instant interactivity on intent.",
+  "keywords": [
+    "resumability",
+    "qwik",
+    "event-delegation",
+    "lazy-loading",
+    "progressive-enhancement",
+    "server-rendered",
+    "html",
+    "islands",
+    "signals",
+    "morph",
+    "web-components",
+    "shadow-dom",
+    "inp",
+    "performance",
+    "zero-dependency"
+  ],
+  "homepage": "https://cyclechain.github.io/CycleWire/",
+  "bugs": {
+    "url": "https://github.com/CycleChain/CycleWire/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CycleChain/CycleWire.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "CycleChain",
+    "email": "fatih.dogancan@cyclechain.io",
+    "url": "https://cyclechain.io"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./dist/esm/auto.js",
+    "./dist/esm-dev/auto.js",
+    "./dist/*.global.min.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "development": "./dist/esm-dev/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./auto": {
+      "types": "./types/auto.d.ts",
+      "development": "./dist/esm-dev/auto.js",
+      "default": "./dist/esm/auto.js"
+    },
+    "./css": {
+      "types": "./types/css.d.ts",
+      "development": "./dist/esm-dev/css.js",
+      "default": "./dist/esm/css.js"
+    },
+    "./dom": {
+      "types": "./types/dom.d.ts",
+      "development": "./dist/esm-dev/dom.js",
+      "default": "./dist/esm/dom.js"
+    },
+    "./morph": {
+      "types": "./types/morph.d.ts",
+      "development": "./dist/esm-dev/morph.js",
+      "default": "./dist/esm/morph.js"
+    },
+    "./signals": {
+      "types": "./types/signals.d.ts",
+      "development": "./dist/esm-dev/signals.js",
+      "default": "./dist/esm/signals.js"
+    },
+    "./bootstrap": {
+      "types": "./types/bootstrap.d.ts",
+      "development": "./dist/esm-dev/bootstrap.js",
+      "default": "./dist/esm/bootstrap.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/esm/index.js",
+  "types": "./types/index.d.ts",
+  "unpkg": "./dist/cyclewire.global.min.js",
+  "jsdelivr": "./dist/cyclewire.global.min.js",
+  "files": [
+    "dist",
+    "types",
+    "src",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "node scripts/serve.js",
+    "size": "node scripts/size.js",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --import ./test/unit/setup.js --test \"test/unit/**/*.test.js\"",
+    "test:e2e": "playwright test",
+    "prepublishOnly": "npm run build && npm run size && npm test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
