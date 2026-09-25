@@ -32,12 +32,7 @@ jobs:
       - name: Build the examples
         run: npm run examples -- --production
       - name: Assemble the site
-        run: |
-          mkdir -p _site/dist
-          cp -R site/. _site/
-          cp dist/*.min.js dist/*.min.js.map dist/sizes.json _site/dist/
-          cp -R examples/dist _site/examples
-          touch _site/.nojekyll
+        run: node scripts/site.js
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

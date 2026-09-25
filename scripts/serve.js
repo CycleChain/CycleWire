@@ -17,6 +17,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stamp, version } from './site.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const option = (name, fallback) => {
@@ -95,7 +96,10 @@ createServer(async (req, res) => {
     if (!file) return send(res, 404, 'Not found');
     try {
         if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
-        send(res, 200, await readFile(file), types[extname(file)] || 'application/octet-stream');
+        let body = await readFile(file);
+        // The same version stamp as the deployed site (scripts/site.js).
+        if (extname(file) === '.html') body = Buffer.from(stamp(body.toString('utf8'), await version()).html);
+        send(res, 200, body, types[extname(file)] || 'application/octet-stream');
     } catch {
         send(res, 404, 'Not found');
     }
