@@ -8,6 +8,7 @@ _site/
 *.tgz
 *.log
 .DS_Store
+__pycache__/
 docs-site/node_modules/
 docs-site/dist/
 docs-site/.astro/

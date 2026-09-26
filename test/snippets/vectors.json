@@ -1,0 +1,705 @@
+{
+  "about": "Cases every cw() helper in test/snippets must pass: the exact `expected` string, byte for byte, or the language's argument error when `error` is true. Maps are JSON objects, so PHP must decode them as objects to keep {} a map. See docs/server-helpers.md.",
+  "cases": [
+    {
+      "name": "a module name",
+      "action": "cart",
+      "props": null,
+      "options": {},
+      "expected": "data-cw-action=\"cart\""
+    },
+    {
+      "name": "module#export",
+      "action": "cart#add",
+      "props": null,
+      "options": {},
+      "expected": "data-cw-action=\"cart#add\""
+    },
+    {
+      "name": "dots, hyphens and underscores in the module",
+      "action": "ui.menu-bar_2#open",
+      "props": null,
+      "options": {},
+      "expected": "data-cw-action=\"ui.menu-bar_2#open\""
+    },
+    {
+      "name": "an export with $ and digits",
+      "action": "store#$reset2",
+      "props": null,
+      "options": {},
+      "expected": "data-cw-action=\"store#$reset2\""
+    },
+    {
+      "name": "an empty export after #",
+      "action": "cart#",
+      "props": null,
+      "options": {},
+      "expected": "data-cw-action=\"cart#\""
+    },
+    {
+      "name": "props",
+      "action": "cart#add",
+      "props": {"sku":"wire-01","qty":1},
+      "options": {},
+      "expected": "data-cw-action=\"cart#add\" data-cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;,&quot;qty&quot;:1}\""
+    },
+    {
+      "name": "map keys keep their order",
+      "action": "sort",
+      "props": {"z":1,"a":2,"m":3},
+      "options": {},
+      "expected": "data-cw-action=\"sort\" data-cw-props=\"{&quot;z&quot;:1,&quot;a&quot;:2,&quot;m&quot;:3}\""
+    },
+    {
+      "name": "quotes and apostrophes",
+      "action": "note",
+      "props": {"title":"Say \"hi\"","body":"it's"},
+      "options": {},
+      "expected": "data-cw-action=\"note\" data-cw-props=\"{&quot;title&quot;:&quot;Say \\&quot;hi\\&quot;&quot;,&quot;body&quot;:&quot;it&#39;s&quot;}\""
+    },
+    {
+      "name": "an attribute breakout attempt",
+      "action": "search",
+      "props": {"q":"\"'><img src=x onerror=alert(1)>"},
+      "options": {},
+      "expected": "data-cw-action=\"search\" data-cw-props=\"{&quot;q&quot;:&quot;\\&quot;&#39;&gt;&lt;img src=x onerror=alert(1)&gt;&quot;}\""
+    },
+    {
+      "name": "a script element",
+      "action": "comment",
+      "props": {"html":"<script>alert(1)</script>"},
+      "options": {},
+      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;html&quot;:&quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;}\""
+    },
+    {
+      "name": "a closing script tag",
+      "action": "comment",
+      "props": {"text":"</script><script>alert(1)//"},
+      "options": {},
+      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;text&quot;:&quot;&lt;/script&gt;&lt;script&gt;alert(1)//&quot;}\""
+    },
+    {
+      "name": "text that is already escaped is escaped again",
+      "action": "comment",
+      "props": {"text":"&amp; &lt;b&gt; &#39;"},
+      "options": {},
+      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;text&quot;:&quot;&amp;amp; &amp;lt;b&amp;gt; &amp;#39;&quot;}\""
+    },
+    {
+      "name": "a javascript: URL is only text",
+      "action": "link",
+      "props": {"href":"javascript:alert(1)"},
+      "options": {},
+      "expected": "data-cw-action=\"link\" data-cw-props=\"{&quot;href&quot;:&quot;javascript:alert(1)&quot;}\""
+    },
+    {
+      "name": "emoji and non-ASCII text stay as they are",
+      "action": "greet",
+      "props": {"city":"İzmir","text":"Grüße, 日本語 🔌"},
+      "options": {},
+      "expected": "data-cw-action=\"greet\" data-cw-props=\"{&quot;city&quot;:&quot;İzmir&quot;,&quot;text&quot;:&quot;Grüße, 日本語 🔌&quot;}\""
+    },
+    {
+      "name": "newlines, tabs and control characters",
+      "action": "log",
+      "props": {"text":"a\nb\tc\rd\be\ff\u0000g\u0001h\u001fi\u007fj"},
+      "options": {},
+      "expected": "data-cw-action=\"log\" data-cw-props=\"{&quot;text&quot;:&quot;a\\nb\\tc\\rd\\be\\ff\\u0000g\\u0001h\\u001fi\u007fj&quot;}\""
+    },
+    {
+      "name": "U+2028 and U+2029 stay as they are",
+      "action": "log",
+      "props": {"text":"a\u2028b\u2029c"},
+      "options": {},
+      "expected": "data-cw-action=\"log\" data-cw-props=\"{&quot;text&quot;:&quot;a\u2028b\u2029c&quot;}\""
+    },
+    {
+      "name": "slashes stay as they are",
+      "action": "nav",
+      "props": {"path":"/cart/add","url":"https://example.com/?a=1&b=2"},
+      "options": {},
+      "expected": "data-cw-action=\"nav\" data-cw-props=\"{&quot;path&quot;:&quot;/cart/add&quot;,&quot;url&quot;:&quot;https://example.com/?a=1&amp;b=2&quot;}\""
+    },
+    {
+      "name": "backslashes",
+      "action": "files",
+      "props": {"path":"C:\\Temp\\new"},
+      "options": {},
+      "expected": "data-cw-action=\"files\" data-cw-props=\"{&quot;path&quot;:&quot;C:\\\\Temp\\\\new&quot;}\""
+    },
+    {
+      "name": "nested lists and maps",
+      "action": "cart#sync",
+      "props": {"items":[{"sku":"a","tags":["x","y"]},{"sku":"b","tags":[]}],"meta":{"page":1,"filters":{}}},
+      "options": {},
+      "expected": "data-cw-action=\"cart#sync\" data-cw-props=\"{&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;tags&quot;:[&quot;x&quot;,&quot;y&quot;]},{&quot;sku&quot;:&quot;b&quot;,&quot;tags&quot;:[]}],&quot;meta&quot;:{&quot;page&quot;:1,&quot;filters&quot;:{}}}\""
+    },
+    {
+      "name": "an empty list",
+      "action": "list",
+      "props": [],
+      "options": {},
+      "expected": "data-cw-action=\"list\" data-cw-props=\"[]\""
+    },
+    {
+      "name": "an empty map",
+      "action": "map",
+      "props": {},
+      "options": {},
+      "expected": "data-cw-action=\"map\" data-cw-props=\"{}\""
+    },
+    {
+      "name": "true, false and null",
+      "action": "flags",
+      "props": {"on":true,"off":false,"none":null},
+      "options": {},
+      "expected": "data-cw-action=\"flags\" data-cw-props=\"{&quot;on&quot;:true,&quot;off&quot;:false,&quot;none&quot;:null}\""
+    },
+    {
+      "name": "integers",
+      "action": "count",
+      "props": {"zero":0,"negative":-42,"largest":9007199254740991},
+      "options": {},
+      "expected": "data-cw-action=\"count\" data-cw-props=\"{&quot;zero&quot;:0,&quot;negative&quot;:-42,&quot;largest&quot;:9007199254740991}\""
+    },
+    {
+      "name": "a list at the top",
+      "action": "pick",
+      "props": [1,"two",[3],{"four":4}],
+      "options": {},
+      "expected": "data-cw-action=\"pick\" data-cw-props=\"[1,&quot;two&quot;,[3],{&quot;four&quot;:4}]\""
+    },
+    {
+      "name": "a string at the top",
+      "action": "say",
+      "props": "hello",
+      "options": {},
+      "expected": "data-cw-action=\"say\" data-cw-props=\"&quot;hello&quot;\""
+    },
+    {
+      "name": "an empty string is printed",
+      "action": "say",
+      "props": "",
+      "options": {},
+      "expected": "data-cw-action=\"say\" data-cw-props=\"&quot;&quot;\""
+    },
+    {
+      "name": "false is printed",
+      "action": "toggle",
+      "props": false,
+      "options": {},
+      "expected": "data-cw-action=\"toggle\" data-cw-props=\"false\""
+    },
+    {
+      "name": "zero is printed",
+      "action": "count",
+      "props": 0,
+      "options": {},
+      "expected": "data-cw-action=\"count\" data-cw-props=\"0\""
+    },
+    {
+      "name": "on",
+      "action": "search#keys",
+      "props": null,
+      "options": {"on":"keydown"},
+      "expected": "data-cw-on-keydown=\"search#keys\""
+    },
+    {
+      "name": "on with a namespaced event",
+      "action": "form#done",
+      "props": null,
+      "options": {"on":"turbo:submit-end"},
+      "expected": "data-cw-on-turbo:submit-end=\"form#done\""
+    },
+    {
+      "name": "trigger load",
+      "action": "stats",
+      "props": null,
+      "options": {"trigger":"load"},
+      "expected": "data-cw-action=\"stats\" data-cw-trigger=\"load\""
+    },
+    {
+      "name": "trigger visible, after the props",
+      "action": "reviews#load",
+      "props": {"product":7},
+      "options": {"trigger":"visible"},
+      "expected": "data-cw-action=\"reviews#load\" data-cw-props=\"{&quot;product&quot;:7}\" data-cw-trigger=\"visible\""
+    },
+    {
+      "name": "a media trigger",
+      "action": "menu",
+      "props": null,
+      "options": {"trigger":"media:(min-width: 48em)"},
+      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(min-width: 48em)\""
+    },
+    {
+      "name": "a media trigger with a range",
+      "action": "menu",
+      "props": null,
+      "options": {"trigger":"media:(width >= 600px) and (hover: hover)"},
+      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(width &gt;= 600px) and (hover: hover)\""
+    },
+    {
+      "name": "a media query over two lines",
+      "action": "menu",
+      "props": null,
+      "options": {"trigger":"media:(min-width: 48em)\nand (hover: hover)"},
+      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(min-width: 48em)\nand (hover: hover)\""
+    },
+    {
+      "name": "option values are escaped too",
+      "action": "menu",
+      "props": null,
+      "options": {"trigger":"media:\"'><script>alert(1)</script>"},
+      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:&quot;&#39;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\""
+    },
+    {
+      "name": "preload",
+      "action": "cart#add",
+      "props": null,
+      "options": {"preload":"none"},
+      "expected": "data-cw-action=\"cart#add\" data-cw-preload=\"none\""
+    },
+    {
+      "name": "concurrency",
+      "action": "search",
+      "props": null,
+      "options": {"concurrency":"restart"},
+      "expected": "data-cw-action=\"search\" data-cw-concurrency=\"restart\""
+    },
+    {
+      "name": "debounce",
+      "action": "search",
+      "props": null,
+      "options": {"debounce":250},
+      "expected": "data-cw-action=\"search\" data-cw-debounce=\"250\""
+    },
+    {
+      "name": "debounce 0 is printed",
+      "action": "search",
+      "props": null,
+      "options": {"debounce":0},
+      "expected": "data-cw-action=\"search\" data-cw-debounce=\"0\""
+    },
+    {
+      "name": "once is a bare attribute",
+      "action": "newsletter",
+      "props": null,
+      "options": {"once":true},
+      "expected": "data-cw-action=\"newsletter\" data-cw-once"
+    },
+    {
+      "name": "prevent true is a bare attribute",
+      "action": "menu#toggle",
+      "props": null,
+      "options": {"prevent":true},
+      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent"
+    },
+    {
+      "name": "prevent some events",
+      "action": "menu#toggle",
+      "props": null,
+      "options": {"prevent":"click submit"},
+      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent=\"click submit\""
+    },
+    {
+      "name": "prevent none",
+      "action": "menu#toggle",
+      "props": null,
+      "options": {"prevent":"none"},
+      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent=\"none\""
+    },
+    {
+      "name": "every option, in a fixed order",
+      "action": "cart#add",
+      "props": {"sku":"wire-01"},
+      "options": {"prevent":"click","once":true,"debounce":300,"concurrency":"drop","preload":"visible","trigger":"idle"},
+      "expected": "data-cw-action=\"cart#add\" data-cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;}\" data-cw-trigger=\"idle\" data-cw-preload=\"visible\" data-cw-concurrency=\"drop\" data-cw-debounce=\"300\" data-cw-once data-cw-prevent=\"click\""
+    },
+    {
+      "name": "on with props and options",
+      "action": "search#suggest",
+      "props": {"limit":5},
+      "options": {"debounce":200,"on":"input","concurrency":"latest"},
+      "expected": "data-cw-on-input=\"search#suggest\" data-cw-props=\"{&quot;limit&quot;:5}\" data-cw-concurrency=\"latest\" data-cw-debounce=\"200\""
+    },
+    {
+      "name": "null and false leave options out",
+      "action": "cart",
+      "props": null,
+      "options": {"on":null,"trigger":null,"preload":false,"once":false,"prevent":false,"prefix":null,"debounce":null},
+      "expected": "data-cw-action=\"cart\""
+    },
+    {
+      "name": "a custom prefix",
+      "action": "search#keys",
+      "props": {"q":""},
+      "options": {"prefix":"x-","on":"keydown","once":true},
+      "expected": "data-x-on-keydown=\"search#keys\" data-x-props=\"{&quot;q&quot;:&quot;&quot;}\" data-x-once"
+    },
+    {
+      "name": "an empty prefix",
+      "action": "cart#add",
+      "props": {"sku":"wire-01"},
+      "options": {"prefix":"","trigger":"load","prevent":true},
+      "expected": "data-action=\"cart#add\" data-props=\"{&quot;sku&quot;:&quot;wire-01&quot;}\" data-trigger=\"load\" data-prevent"
+    },
+    {
+      "name": "a prefix with digits and hyphens",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"app-2-"},
+      "expected": "data-app-2-action=\"cart\""
+    },
+    {
+      "name": "a path is not a name",
+      "action": "../evil",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "a URL is not a name",
+      "action": "https://attacker.example/x.js",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "two hashes",
+      "action": "cart#add#x",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "a space",
+      "action": "a b",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "an empty name",
+      "action": "",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "a hyphen in the export",
+      "action": "cart#-x",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "an empty module",
+      "action": "#add",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "a trailing newline",
+      "action": "cart\n",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "a leading newline",
+      "action": "\ncart",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "non-ASCII letters",
+      "action": "çart",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "surrounding spaces",
+      "action": " cart ",
+      "props": null,
+      "options": {},
+      "error": true
+    },
+    {
+      "name": "an unknown option",
+      "action": "cart",
+      "props": null,
+      "options": {"preloads":"idle"},
+      "error": true
+    },
+    {
+      "name": "option names are case-sensitive",
+      "action": "cart",
+      "props": null,
+      "options": {"Trigger":"load"},
+      "error": true
+    },
+    {
+      "name": "an unknown option set to null",
+      "action": "cart",
+      "props": null,
+      "options": {"bogus":null},
+      "error": true
+    },
+    {
+      "name": "an unknown trigger",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":"visibel"},
+      "error": true
+    },
+    {
+      "name": "trigger values are case-sensitive",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":"Load"},
+      "error": true
+    },
+    {
+      "name": "a media trigger without a query",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":"media:"},
+      "error": true
+    },
+    {
+      "name": "a trigger with a trailing newline",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":"load\n"},
+      "error": true
+    },
+    {
+      "name": "a trigger with a trailing space",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":"load "},
+      "error": true
+    },
+    {
+      "name": "an empty trigger",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":""},
+      "error": true
+    },
+    {
+      "name": "trigger true",
+      "action": "cart",
+      "props": null,
+      "options": {"trigger":true},
+      "error": true
+    },
+    {
+      "name": "an unknown preload",
+      "action": "cart",
+      "props": null,
+      "options": {"preload":"hover"},
+      "error": true
+    },
+    {
+      "name": "preload true",
+      "action": "cart",
+      "props": null,
+      "options": {"preload":true},
+      "error": true
+    },
+    {
+      "name": "an unknown concurrency",
+      "action": "cart",
+      "props": null,
+      "options": {"concurrency":"queue"},
+      "error": true
+    },
+    {
+      "name": "concurrency true",
+      "action": "cart",
+      "props": null,
+      "options": {"concurrency":true},
+      "error": true
+    },
+    {
+      "name": "a negative debounce",
+      "action": "cart",
+      "props": null,
+      "options": {"debounce":-1},
+      "error": true
+    },
+    {
+      "name": "a fractional debounce",
+      "action": "cart",
+      "props": null,
+      "options": {"debounce":1.5},
+      "error": true
+    },
+    {
+      "name": "debounce as a string",
+      "action": "cart",
+      "props": null,
+      "options": {"debounce":"300"},
+      "error": true
+    },
+    {
+      "name": "debounce true",
+      "action": "cart",
+      "props": null,
+      "options": {"debounce":true},
+      "error": true
+    },
+    {
+      "name": "once as a string",
+      "action": "cart",
+      "props": null,
+      "options": {"once":"yes"},
+      "error": true
+    },
+    {
+      "name": "once 1",
+      "action": "cart",
+      "props": null,
+      "options": {"once":1},
+      "error": true
+    },
+    {
+      "name": "once 0",
+      "action": "cart",
+      "props": null,
+      "options": {"once":0},
+      "error": true
+    },
+    {
+      "name": "an empty prevent",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":""},
+      "error": true
+    },
+    {
+      "name": "prevent with two spaces",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":"click  submit"},
+      "error": true
+    },
+    {
+      "name": "prevent with a leading space",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":" click"},
+      "error": true
+    },
+    {
+      "name": "prevent with a trailing newline",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":"click\n"},
+      "error": true
+    },
+    {
+      "name": "prevent with capitals",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":"Click"},
+      "error": true
+    },
+    {
+      "name": "prevent 1",
+      "action": "cart",
+      "props": null,
+      "options": {"prevent":1},
+      "error": true
+    },
+    {
+      "name": "on with capitals",
+      "action": "cart",
+      "props": null,
+      "options": {"on":"keyDown"},
+      "error": true
+    },
+    {
+      "name": "on starting with a digit",
+      "action": "cart",
+      "props": null,
+      "options": {"on":"1click"},
+      "error": true
+    },
+    {
+      "name": "on with a space",
+      "action": "cart",
+      "props": null,
+      "options": {"on":"key down"},
+      "error": true
+    },
+    {
+      "name": "on with a trailing newline",
+      "action": "cart",
+      "props": null,
+      "options": {"on":"click\n"},
+      "error": true
+    },
+    {
+      "name": "an empty on",
+      "action": "cart",
+      "props": null,
+      "options": {"on":""},
+      "error": true
+    },
+    {
+      "name": "on true",
+      "action": "cart",
+      "props": null,
+      "options": {"on":true},
+      "error": true
+    },
+    {
+      "name": "a prefix without a trailing hyphen",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"cw"},
+      "error": true
+    },
+    {
+      "name": "a prefix with capitals",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"CW-"},
+      "error": true
+    },
+    {
+      "name": "a prefix with an underscore",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"cw_"},
+      "error": true
+    },
+    {
+      "name": "a prefix with a space",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"c w-"},
+      "error": true
+    },
+    {
+      "name": "a prefix with a trailing newline",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":"cw-\n"},
+      "error": true
+    },
+    {
+      "name": "prefix true",
+      "action": "cart",
+      "props": null,
+      "options": {"prefix":true},
+      "error": true
+    }
+  ]
+}
