@@ -67,15 +67,16 @@ listen(['dblclick', 'contextmenu']);
 listen(['pointermove'], { passive: true });
 ```
 
-Delegates more event types on every observed root. Listeners are passive for
+Delegates more event types on every observed root, at once. Listeners are passive for
 high-frequency events that cannot be cancelled usefully (`pointermove`, `touchmove`,
 `wheel`, `scroll`, …). Override with `{ capture, passive }`.
 
 ## `scan(root = document)`
 
-Activates the triggers and scheduled preloads in `root`, including `root` itself. You
-only need it when you started with `mutations: false`; otherwise added content is
-scanned automatically.
+Activates the triggers and scheduled preloads in `root`, including `root` itself, and
+delegates the event types its bindings use. You only need it when you started with
+`mutations: false`, or to use a binding set on an element already in the page before
+any pointer or focus reaches it; otherwise added content is scanned automatically.
 
 ## `observe(root)`
 

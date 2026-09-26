@@ -35,7 +35,7 @@ const budgets = {
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
     'cyclewire.global.min.js': { brotli: 5376 },
-    // With 1.2's request: measured at 16095 B.
+    // With 1.2's request: measured at 16281 B.
     'cyclewire.full.global.min.js': { brotli: 16384 },
 };
 

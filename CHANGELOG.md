@@ -30,6 +30,15 @@ All notable changes to CycleWire are documented here. The format follows
 - `apply()` from `cyclewire/stream` also takes nodes already parsed.
 - `cyclewire check` reports `cw-swap` values CycleWire does not know (`invalid-swap`).
 
+### Changed
+
+- A page pays a listener only for the events it uses. `click`, `submit`, `input` and
+  `change` are delegated as before; `keydown`, `keyup`, `focusin`, `focusout`,
+  `pointerdown`, `toggle` and `command` once a binding needs them: in the page at start,
+  added later, or on an element the pointer or focus reaches. The benchmark page goes
+  from 14 listeners to 6. Code that sets such a binding on an element already in the page
+  and dispatches the event itself straight away should call `scan(element)` in between.
+
 ## [1.1.0] - 2026-09-26
 
 ### Added

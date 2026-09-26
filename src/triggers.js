@@ -1,8 +1,8 @@
 import { actionsOf, ignored, splitName } from './attrs.js';
-import { attach, detach } from './delegate.js';
+import { attach, detach, needs } from './delegate.js';
 import * as registry from './registry.js';
 import { abortDetached, announce, dispatch } from './runner.js';
-import { attrs, opts, plugins, started } from './state.js';
+import { attrs, opts, plugins, started, types } from './state.js';
 import { noop, saveData, trace, warn } from './util.js';
 
 /**
@@ -128,10 +128,12 @@ function fire(el, action) {
  * @param {boolean} look whether elements without a preload look ahead, decided once per scan
  */
 function setup(el, look) {
-    // Triggers and preloads inside cw-ignore never activate: injected markup must not run code.
-    if (ignored(el, attrs)) return;
     const current = generation;
     const trigger = el.getAttribute(attrs.trigger);
+    const own = el.getAttribute(attrs.preload);
+    const preload = own === null ? (look && el.hasAttribute(attrs.action) ? 'ahead' : '') : own.trim();
+    // Triggers and preloads inside cw-ignore never activate: injected markup must not run code.
+    if (!(trigger || preload) || ignored(el, attrs)) return;
     if (trigger && !activated.has(el)) {
         activated.add(el);
         const action = el.getAttribute(attrs.action)?.trim();
@@ -140,8 +142,6 @@ function setup(el, look) {
             gate(() => schedule(el, trigger.trim(), () => current === generation && fire(el, action)));
         } else if (__DEV__) warn(`${attrs.trigger} needs a ${attrs.action} on the same element.`, el);
     }
-    const own = el.getAttribute(attrs.preload);
-    const preload = own === null ? (look && el.hasAttribute(attrs.action) ? 'ahead' : '') : own.trim();
     if (preload && preload !== 'intent' && preload !== 'none' && !preloaded.has(el)) {
         preloaded.add(el);
         if (__DEV__) trace({ type: 'schedule', element: el, when: preload, kind: 'preload' });
@@ -153,15 +153,21 @@ function setup(el, look) {
 }
 
 /**
- * Activates the triggers and scheduled preloads in `root` (root included),
- * then lets plugins look at the same subtree.
+ * Delegates the event types the bindings in `root` (root included) need,
+ * activates its triggers and scheduled preloads, then lets plugins look at the
+ * same subtree.
  * @param {ParentNode} root
  */
 export function scan(root) {
     const look = ahead();
-    const selector = `[${attrs.trigger}],[${attrs.preload}]${look ? `,[${attrs.action}]` : ''}`;
-    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) setup(/** @type {Element} */ (root), look);
-    for (const el of root.querySelectorAll(selector)) setup(el, look);
+    // Triggers, preloads and every binding.
+    const selector = [attrs.trigger, attrs.preload, attrs.action, ...[...types].map((type) => CSS.escape(attrs.on + type))].map((name) => `[${name}]`).join();
+    const found = (/** @type {Element} */ el) => {
+        needs(el);
+        setup(el, look);
+    };
+    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) found(/** @type {Element} */ (root));
+    root.querySelectorAll(selector).forEach(found);
     if (opts.shadow) {
         for (const el of root.querySelectorAll('*')) if (el.shadowRoot) observe(el.shadowRoot);
     }

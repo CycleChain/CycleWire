@@ -199,4 +199,42 @@ test.describe('delegation', () => {
         await page.click('#invoker');
         await expectLog(page, [{ fn: 'command', el: 'panel', type: 'command', target: 'panel', command: '--refresh', source: 'invoker' }]);
     });
+
+    test('rarer event types cost a listener only once something binds them', async ({ page, browserName }) => {
+        test.skip(browserName !== 'chromium', 'counts listeners through the Chrome DevTools Protocol');
+        await boot(page, { html: '<button id="b" cw-action="log">x</button>' });
+        const cdp = await page.context().newCDPSession(page);
+        const types = async () => {
+            const { result } = await cdp.send('Runtime.evaluate', { expression: 'document' });
+            const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
+            // The intent listeners (pointerover, focusin, pointerdown) are passive; Playwright adds its own.
+            return listeners.filter((listener) => !listener.passive && !listener.type.startsWith('__')).map((listener) => listener.type).sort();
+        };
+        expect(await types()).toEqual(['change', 'click', 'input', 'submit']);
+        await page.evaluate(() => document.getElementById('app').insertAdjacentHTML('beforeend', '<input id="k" cw-on-keydown="log">'));
+        await expect.poll(types).toEqual(['change', 'click', 'input', 'keydown', 'submit']);
+        await page.focus('#k');
+        await page.keyboard.press('a');
+        await expect.poll(async () => (await log(page)).map((entry) => `${entry.el}:${entry.type}`)).toEqual(['k:keydown']);
+    });
+
+    test('a binding set on an element already in the page works once the pointer or focus reaches it', async ({ page }) => {
+        await boot(page, { html: '<input id="late">' });
+        await page.evaluate(() => document.getElementById('late').setAttribute('cw-on-keyup', 'log'));
+        await page.focus('#late');
+        await page.keyboard.press('a');
+        await expect.poll(async () => (await log(page)).map((entry) => `${entry.el}:${entry.type}`)).toEqual(['late:keyup']);
+    });
+
+    test('content added and dispatched to in one go still reaches its binding for the common events', async ({ page }) => {
+        await boot(page, { html: '' });
+        await page.evaluate(() => {
+            const select = document.createElement('select');
+            select.id = 'fresh';
+            select.setAttribute('cw-on-change', 'log');
+            document.getElementById('app').append(select);
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await expect.poll(async () => (await log(page)).map((entry) => `${entry.el}:${entry.type}`)).toEqual(['fresh:change']);
+    });
 });

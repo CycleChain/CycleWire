@@ -26,7 +26,7 @@ reading an attribute.
 
 ```text
                  load                         intent                     interaction
-Server HTML ─► [ 5.0 kB core ] ─► pointerover/focus ─► modulepreload ─► click ─► import ─► yield ─► run
+Server HTML ─► [ 5.1 kB core ] ─► pointerover/focus ─► modulepreload ─► click ─► import ─► yield ─► run
                     │
                     └─ triggers: load · idle (after load) · visible (IntersectionObserver) · media:(query)
 ```
@@ -54,9 +54,10 @@ markup an attacker managed to inject, from reaching arbitrary code. See
 
 ### Delegation
 
-For each event type (`click`, `submit`, `input`, `change`, `keydown`, `keyup`, `focusin`,
-`focusout`, `pointerdown`, `toggle`, `command`, plus whatever you `listen()` to), CycleWire
-adds one listener to the document:
+For each event type the page binds (`click`, `submit`, `input` and `change` always;
+`keydown`, `keyup`, `focusin`, `focusout`, `pointerdown`, `toggle` and `command` once a
+binding uses them; plus whatever you `listen()` to), CycleWire adds one listener to the
+document:
 - Events that bubble are handled in the bubble phase, so your framework's handlers and
   `stopPropagation()` run first and are respected.
 - Events that do not bubble (`toggle`, `command`, `focus`, …) are handled in the capture

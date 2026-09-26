@@ -47,6 +47,12 @@ Delegated by default: `click`, `submit`, `input`, `change`, `keydown`, `keyup`,
 [`listen()`](js-api.md#listentypes-options). Attribute names are lowercase, so event names
 must be too.
 
+The first four always have their listener. The others get theirs once a binding needs it:
+one in the page at start or added later, or on an element the pointer or focus reaches.
+So a page pays a listener only for the events it uses. The one case to know: code that
+sets such a binding on an element already in the page and dispatches the event itself
+straight away should call [`scan(element)`](js-api.md#scanroot--document) in between.
+
 ### Names
 
 - `module`: calls the module's `run` export, or its default export.

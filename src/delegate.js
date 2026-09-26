@@ -6,8 +6,9 @@ import { noop, saveData, trace, warn } from './util.js';
 
 /**
  * One listener per event type and root (the document, or a shadow root given
- * to `observe()`). It finds the element an event is bound to, decides about
- * preventDefault synchronously, and hands the run to the runner.
+ * to `observe()`), for the types some binding in the page needs. It finds the
+ * element an event is bound to, decides about preventDefault synchronously,
+ * and hands the run to the runner.
  */
 
 /** Events that hint the user is about to interact: time to fetch the module. */
@@ -19,6 +20,13 @@ const roots = new Map();
 const overrides = new Map();
 /** Events a root already handled, so an outer root leaves them alone. */
 const handled = new WeakSet();
+/**
+ * The event types delegated: those nearly every page binds, which code also
+ * dispatches right after adding what it binds, and the others once a binding
+ * needs them. An event type nothing binds costs no listener.
+ * @type {Set<string>}
+ */
+const used = new Set(['click', 'submit', 'input', 'change']);
 /** @type {WeakSet<Element>} */
 const warnedFocus = new WeakSet();
 
@@ -132,8 +140,11 @@ function onIntent(/** @type {Event} */ event) {
         names = actionsOf(el, attrs);
         if (names.length) target = el;
     }
+    if (!target) return;
+    // A binding set on an element after it was scanned gets its listener before the event.
+    needs(target);
     // Intent fetches now what a scheduled preload would fetch later; only "none" opts out.
-    if (!target || target.getAttribute(attrs.preload)?.trim() === 'none' || saveData()) return;
+    if (target.getAttribute(attrs.preload)?.trim() === 'none' || saveData()) return;
     for (const name of names) registry.preload(splitName(name)[0], 'intent');
     for (const plugin of plugins) plugin.intent?.(target);
 }
@@ -150,11 +161,29 @@ function add(root, type) {
     listeners.set(type, [listener, capture]);
 }
 
+/** Delegates an event type on every root from now on, if CycleWire delegates it. @param {string} type */
+function use(type) {
+    if (!used.has(type) && types.has(type)) {
+        used.add(type);
+        for (const root of roots.keys()) add(root, type);
+    }
+}
+
+/**
+ * Delegates the event types an element's bindings need: its `cw-on-<event>`
+ * attributes, and the event its `cw-action` runs on. Every scan calls it for
+ * the bindings it finds: at start, in content added later, in observed roots.
+ * @param {Element} el
+ */
+export function needs(el) {
+    for (const name of el.getAttributeNames()) use(name === attrs.action ? defaultEvent(el) : name.startsWith(attrs.on) ? name.slice(attrs.on.length) : '');
+}
+
 /** @param {Node} root */
 export function attach(root) {
     if (roots.has(root)) return;
     roots.set(root, new Map());
-    for (const type of types) add(root, type);
+    for (const type of used) add(root, type);
     for (const type of INTENT) root.addEventListener(type, onIntent, { capture: true, passive: true });
 }
 
@@ -172,6 +201,7 @@ export function detachAll() {
 }
 
 /**
+ * Delegates more event types, at once: bindings for them may be in the page already.
  * @param {Iterable<string>} list
  * @param {{ capture?: boolean, passive?: boolean }} [options]
  */
@@ -179,6 +209,6 @@ export function listen(list, options) {
     for (const type of list) {
         types.add(type);
         if (options) overrides.set(type, options);
-        for (const root of roots.keys()) add(root, type);
+        use(type);
     }
 }

@@ -2,14 +2,17 @@
 
 ## What the page pays on load
 
-- **One script.** The core is 5.0 kB brotli, or 5.2 kB for the classic-script build
+- **One script.** The core is 5.1 kB brotli, or 5.3 kB for the classic-script build
   that also starts itself.
 - **No action code** until someone reaches for it, or a trigger or preload asks for it.
   On screens that cannot hover, the modules of the actions in view are fetched once the
   page is idle (see below).
-- **No work on load** beyond attaching listeners and one `querySelectorAll` for triggers
-  and scheduled preloads. No component renders; state is not even parsed until it is
-  used.
+- **No work on load** beyond attaching listeners and one `querySelectorAll` for bindings,
+  triggers and scheduled preloads. No component renders; state is not even parsed until
+  it is used.
+- **A listener only for what the page uses:** `click`, `submit`, `input` and `change`,
+  three for intent (`pointerover`, `focusin`, `pointerdown`), and one more for each other
+  event type a binding in the page uses. The benchmark page has six.
 
 Check it on any page:
 
@@ -29,7 +32,7 @@ CycleWire starts. Starting early shortens the wait itself:
 <script type="module" src="/assets/app.js"></script> <!-- in <head> -->
 ```
 
-For the fastest possible activation, inline the 5.2 kB classic-script build in the
+For the fastest possible activation, inline the 5.3 kB classic-script build in the
 `<head>`, the way Qwik inlines its loader. It starts CycleWire while the page is still
 parsing, from the JSON block before it:
 
