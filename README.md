@@ -325,6 +325,10 @@ npx cyclewire check    # every data-cw-* value in your templates, against your a
   action names up to date. [Vite plugin](docs/vite.md)
 - **`defineAction<Props>()`** types a handler's props, and with the generated names
   `run('cart#ad')` is a compile error. [TypeScript](docs/typescript.md)
+- **`cyclewire/devtools`** is an inspector inside the page: registered and loaded actions,
+  every run and how it ended, the development build's trace, waiting triggers, and what
+  any element is bound to. Alt+Shift+W, or `devtools: true` in the Vite plugin.
+  [Devtools](docs/devtools.md)
 
 ## 🌐 Browser support
 
@@ -349,6 +353,7 @@ Minified, measured by `npm run size` and enforced in CI:
 | `signals.min.js` | 3.1 kB | 3.4 kB |
 | `stream.min.js` (includes dom and morph) | 3.3 kB | 3.6 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
+| `devtools.min.js` (development only) | 7.0 kB | 7.9 kB |
 | `cyclewire.global.min.js` (core + auto start) | 5.0 kB | 5.5 kB |
 | `cyclewire.full.global.min.js` (everything) | 14.0 kB | 15.3 kB |
 <!-- size:end -->
@@ -445,7 +450,7 @@ The release process is documented in [docs/releasing.md](docs/releasing.md).
 | [Getting started](docs/getting-started.md) | Install, first action, first trigger |
 | [Concepts](docs/concepts.md) | The architecture, compared with Qwik |
 | [HTML API](docs/html-api.md) · [JavaScript API](docs/js-api.md) | Complete reference |
-| [TypeScript](docs/typescript.md) · [Command line](docs/cli.md) · [Vite plugin](docs/vite.md) | Typed actions, template checks, edits without reloads |
+| [TypeScript](docs/typescript.md) · [Command line](docs/cli.md) · [Vite plugin](docs/vite.md) · [Devtools](docs/devtools.md) | Typed actions, template checks, edits without reloads, an in-page inspector |
 | [Actions](docs/actions.md) | Context, signals, concurrency, errors, patterns |
 | [css](docs/css.md) · [dom](docs/dom.md) · [morph](docs/morph.md) · [signals](docs/signals.md) · [plugins](docs/plugins.md) | Optional modules |
 | [Shadow DOM](docs/shadow-dom.md) | Web Components and declarative shadow DOM |

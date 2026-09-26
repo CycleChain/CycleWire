@@ -19,7 +19,8 @@ const budgets = {
     'signals.min.js': { brotli: 3200 },
     'stream.min.js': { brotli: 4096 },
     'bootstrap.min.js': { brotli: 2304 },
-    'devtools.min.js': { brotli: 8192 },
+    // Measured at 7031 B, plus 5%; it loads only when you open it.
+    'devtools.min.js': { brotli: 7424 },
     'cyclewire.global.min.js': { brotli: 5120 },
     'cyclewire.full.global.min.js': { brotli: 14336 },
 };
@@ -30,6 +31,7 @@ const notes = {
     'cyclewire.global.min.js': 'core + auto start',
     'morph.min.js': 'includes what it needs from dom',
     'stream.min.js': 'includes dom and morph',
+    'devtools.min.js': 'development only',
     'cyclewire.full.global.min.js': 'everything',
 };
 

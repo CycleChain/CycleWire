@@ -114,7 +114,8 @@ its `reason`: `intent`, a `data-cw-preload` value, or none for `preload()`), `im
 `debounce`, `queue`, `start` and `end`. The `start` and `end` of a run share its `run`
 object. Only the development build (the `development` export condition, or
 `dist/esm-dev/`) calls it; the production build contains none of these calls. The
-`TraceEvent` type lists every field.
+`TraceEvent` type lists every field, and [`cyclewire/devtools`](devtools.md) shows it all
+in a panel.
 
 Keep plugins independent of the core's internals. Import nothing from `cyclewire` beyond
 its public API, so a CDN copy and a bundled copy can never disagree.

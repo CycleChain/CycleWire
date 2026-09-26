@@ -18,15 +18,22 @@ test('an edited action runs its new code without reloading the page', async ({ p
         root,
         configFile: false,
         logLevel: 'silent',
-        resolve: { alias: [{ find: /^cyclewire$/, replacement: join(repo, 'src/index.js') }] },
+        resolve: {
+            alias: [
+                { find: /^cyclewire$/, replacement: join(repo, 'src/index.js') },
+                { find: /^cyclewire\/devtools$/, replacement: join(repo, 'src/devtools.js') },
+            ],
+        },
         define: { __DEV__: 'true', __VERSION__: '"test"' },
         server: { port: 0, host: '127.0.0.1', fs: { allow: [root, repo] } },
-        plugins: [cyclewire({ types: false })],
+        plugins: [cyclewire({ types: false, devtools: true })],
     });
     await server.listen();
     try {
         await page.goto(server.resolvedUrls.local[0]);
         await page.waitForFunction(() => window.__started === true);
+        // devtools: true mounts the panel during development, once.
+        await expect(page.locator('cyclewire-devtools')).toHaveCount(1);
         await page.evaluate(() => {
             window.__sameDocument = true;
         });
