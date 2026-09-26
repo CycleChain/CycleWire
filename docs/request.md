@@ -115,6 +115,26 @@ nothing: CycleWire takes their submit in any case.
 - **Scripts** in an answer never run: it is parsed inertly, like everything
   [`cyclewire/dom`](dom.md) parses.
 
+## In an action of your own
+
+`run` is an ordinary handler, so an action can make the request and then do what markup
+cannot declare. A quick view that opens its dialog once the product is in it:
+
+```html
+<a href="/products/42" cw-action="quickview" cw-prevent cw-target="#quick-view">Quick view</a>
+<dialog id="quick-view"></dialog>
+```
+
+```js
+// actions/quickview.js
+import { run as request } from 'cyclewire/request';
+
+export async function run(context) {
+    await request(context); // reads cw-target and the rest from the element, as always
+    document.getElementById('quick-view').showModal();
+}
+```
+
 ## Fetch it before the click
 
 With the [prefetch plugin](prefetch.md), an empty `cw-prefetch` fetches the element's own
