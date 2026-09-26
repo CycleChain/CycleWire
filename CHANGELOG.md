@@ -28,6 +28,12 @@ All notable changes to CycleWire are documented here. The format follows
 - Size budgets: `cyclewire.min.js` 5120 B brotli (measured 4952 B), the classic builds
   5376 B and 14848 B, and `prefetch.min.js` 768 B.
 
+### Fixed
+
+- The production modules of `cyclewire/prefetch` and `cyclewire/stream` no longer
+  import `util.js` for nothing: a page that loads them without a bundler makes one
+  request fewer, and esbuild stops warning about the import.
+
 ### Performance
 
 - The pointer-over handler skips elements without attributes, the look-ahead decides

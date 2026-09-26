@@ -11,7 +11,7 @@
  * Type declarations are emitted separately by `tsc` (see the "build" npm script).
  */
 import { build } from 'esbuild';
-import { readdir, readFile, rm } from 'node:fs/promises';
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 const banner = `/*! CycleWire v${pkg.version} | MIT License | https://github.com/CycleChain/CycleWire */`;
@@ -37,6 +37,18 @@ for (const [dir, dev] of [['esm', false], ['esm-dev', true]]) {
         // output readable (no renaming, no whitespace removal).
         minifySyntax: !dev,
     });
+}
+
+// A module whose imports from another were all development-only keeps a bare
+// `import "./util.js";`: built one file at a time, esbuild cannot see that the
+// other module does nothing when imported. Every module but auto.js is free of
+// side effects (package.json's "sideEffects"), so the import only costs a
+// request where the files load unbundled, and a warning in bundlers.
+for (const file of await readdir('dist/esm')) {
+    const path = `dist/esm/${file}`;
+    const code = await readFile(path, 'utf8');
+    const lean = code.replace(/^import "\.\/(?!auto\.js")[\w-]+\.js";\n/gm, '');
+    if (lean !== code) await writeFile(path, lean);
 }
 
 const bundles = {
