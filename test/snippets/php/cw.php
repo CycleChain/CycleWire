@@ -12,7 +12,7 @@ namespace CycleWire;
 /**
  * The attributes, escaped for HTML, to print inside a start tag.
  * cw('cart#add', ['sku' => 'wire-01'], ['trigger' => 'visible']) returns
- * data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+ * cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
  *
  * @param string $action "module" or "module#export"
  * @param mixed $props anything json_encode() takes, or null for none; [] is a list,
@@ -52,10 +52,12 @@ function cw(string $action, mixed $props = null, array $options = []): string
         throw new \InvalidArgumentException('CycleWire: invalid on ' . var_export($on, true));
     }
 
-    $attributes = ["data-$prefix" . ($on === null ? 'action' : "on-$on") => $action];
+    // An empty prefix means data-: a bare "action" is already a form attribute.
+    $base = $prefix === '' ? 'data-' : $prefix;
+    $attributes = [$base . ($on === null ? 'action' : "on-$on") => $action];
     if ($props !== null) {
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_THROW_ON_ERROR;
-        $attributes["data-{$prefix}props"] = json_encode($props, $flags);
+        $attributes["{$base}props"] = json_encode($props, $flags);
     }
     foreach ($strings as $name => $pattern) {
         if (!array_key_exists($name, $options)) {
@@ -70,7 +72,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
         if (!$valid) {
             throw new \InvalidArgumentException("CycleWire: invalid $name " . var_export($value, true));
         }
-        $attributes["data-$prefix$name"] = $value === true ? null : (string) $value;
+        $attributes[$base . $name] = $value === true ? null : (string) $value;
     }
 
     $escapes = ['&' => '&amp;', '"' => '&quot;', "'" => '&#39;', '<' => '&lt;', '>' => '&gt;'];

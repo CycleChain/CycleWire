@@ -25,13 +25,13 @@
         <section class="card">
             <h2>Flatpickr: a date picker on first focus</h2>
             <p class="note">A plain text input until you focus it. Then CycleWire loads Flatpickr and its stylesheet, and the calendar opens.</p>
-            <label>Due date <input id="due" name="due" placeholder="YYYY-MM-DD" autocomplete="off" data-cw-on-focusin="datepicker" data-cw-once></label>
+            <label>Due date <input id="due" name="due" placeholder="YYYY-MM-DD" autocomplete="off" cw-on-focusin="datepicker" cw-once></label>
         </section>
 
         <section class="card">
             <h2>SweetAlert2: confirm before a destructive submit</h2>
             <p class="note">Without JavaScript the form simply posts. With CycleWire it asks first, then sends the form in the background. SweetAlert2 loads on the first submit.</p>
-            <form id="delete" method="post" action="/projects/atlas/delete" data-cw-action="confirm" data-cw-props='{"title": "Delete project Atlas?", "text": "This cannot be undone.", "confirm": "Delete", "done": "Project Atlas was deleted."}'>
+            <form id="delete" method="post" action="/projects/atlas/delete" cw-action="confirm" cw-props='{"title": "Delete project Atlas?", "text": "This cannot be undone.", "confirm": "Delete", "done": "Project Atlas was deleted."}'>
                 <input type="hidden" name="project" value="atlas">
                 <button class="primary">Delete project</button>
             </form>
@@ -48,21 +48,21 @@
         <section class="card">
             <h2>DataTables: a table enhanced when it scrolls into view</h2>
             <p class="note">Sorting, search and paging arrive when the table comes into view. The Archive buttons keep working on every page and after every search.</p>
-            <table id="projects" class="display" data-cw-action="table" data-cw-trigger="visible">
+            <table id="projects" class="display" cw-action="table" cw-trigger="visible">
                 <thead><tr><th>Project</th><th>Owner</th><th></th></tr></thead>
                 <tbody>
-                    <tr id="p1"><td>Atlas</td><td>Ada</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p1", "name": "Atlas"}'>Archive</button></td></tr>
-                    <tr id="p2"><td>Borealis</td><td>Grace</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p2", "name": "Borealis"}'>Archive</button></td></tr>
-                    <tr id="p3"><td>Cobalt</td><td>Alan</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p3", "name": "Cobalt"}'>Archive</button></td></tr>
-                    <tr id="p4"><td>Dune</td><td>Linus</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p4", "name": "Dune"}'>Archive</button></td></tr>
-                    <tr id="p5"><td>Ember</td><td>Margaret</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p5", "name": "Ember"}'>Archive</button></td></tr>
-                    <tr id="p6"><td>Fjord</td><td>Dennis</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p6", "name": "Fjord"}'>Archive</button></td></tr>
-                    <tr id="p7"><td>Granite</td><td>Barbara</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p7", "name": "Granite"}'>Archive</button></td></tr>
-                    <tr id="p8"><td>Harbor</td><td>Ken</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p8", "name": "Harbor"}'>Archive</button></td></tr>
-                    <tr id="p9"><td>Iris</td><td>Frances</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p9", "name": "Iris"}'>Archive</button></td></tr>
-                    <tr id="p10"><td>Juniper</td><td>Edsger</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p10", "name": "Juniper"}'>Archive</button></td></tr>
-                    <tr id="p11"><td>Kestrel</td><td>Radia</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p11", "name": "Kestrel"}'>Archive</button></td></tr>
-                    <tr id="p12"><td>Lumen</td><td>Tim</td><td><button type="button" data-cw-action="projects#archive" data-cw-props='{"id": "p12", "name": "Lumen"}'>Archive</button></td></tr>
+                    <tr id="p1"><td>Atlas</td><td>Ada</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p1", "name": "Atlas"}'>Archive</button></td></tr>
+                    <tr id="p2"><td>Borealis</td><td>Grace</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p2", "name": "Borealis"}'>Archive</button></td></tr>
+                    <tr id="p3"><td>Cobalt</td><td>Alan</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p3", "name": "Cobalt"}'>Archive</button></td></tr>
+                    <tr id="p4"><td>Dune</td><td>Linus</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p4", "name": "Dune"}'>Archive</button></td></tr>
+                    <tr id="p5"><td>Ember</td><td>Margaret</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p5", "name": "Ember"}'>Archive</button></td></tr>
+                    <tr id="p6"><td>Fjord</td><td>Dennis</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p6", "name": "Fjord"}'>Archive</button></td></tr>
+                    <tr id="p7"><td>Granite</td><td>Barbara</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p7", "name": "Granite"}'>Archive</button></td></tr>
+                    <tr id="p8"><td>Harbor</td><td>Ken</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p8", "name": "Harbor"}'>Archive</button></td></tr>
+                    <tr id="p9"><td>Iris</td><td>Frances</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p9", "name": "Iris"}'>Archive</button></td></tr>
+                    <tr id="p10"><td>Juniper</td><td>Edsger</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p10", "name": "Juniper"}'>Archive</button></td></tr>
+                    <tr id="p11"><td>Kestrel</td><td>Radia</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p11", "name": "Kestrel"}'>Archive</button></td></tr>
+                    <tr id="p12"><td>Lumen</td><td>Tim</td><td><button type="button" cw-action="projects#archive" cw-props='{"id": "p12", "name": "Lumen"}'>Archive</button></td></tr>
                 </tbody>
             </table>
         </section>
@@ -79,8 +79,8 @@
                         .attr('id', 'activity-' + project.id)
                         .append($('<span>').text(project.name + ' archived.'))
                         .append($('<button type="button">Undo</button>')
-                            .attr('data-cw-action', 'projects#restore')
-                            .attr('data-cw-props', JSON.stringify(project)))
+                            .attr('cw-action', 'projects#restore')
+                            .attr('cw-props', JSON.stringify(project)))
                         .prependTo('#activity');
                 } else if (detail.action === 'projects#restore') {
                     $('#activity-' + project.id).remove();

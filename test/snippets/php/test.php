@@ -59,8 +59,8 @@ namespace {
     }
 
     // PHP values the vectors cannot express.
-    $check('an empty array is a list', \CycleWire\cw('list', []) === 'data-cw-action="list" data-cw-props="[]"', '[]', \CycleWire\cw('list', []));
-    $check('(object) [] is an empty map', \CycleWire\cw('map', (object) []) === 'data-cw-action="map" data-cw-props="{}"', '{}', \CycleWire\cw('map', (object) []));
+    $check('an empty array is a list', \CycleWire\cw('list', []) === 'cw-action="list" cw-props="[]"', '[]', \CycleWire\cw('list', []));
+    $check('(object) [] is an empty map', \CycleWire\cw('map', (object) []) === 'cw-action="map" cw-props="{}"', '{}', \CycleWire\cw('map', (object) []));
 
     // Blade hands a directive its arguments as PHP source, then runs the PHP the
     // directive returns as part of the compiled template.
@@ -70,7 +70,7 @@ namespace {
     ob_start();
     eval('?><button ' . $compiled . '>Add</button>');
     $html = (string) ob_get_clean();
-    $expected = '<button data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;Say \&quot;hi\&quot; &lt;3&quot;}" data-cw-trigger="visible">Add</button>';
+    $expected = '<button cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;Say \&quot;hi\&quot; &lt;3&quot;}" cw-trigger="visible">Add</button>';
     $check('the Blade directive', $html === $expected, $expected, $html);
 
     $total = count($vectors->cases) + 3;

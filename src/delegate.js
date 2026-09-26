@@ -30,8 +30,8 @@ const isDisabled = (el) => el.matches(':disabled') || el.getAttribute('aria-disa
 /**
  * The innermost element bound to this event type, `false` when that element
  * is disabled (the event is swallowed), or null. Stops at the listener's root.
- * Nothing inside `data-cw-ignore` binds, not even an element that carries its
- * own action, so the whole path up to the root is checked.
+ * Nothing inside `cw-ignore` binds, not even an element that carries its own
+ * action, so the whole path up to the root is checked.
  * @param {Event} event @param {Node} root @param {string} type
  * @returns {[Element, string] | false | null}
  */
@@ -45,7 +45,8 @@ function resolve(event, root, type) {
     for (let i = 0; i < path.length; i++) {
         const node = /** @type {Node} */ (path[i]);
         if (node === root) break;
-        if (node.nodeType !== 1) continue;
+        // An element without attributes can neither bind nor ignore.
+        if (node.nodeType !== 1 || !(/** @type {Element} */ (node)).hasAttributes()) continue;
         const el = /** @type {Element} */ (node);
         if (el.hasAttribute(attrs.ignore)) return null;
         if (found !== null || (own && i)) continue;
@@ -117,7 +118,7 @@ function onIntent(/** @type {Event} */ event) {
     for (const node of event.composedPath()) {
         if (/** @type {Node} */ (node).nodeType !== 1) continue;
         const el = /** @type {Element} */ (node);
-        // Nothing inside data-cw-ignore is preloaded either.
+        // Nothing inside cw-ignore is preloaded either.
         if (el.hasAttribute(attrs.ignore)) return;
         if (names) continue;
         const bound = actionsOf(el, attrs);

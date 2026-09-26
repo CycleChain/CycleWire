@@ -6,8 +6,8 @@ import { attrs, opts, plugins, started } from './state.js';
 import { noop, saveData, trace, warn } from './util.js';
 
 /**
- * Event-less activation (`data-cw-trigger`), scheduled preloads
- * (`data-cw-preload`) and the MutationObservers that pick up content added
+ * Event-less activation (`cw-trigger`), scheduled preloads
+ * (`cw-preload`) and the MutationObservers that pick up content added
  * after start, whether a framework, `swap()` or `morph()` inserted it.
  */
 
@@ -125,7 +125,7 @@ function fire(el, action) {
 
 /** @param {Element} el */
 function setup(el) {
-    // Triggers and preloads inside data-cw-ignore never activate: injected markup must not run code.
+    // Triggers and preloads inside cw-ignore never activate: injected markup must not run code.
     if (ignored(el, attrs)) return;
     const current = generation;
     const trigger = el.getAttribute(attrs.trigger);

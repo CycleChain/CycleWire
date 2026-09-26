@@ -23,7 +23,7 @@ module CycleWire
 
   # The attributes, escaped for HTML, to print inside a start tag.
   # CycleWire.cw('cart#add', { sku: 'wire-01' }, trigger: 'visible') returns
-  # data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+  # cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
   # Raises ArgumentError for a bad name, option or value.
   def self.cw(action, props = nil, options = {})
     options.each_key do |name|
@@ -41,16 +41,18 @@ module CycleWire
     on = options[:on]
     raise ArgumentError, "CycleWire: invalid on #{on.inspect}" unless on.nil? || (on.is_a?(String) && EVENT.match?(on))
 
+    # An empty prefix means data-: a bare "action" is already a form attribute.
+    base = prefix.empty? ? 'data-' : prefix
     binds = on.nil? ? 'action' : "on-#{on}"
-    attributes = { "data-#{prefix}#{binds}" => action }
-    attributes["data-#{prefix}props"] = JSON.generate(props) unless props.nil?
+    attributes = { "#{base}#{binds}" => action }
+    attributes["#{base}props"] = JSON.generate(props) unless props.nil?
     OPTIONS.each_key do |name|
       next unless options.key?(name)
 
       value = options[name]
       raise ArgumentError, "CycleWire: invalid #{name} #{value.inspect}" unless valid?(name, value)
 
-      attributes["data-#{prefix}#{name}"] = value == true ? nil : value.to_s
+      attributes["#{base}#{name}"] = value == true ? nil : value.to_s
     end
     attributes.map { |name, value| value.nil? ? name : %(#{name}="#{value.gsub(/[&"'<>]/, ESCAPES)}") }.join(' ')
   end

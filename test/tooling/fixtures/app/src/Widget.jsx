@@ -1,1 +1,1 @@
-export const Widget = () => <button data-cw-action={'like'} data-cw-preload="idle">Like</button>;
+export const Widget = () => <button cw-action={'like'} cw-preload="idle">Like</button>;

@@ -6,336 +6,336 @@
       "action": "cart",
       "props": null,
       "options": {},
-      "expected": "data-cw-action=\"cart\""
+      "expected": "cw-action=\"cart\""
     },
     {
       "name": "module#export",
       "action": "cart#add",
       "props": null,
       "options": {},
-      "expected": "data-cw-action=\"cart#add\""
+      "expected": "cw-action=\"cart#add\""
     },
     {
       "name": "dots, hyphens and underscores in the module",
       "action": "ui.menu-bar_2#open",
       "props": null,
       "options": {},
-      "expected": "data-cw-action=\"ui.menu-bar_2#open\""
+      "expected": "cw-action=\"ui.menu-bar_2#open\""
     },
     {
       "name": "an export with $ and digits",
       "action": "store#$reset2",
       "props": null,
       "options": {},
-      "expected": "data-cw-action=\"store#$reset2\""
+      "expected": "cw-action=\"store#$reset2\""
     },
     {
       "name": "an empty export after #",
       "action": "cart#",
       "props": null,
       "options": {},
-      "expected": "data-cw-action=\"cart#\""
+      "expected": "cw-action=\"cart#\""
     },
     {
       "name": "props",
       "action": "cart#add",
       "props": {"sku":"wire-01","qty":1},
       "options": {},
-      "expected": "data-cw-action=\"cart#add\" data-cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;,&quot;qty&quot;:1}\""
+      "expected": "cw-action=\"cart#add\" cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;,&quot;qty&quot;:1}\""
     },
     {
       "name": "map keys keep their order",
       "action": "sort",
       "props": {"z":1,"a":2,"m":3},
       "options": {},
-      "expected": "data-cw-action=\"sort\" data-cw-props=\"{&quot;z&quot;:1,&quot;a&quot;:2,&quot;m&quot;:3}\""
+      "expected": "cw-action=\"sort\" cw-props=\"{&quot;z&quot;:1,&quot;a&quot;:2,&quot;m&quot;:3}\""
     },
     {
       "name": "quotes and apostrophes",
       "action": "note",
       "props": {"title":"Say \"hi\"","body":"it's"},
       "options": {},
-      "expected": "data-cw-action=\"note\" data-cw-props=\"{&quot;title&quot;:&quot;Say \\&quot;hi\\&quot;&quot;,&quot;body&quot;:&quot;it&#39;s&quot;}\""
+      "expected": "cw-action=\"note\" cw-props=\"{&quot;title&quot;:&quot;Say \\&quot;hi\\&quot;&quot;,&quot;body&quot;:&quot;it&#39;s&quot;}\""
     },
     {
       "name": "an attribute breakout attempt",
       "action": "search",
       "props": {"q":"\"'><img src=x onerror=alert(1)>"},
       "options": {},
-      "expected": "data-cw-action=\"search\" data-cw-props=\"{&quot;q&quot;:&quot;\\&quot;&#39;&gt;&lt;img src=x onerror=alert(1)&gt;&quot;}\""
+      "expected": "cw-action=\"search\" cw-props=\"{&quot;q&quot;:&quot;\\&quot;&#39;&gt;&lt;img src=x onerror=alert(1)&gt;&quot;}\""
     },
     {
       "name": "a script element",
       "action": "comment",
       "props": {"html":"<script>alert(1)</script>"},
       "options": {},
-      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;html&quot;:&quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;}\""
+      "expected": "cw-action=\"comment\" cw-props=\"{&quot;html&quot;:&quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;}\""
     },
     {
       "name": "a closing script tag",
       "action": "comment",
       "props": {"text":"</script><script>alert(1)//"},
       "options": {},
-      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;text&quot;:&quot;&lt;/script&gt;&lt;script&gt;alert(1)//&quot;}\""
+      "expected": "cw-action=\"comment\" cw-props=\"{&quot;text&quot;:&quot;&lt;/script&gt;&lt;script&gt;alert(1)//&quot;}\""
     },
     {
       "name": "text that is already escaped is escaped again",
       "action": "comment",
       "props": {"text":"&amp; &lt;b&gt; &#39;"},
       "options": {},
-      "expected": "data-cw-action=\"comment\" data-cw-props=\"{&quot;text&quot;:&quot;&amp;amp; &amp;lt;b&amp;gt; &amp;#39;&quot;}\""
+      "expected": "cw-action=\"comment\" cw-props=\"{&quot;text&quot;:&quot;&amp;amp; &amp;lt;b&amp;gt; &amp;#39;&quot;}\""
     },
     {
       "name": "a javascript: URL is only text",
       "action": "link",
       "props": {"href":"javascript:alert(1)"},
       "options": {},
-      "expected": "data-cw-action=\"link\" data-cw-props=\"{&quot;href&quot;:&quot;javascript:alert(1)&quot;}\""
+      "expected": "cw-action=\"link\" cw-props=\"{&quot;href&quot;:&quot;javascript:alert(1)&quot;}\""
     },
     {
       "name": "emoji and non-ASCII text stay as they are",
       "action": "greet",
       "props": {"city":"İzmir","text":"Grüße, 日本語 🔌"},
       "options": {},
-      "expected": "data-cw-action=\"greet\" data-cw-props=\"{&quot;city&quot;:&quot;İzmir&quot;,&quot;text&quot;:&quot;Grüße, 日本語 🔌&quot;}\""
+      "expected": "cw-action=\"greet\" cw-props=\"{&quot;city&quot;:&quot;İzmir&quot;,&quot;text&quot;:&quot;Grüße, 日本語 🔌&quot;}\""
     },
     {
       "name": "newlines, tabs and control characters",
       "action": "log",
       "props": {"text":"a\nb\tc\rd\be\ff\u0000g\u0001h\u001fi\u007fj"},
       "options": {},
-      "expected": "data-cw-action=\"log\" data-cw-props=\"{&quot;text&quot;:&quot;a\\nb\\tc\\rd\\be\\ff\\u0000g\\u0001h\\u001fi\u007fj&quot;}\""
+      "expected": "cw-action=\"log\" cw-props=\"{&quot;text&quot;:&quot;a\\nb\\tc\\rd\\be\\ff\\u0000g\\u0001h\\u001fi\u007fj&quot;}\""
     },
     {
       "name": "U+2028 and U+2029 stay as they are",
       "action": "log",
       "props": {"text":"a\u2028b\u2029c"},
       "options": {},
-      "expected": "data-cw-action=\"log\" data-cw-props=\"{&quot;text&quot;:&quot;a\u2028b\u2029c&quot;}\""
+      "expected": "cw-action=\"log\" cw-props=\"{&quot;text&quot;:&quot;a\u2028b\u2029c&quot;}\""
     },
     {
       "name": "slashes stay as they are",
       "action": "nav",
       "props": {"path":"/cart/add","url":"https://example.com/?a=1&b=2"},
       "options": {},
-      "expected": "data-cw-action=\"nav\" data-cw-props=\"{&quot;path&quot;:&quot;/cart/add&quot;,&quot;url&quot;:&quot;https://example.com/?a=1&amp;b=2&quot;}\""
+      "expected": "cw-action=\"nav\" cw-props=\"{&quot;path&quot;:&quot;/cart/add&quot;,&quot;url&quot;:&quot;https://example.com/?a=1&amp;b=2&quot;}\""
     },
     {
       "name": "backslashes",
       "action": "files",
       "props": {"path":"C:\\Temp\\new"},
       "options": {},
-      "expected": "data-cw-action=\"files\" data-cw-props=\"{&quot;path&quot;:&quot;C:\\\\Temp\\\\new&quot;}\""
+      "expected": "cw-action=\"files\" cw-props=\"{&quot;path&quot;:&quot;C:\\\\Temp\\\\new&quot;}\""
     },
     {
       "name": "nested lists and maps",
       "action": "cart#sync",
       "props": {"items":[{"sku":"a","tags":["x","y"]},{"sku":"b","tags":[]}],"meta":{"page":1,"filters":{}}},
       "options": {},
-      "expected": "data-cw-action=\"cart#sync\" data-cw-props=\"{&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;tags&quot;:[&quot;x&quot;,&quot;y&quot;]},{&quot;sku&quot;:&quot;b&quot;,&quot;tags&quot;:[]}],&quot;meta&quot;:{&quot;page&quot;:1,&quot;filters&quot;:{}}}\""
+      "expected": "cw-action=\"cart#sync\" cw-props=\"{&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;tags&quot;:[&quot;x&quot;,&quot;y&quot;]},{&quot;sku&quot;:&quot;b&quot;,&quot;tags&quot;:[]}],&quot;meta&quot;:{&quot;page&quot;:1,&quot;filters&quot;:{}}}\""
     },
     {
       "name": "an empty list",
       "action": "list",
       "props": [],
       "options": {},
-      "expected": "data-cw-action=\"list\" data-cw-props=\"[]\""
+      "expected": "cw-action=\"list\" cw-props=\"[]\""
     },
     {
       "name": "an empty map",
       "action": "map",
       "props": {},
       "options": {},
-      "expected": "data-cw-action=\"map\" data-cw-props=\"{}\""
+      "expected": "cw-action=\"map\" cw-props=\"{}\""
     },
     {
       "name": "true, false and null",
       "action": "flags",
       "props": {"on":true,"off":false,"none":null},
       "options": {},
-      "expected": "data-cw-action=\"flags\" data-cw-props=\"{&quot;on&quot;:true,&quot;off&quot;:false,&quot;none&quot;:null}\""
+      "expected": "cw-action=\"flags\" cw-props=\"{&quot;on&quot;:true,&quot;off&quot;:false,&quot;none&quot;:null}\""
     },
     {
       "name": "integers",
       "action": "count",
       "props": {"zero":0,"negative":-42,"largest":9007199254740991},
       "options": {},
-      "expected": "data-cw-action=\"count\" data-cw-props=\"{&quot;zero&quot;:0,&quot;negative&quot;:-42,&quot;largest&quot;:9007199254740991}\""
+      "expected": "cw-action=\"count\" cw-props=\"{&quot;zero&quot;:0,&quot;negative&quot;:-42,&quot;largest&quot;:9007199254740991}\""
     },
     {
       "name": "a list at the top",
       "action": "pick",
       "props": [1,"two",[3],{"four":4}],
       "options": {},
-      "expected": "data-cw-action=\"pick\" data-cw-props=\"[1,&quot;two&quot;,[3],{&quot;four&quot;:4}]\""
+      "expected": "cw-action=\"pick\" cw-props=\"[1,&quot;two&quot;,[3],{&quot;four&quot;:4}]\""
     },
     {
       "name": "a string at the top",
       "action": "say",
       "props": "hello",
       "options": {},
-      "expected": "data-cw-action=\"say\" data-cw-props=\"&quot;hello&quot;\""
+      "expected": "cw-action=\"say\" cw-props=\"&quot;hello&quot;\""
     },
     {
       "name": "an empty string is printed",
       "action": "say",
       "props": "",
       "options": {},
-      "expected": "data-cw-action=\"say\" data-cw-props=\"&quot;&quot;\""
+      "expected": "cw-action=\"say\" cw-props=\"&quot;&quot;\""
     },
     {
       "name": "false is printed",
       "action": "toggle",
       "props": false,
       "options": {},
-      "expected": "data-cw-action=\"toggle\" data-cw-props=\"false\""
+      "expected": "cw-action=\"toggle\" cw-props=\"false\""
     },
     {
       "name": "zero is printed",
       "action": "count",
       "props": 0,
       "options": {},
-      "expected": "data-cw-action=\"count\" data-cw-props=\"0\""
+      "expected": "cw-action=\"count\" cw-props=\"0\""
     },
     {
       "name": "on",
       "action": "search#keys",
       "props": null,
       "options": {"on":"keydown"},
-      "expected": "data-cw-on-keydown=\"search#keys\""
+      "expected": "cw-on-keydown=\"search#keys\""
     },
     {
       "name": "on with a namespaced event",
       "action": "form#done",
       "props": null,
       "options": {"on":"turbo:submit-end"},
-      "expected": "data-cw-on-turbo:submit-end=\"form#done\""
+      "expected": "cw-on-turbo:submit-end=\"form#done\""
     },
     {
       "name": "trigger load",
       "action": "stats",
       "props": null,
       "options": {"trigger":"load"},
-      "expected": "data-cw-action=\"stats\" data-cw-trigger=\"load\""
+      "expected": "cw-action=\"stats\" cw-trigger=\"load\""
     },
     {
       "name": "trigger visible, after the props",
       "action": "reviews#load",
       "props": {"product":7},
       "options": {"trigger":"visible"},
-      "expected": "data-cw-action=\"reviews#load\" data-cw-props=\"{&quot;product&quot;:7}\" data-cw-trigger=\"visible\""
+      "expected": "cw-action=\"reviews#load\" cw-props=\"{&quot;product&quot;:7}\" cw-trigger=\"visible\""
     },
     {
       "name": "a media trigger",
       "action": "menu",
       "props": null,
       "options": {"trigger":"media:(min-width: 48em)"},
-      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(min-width: 48em)\""
+      "expected": "cw-action=\"menu\" cw-trigger=\"media:(min-width: 48em)\""
     },
     {
       "name": "a media trigger with a range",
       "action": "menu",
       "props": null,
       "options": {"trigger":"media:(width >= 600px) and (hover: hover)"},
-      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(width &gt;= 600px) and (hover: hover)\""
+      "expected": "cw-action=\"menu\" cw-trigger=\"media:(width &gt;= 600px) and (hover: hover)\""
     },
     {
       "name": "a media query over two lines",
       "action": "menu",
       "props": null,
       "options": {"trigger":"media:(min-width: 48em)\nand (hover: hover)"},
-      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:(min-width: 48em)\nand (hover: hover)\""
+      "expected": "cw-action=\"menu\" cw-trigger=\"media:(min-width: 48em)\nand (hover: hover)\""
     },
     {
       "name": "option values are escaped too",
       "action": "menu",
       "props": null,
       "options": {"trigger":"media:\"'><script>alert(1)</script>"},
-      "expected": "data-cw-action=\"menu\" data-cw-trigger=\"media:&quot;&#39;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\""
+      "expected": "cw-action=\"menu\" cw-trigger=\"media:&quot;&#39;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\""
     },
     {
       "name": "preload",
       "action": "cart#add",
       "props": null,
       "options": {"preload":"none"},
-      "expected": "data-cw-action=\"cart#add\" data-cw-preload=\"none\""
+      "expected": "cw-action=\"cart#add\" cw-preload=\"none\""
     },
     {
       "name": "concurrency",
       "action": "search",
       "props": null,
       "options": {"concurrency":"restart"},
-      "expected": "data-cw-action=\"search\" data-cw-concurrency=\"restart\""
+      "expected": "cw-action=\"search\" cw-concurrency=\"restart\""
     },
     {
       "name": "debounce",
       "action": "search",
       "props": null,
       "options": {"debounce":250},
-      "expected": "data-cw-action=\"search\" data-cw-debounce=\"250\""
+      "expected": "cw-action=\"search\" cw-debounce=\"250\""
     },
     {
       "name": "debounce 0 is printed",
       "action": "search",
       "props": null,
       "options": {"debounce":0},
-      "expected": "data-cw-action=\"search\" data-cw-debounce=\"0\""
+      "expected": "cw-action=\"search\" cw-debounce=\"0\""
     },
     {
       "name": "once is a bare attribute",
       "action": "newsletter",
       "props": null,
       "options": {"once":true},
-      "expected": "data-cw-action=\"newsletter\" data-cw-once"
+      "expected": "cw-action=\"newsletter\" cw-once"
     },
     {
       "name": "prevent true is a bare attribute",
       "action": "menu#toggle",
       "props": null,
       "options": {"prevent":true},
-      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent"
+      "expected": "cw-action=\"menu#toggle\" cw-prevent"
     },
     {
       "name": "prevent some events",
       "action": "menu#toggle",
       "props": null,
       "options": {"prevent":"click submit"},
-      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent=\"click submit\""
+      "expected": "cw-action=\"menu#toggle\" cw-prevent=\"click submit\""
     },
     {
       "name": "prevent none",
       "action": "menu#toggle",
       "props": null,
       "options": {"prevent":"none"},
-      "expected": "data-cw-action=\"menu#toggle\" data-cw-prevent=\"none\""
+      "expected": "cw-action=\"menu#toggle\" cw-prevent=\"none\""
     },
     {
       "name": "every option, in a fixed order",
       "action": "cart#add",
       "props": {"sku":"wire-01"},
       "options": {"prevent":"click","once":true,"debounce":300,"concurrency":"drop","preload":"visible","trigger":"idle"},
-      "expected": "data-cw-action=\"cart#add\" data-cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;}\" data-cw-trigger=\"idle\" data-cw-preload=\"visible\" data-cw-concurrency=\"drop\" data-cw-debounce=\"300\" data-cw-once data-cw-prevent=\"click\""
+      "expected": "cw-action=\"cart#add\" cw-props=\"{&quot;sku&quot;:&quot;wire-01&quot;}\" cw-trigger=\"idle\" cw-preload=\"visible\" cw-concurrency=\"drop\" cw-debounce=\"300\" cw-once cw-prevent=\"click\""
     },
     {
       "name": "on with props and options",
       "action": "search#suggest",
       "props": {"limit":5},
       "options": {"debounce":200,"on":"input","concurrency":"latest"},
-      "expected": "data-cw-on-input=\"search#suggest\" data-cw-props=\"{&quot;limit&quot;:5}\" data-cw-concurrency=\"latest\" data-cw-debounce=\"200\""
+      "expected": "cw-on-input=\"search#suggest\" cw-props=\"{&quot;limit&quot;:5}\" cw-concurrency=\"latest\" cw-debounce=\"200\""
     },
     {
       "name": "null and false leave options out",
       "action": "cart",
       "props": null,
       "options": {"on":null,"trigger":null,"preload":false,"once":false,"prevent":false,"prefix":null,"debounce":null},
-      "expected": "data-cw-action=\"cart\""
+      "expected": "cw-action=\"cart\""
     },
     {
       "name": "a custom prefix",
       "action": "search#keys",
       "props": {"q":""},
       "options": {"prefix":"x-","on":"keydown","once":true},
-      "expected": "data-x-on-keydown=\"search#keys\" data-x-props=\"{&quot;q&quot;:&quot;&quot;}\" data-x-once"
+      "expected": "x-on-keydown=\"search#keys\" x-props=\"{&quot;q&quot;:&quot;&quot;}\" x-once"
     },
     {
       "name": "an empty prefix",
@@ -349,7 +349,7 @@
       "action": "cart",
       "props": null,
       "options": {"prefix":"app-2-"},
-      "expected": "data-app-2-action=\"cart\""
+      "expected": "app-2-action=\"cart\""
     },
     {
       "name": "a path is not a name",

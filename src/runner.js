@@ -16,7 +16,7 @@ import { emit, trace, warn } from './util.js';
  * @typedef {object} Binding
  * @property {AbortController | null} controller  the latest non-parallel run's controller
  * @property {number} running                     runs in flight
- * @property {boolean} done                       a data-cw-once run has succeeded
+ * @property {boolean} done                       a cw-once run has succeeded
  * @property {[Event | null, EventTarget | null, (value: Promise<unknown> | undefined) => void] | null} queued  the one event `latest` holds back
  * @property {ReturnType<typeof setTimeout> | undefined} timer   debounce timer
  * @property {((value: undefined) => void) | null} settle        resolves a debounced call that got superseded
@@ -58,8 +58,8 @@ function binding(el, action) {
 }
 
 /**
- * `data-cw-pending` and `aria-busy` are reference counted, and whatever the
- * server rendered in their place is put back afterwards.
+ * `cw-pending` and `aria-busy` are reference counted, and whatever the server
+ * rendered in their place is put back afterwards.
  * @param {Element} el @param {boolean} busy
  */
 function pend(el, busy) {

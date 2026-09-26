@@ -58,7 +58,7 @@ message it sends. Send messages as the default event (no `event:` field), and gi
 | Option | |
 | --- | --- |
 | `signal` | An `AbortSignal` that closes this subscription |
-| `element` | Closes the subscription when the element leaves the page, and shows the connection's state in its `data-cw-stream-state`: `connecting`, `open` or `closed` |
+| `element` | Closes the subscription when the element leaves the page, and shows the connection's state in its `cw-stream-state`: `connecting`, `open` or `closed` |
 | `root` | Where targets are looked up: the document, or a shadow root |
 | `withCredentials` | Send cookies to another origin |
 
@@ -75,7 +75,7 @@ last subscriber.
   shown.
 
 ```css
-[data-cw-stream-state="connecting"]::after { content: " reconnecting…"; color: gray; }
+[cw-stream-state="connecting"]::after { content: " reconnecting…"; color: gray; }
 ```
 
 ## Streams from markup: `streams()`
@@ -96,13 +96,13 @@ start({
 ```
 
 ```html
-<ul id="messages" data-cw-stream="room" data-room="42"></ul>
+<ul id="messages" cw-stream="room" data-room="42"></ul>
 ```
 
-While an element with `data-cw-stream` is in the page, it is subscribed to its channel's
+While an element with `cw-stream` is in the page, it is subscribed to its channel's
 stream, and removing it unsubscribes it. Markup names channels, never URLs, and a channel
 must lead to the page's own origin: like the action registry, the plugin decides which
-streams markup can open. Nothing inside `data-cw-ignore` opens one.
+streams markup can open. Nothing inside `cw-ignore` opens one.
 
 With the full classic-script build, list the channels in the JSON configuration:
 `"streams": { "channels": { "room": "/rooms/42/events" } }`.

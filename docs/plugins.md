@@ -56,8 +56,8 @@ Modern HTML covers most of these with zero JavaScript:
 ```
 
 These use `<dialog>` with Invoker Commands, the Popover API and exclusive `<details>`
-accordions. CycleWire can still react to them: `data-cw-on-command` receives custom
-commands (`command="--refresh"`), and `data-cw-action` on a `<details>` runs on
+accordions. CycleWire can still react to them: `cw-on-command` receives custom
+commands (`command="--refresh"`), and `cw-action` on a `<details>` runs on
 `toggle`.
 
 ## Signals: `cyclewire/signals`
@@ -109,7 +109,7 @@ start({ actions, plugins: [analytics({ endpoint: '/beacon' })] });
 
 `trace` receives one object per step, with a `type`: `schedule` (a trigger or preload
 was set up), `wait` (a trigger fired before its action was registered), `preload` (with
-its `reason`: `intent`, a `data-cw-preload` value, or none for `preload()`), `import` and
+its `reason`: `intent`, a `cw-preload` value, or none for `preload()`), `import` and
 `imported`, `skip` (with its `reason`: `unregistered`, `cancelled`, `once` or `busy`),
 `debounce`, `queue`, `start` and `end`. The `start` and `end` of a run share its `run`
 object. Only the development build (the `development` export condition, or

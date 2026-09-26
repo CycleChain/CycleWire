@@ -30,7 +30,7 @@ test.describe('boot', () => {
         await page.goto('/fixtures/boot.html');
         await page.waitForFunction(() => window.__ready === true);
         const api = await page.evaluate(() => ({ keys: Object.keys(window.CW).sort(), version: window.CW.version }));
-        expect(api.keys).toEqual(['fromGlob', 'listen', 'loaded', 'observe', 'preload', 'register', 'run', 'scan', 'start', 'stop', 'use', 'version']);
+        expect(api.keys).toEqual(['defineAction', 'fromGlob', 'listen', 'loaded', 'observe', 'preload', 'register', 'registered', 'run', 'scan', 'start', 'stop', 'use', 'version']);
         expect(api.version).toBe(pkg.version);
     });
 });

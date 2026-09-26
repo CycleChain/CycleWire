@@ -5,6 +5,6 @@ import { render as renderComponent } from 'svelte/server';
 import Counter from './components/Counter.svelte';
 
 export const render = () => ({
-    // The same props the page passes to the island in data-cw-props.
+    // The same props the page passes to the island in cw-props.
     counter: renderComponent(Counter, { props: { start: 3 } }).body,
 });

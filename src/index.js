@@ -63,7 +63,8 @@ import { warn } from './util.js';
 
 /**
  * @typedef {object} Options
- * @property {string} [prefix]         attribute prefix, as in `data-${prefix}action`. Default "cw-"; "" leaves the attributes unprefixed
+ * @property {string} [prefix]         attribute prefix: "cw-" (default) gives `cw-action`, "data-cw-" gives `data-cw-action`,
+ *     which HTML validators accept, and "" means "data-"
  * @property {ActionMap} [actions]     actions to register
  * @property {string[]} [events]       extra event types to delegate
  * @property {boolean} [capture]       delegate every event in the capture phase
@@ -71,7 +72,7 @@ import { warn } from './util.js';
  * @property {number} [idleTimeout]    requestIdleCallback timeout for `idle`, in ms. Default 2000
  * @property {boolean} [mutations]     watch for added and removed content. Default true
  * @property {boolean} [shadow]        observe the open shadow roots found while scanning (declarative shadow DOM)
- * @property {'auto' | 'intent' | 'visible'} [preload]  what fetches the modules of elements without `data-cw-preload`
+ * @property {'auto' | 'intent' | 'visible'} [preload]  what fetches the modules of elements without `cw-preload`
  *     besides intent. "auto" (default): on screens that cannot hover, nearing the viewport once the page is idle;
  *     "visible": the same on every screen; "intent": nothing else
  * @property {(error: unknown, info: RunInfo) => void} [onError]  replaces the default console.error

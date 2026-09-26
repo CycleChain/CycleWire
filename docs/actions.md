@@ -10,11 +10,11 @@ export async function add({ element, props, signal }) {
     element.querySelector('.count').textContent = (await response.json()).count;
 }
 
-export default function run(ctx) { /* used for data-cw-action="cart" */ }
+export default function run(ctx) { /* used for cw-action="cart" */ }
 ```
 
-- `data-cw-action="cart#add"` calls the `add` export.
-- `data-cw-action="cart"` calls `run`, falling back to the default export.
+- `cw-action="cart#add"` calls the `add` export.
+- `cw-action="cart"` calls `run`, falling back to the default export.
 
 ## The context
 
@@ -24,7 +24,7 @@ export default function run(ctx) { /* used for data-cw-action="cart" */ }
 | `target` | The innermost event target, captured while the event was dispatched. `event.target` is `null` for shadow DOM events by the time your code runs |
 | `element` | The element carrying the binding |
 | `signal` | An `AbortSignal` that fires when a newer run supersedes this one, when the element leaves the page, or on `stop()` |
-| `props` | Parsed `data-cw-props`, or `null` |
+| `props` | Parsed `cw-props`, or `null` |
 | `action` | The name that ran, e.g. `"cart#add"` |
 | `wire` | The CycleWire API (`run`, `preload`, `observe`, …) |
 | `state`, `store` | Added by the [signals](signals.md) plugin |
@@ -36,10 +36,10 @@ cached, CycleWire yields before calling you so the browser can paint the pressed
 Either way, your handler runs **after** the event has finished dispatching, which means:
 
 - `event.preventDefault()` in a handler does nothing. Use
-  [`data-cw-prevent`](html-api.md#data-cw-prevent), which is applied synchronously.
+  [`cw-prevent`](html-api.md#cw-prevent), which is applied synchronously.
 - APIs that need a user gesture, such as `navigator.clipboard.writeText`, `window.open`
   and `navigator.share`, may be refused after a slow first import, and Safari is the
-  strictest. Preload the module (`data-cw-preload="load"`) or use the upgrade pattern
+  strictest. Preload the module (`cw-preload="load"`) or use the upgrade pattern
   below.
 - `event.currentTarget` is `null`. Use `element`.
 
@@ -57,11 +57,11 @@ export function run({ element, signal }) {
 }
 ```
 
-Pair it with `data-cw-once` so CycleWire stops handling the element after the first
+Pair it with `cw-once` so CycleWire stops handling the element after the first
 successful run:
 
 ```html
-<button data-cw-action="copy" data-cw-once data-cw-preload="load" data-text="npm i cyclewire">Copy</button>
+<button cw-action="copy" cw-once cw-preload="load" data-text="npm i cyclewire">Copy</button>
 ```
 
 ## Concurrency
@@ -77,9 +77,9 @@ going depends on the concurrency mode:
 | `parallel` | other events | Every event starts its own run | Independent, idempotent work |
 
 ```html
-<input type="search" data-cw-action="search" data-cw-debounce="200">
-<input type="checkbox" data-cw-action="settings#save">
-<button data-cw-action="toast" data-cw-concurrency="parallel">Notify</button>
+<input type="search" cw-action="search" cw-debounce="200">
+<input type="checkbox" cw-action="settings#save">
+<button cw-action="toast" cw-concurrency="parallel">Notify</button>
 ```
 
 Pass `signal` to everything that supports it, so superseded work actually stops:
@@ -97,18 +97,18 @@ way.
 
 ## Once, debounce
 
-- `data-cw-once` keeps the element working until one run succeeds. After that, events
+- `cw-once` keeps the element working until one run succeeds. After that, events
   are consumed and still prevented.
-- `data-cw-debounce="ms"` waits for a pause. Under `restart`, a new event aborts the
+- `cw-debounce="ms"` waits for a pause. Under `restart`, a new event aborts the
   in-flight run immediately rather than when the pause ends.
 
 ## Pending state
 
-While a run is in flight, the element has `data-cw-pending`. `drop` runs also set
+While a run is in flight, the element has `cw-pending`. `drop` runs also set
 `aria-busy="true"`. Style them and let assistive technology know:
 
 ```css
-[data-cw-pending] { opacity: .6; pointer-events: none; }
+[cw-pending] { opacity: .6; pointer-events: none; }
 ```
 
 ## Results and errors

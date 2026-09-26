@@ -1,6 +1,6 @@
 // A plain CycleWire action. It runs inside a React, Vue or Svelte island
 // exactly as it would in server-rendered HTML, and knows nothing about the
-// framework: `props` is read from data-cw-props when the action runs, so it
+// framework: `props` is read from cw-props when the action runs, so it
 // always holds what the component rendered last.
 import { post } from '../server.js';
 

@@ -8,7 +8,7 @@
     <script src="/fixtures/harness.js"></script>
 </head>
 <body>
-    <button id="b" data-cw-action="log">go</button>
+    <button id="b" cw-action="log">go</button>
     <script type="module">
         import { start } from '/dist/esm-dev/index.js';
         start({ actions: { log: 'app/log' } });

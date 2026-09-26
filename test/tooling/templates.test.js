@@ -14,13 +14,13 @@ test('the file name picks the template language', () => {
 });
 
 test('HTML: quoted, unquoted and bare attributes, with positions', () => {
-    const source = `<form data-cw-action="cart#add" data-cw-props='{"sku":"a"}' data-cw-once>\n  <input data-cw-on-input=search data-cw-debounce="150">\n</form>`;
+    const source = `<form cw-action="cart#add" cw-props='{"sku":"a"}' cw-once>\n  <input cw-on-input=search cw-debounce="150">\n</form>`;
     assert.deepEqual(values(source), [
-        ['action', 'data-cw-action', 'cart#add'],
-        ['props', 'data-cw-props', '{"sku":"a"}'],
-        ['once', 'data-cw-once', ''],
-        ['action', 'data-cw-on-input', 'search'],
-        ['debounce', 'data-cw-debounce', '150'],
+        ['action', 'cw-action', 'cart#add'],
+        ['props', 'cw-props', '{"sku":"a"}'],
+        ['once', 'cw-once', ''],
+        ['action', 'cw-on-input', 'search'],
+        ['debounce', 'cw-debounce', '150'],
     ]);
     const [first, , , fourth] = referencesIn(source);
     assert.deepEqual([first.line, first.column], [1, 7]);
@@ -28,32 +28,32 @@ test('HTML: quoted, unquoted and bare attributes, with positions', () => {
 });
 
 test('values built by a template language are dynamic', () => {
-    const blade = '<button data-cw-action="{{ $action }}" data-cw-props=\'@json($props)\'>';
-    assert.deepEqual(values(blade, { syntax: 'blade' }), [['action', 'data-cw-action', null], ['props', 'data-cw-props', null]]);
+    const blade = '<button cw-action="{{ $action }}" cw-props=\'@json($props)\'>';
+    assert.deepEqual(values(blade, { syntax: 'blade' }), [['action', 'cw-action', null], ['props', 'cw-props', null]]);
     // An email address is not a directive.
-    assert.deepEqual(values(`<a data-cw-props='{"to":"ada@example.com"}'>`), [['props', 'data-cw-props', '{"to":"ada@example.com"}']]);
-    assert.deepEqual(values('<a data-cw-action="<%= name %>">', { syntax: 'erb' }), [['action', 'data-cw-action', null]]);
-    assert.deepEqual(values('<a data-cw-action="{% if x %}a{% endif %}">', { syntax: 'jinja' }), [['action', 'data-cw-action', null]]);
-    assert.deepEqual(values('<a data-cw-action="cart#{kind}">', { syntax: 'svelte' }), [['action', 'data-cw-action', null]]);
-    assert.deepEqual(values('html`<a data-cw-action="${name}">`', { syntax: 'script' }), [['action', 'data-cw-action', null]]);
+    assert.deepEqual(values(`<a cw-props='{"to":"ada@example.com"}'>`), [['props', 'cw-props', '{"to":"ada@example.com"}']]);
+    assert.deepEqual(values('<a cw-action="<%= name %>">', { syntax: 'erb' }), [['action', 'cw-action', null]]);
+    assert.deepEqual(values('<a cw-action="{% if x %}a{% endif %}">', { syntax: 'jinja' }), [['action', 'cw-action', null]]);
+    assert.deepEqual(values('<a cw-action="cart#{kind}">', { syntax: 'svelte' }), [['action', 'cw-action', null]]);
+    assert.deepEqual(values('html`<a cw-action="${name}">`', { syntax: 'script' }), [['action', 'cw-action', null]]);
 });
 
 test('JSX, Vue, Svelte and Astro expressions: string literals are static', () => {
-    assert.deepEqual(values(`<button data-cw-action={'cart#add'} data-cw-props={JSON.stringify({ sku })} data-cw-trigger={\`visible\`} />`, { syntax: 'script' }), [
-        ['action', 'data-cw-action', 'cart#add'],
-        ['props', 'data-cw-props', null],
-        ['trigger', 'data-cw-trigger', 'visible'],
+    assert.deepEqual(values(`<button cw-action={'cart#add'} cw-props={JSON.stringify({ sku })} cw-trigger={\`visible\`} />`, { syntax: 'script' }), [
+        ['action', 'cw-action', 'cart#add'],
+        ['props', 'cw-props', null],
+        ['trigger', 'cw-trigger', 'visible'],
     ]);
-    assert.deepEqual(values(`<button :data-cw-action="'cart#add'" v-bind:data-cw-props="props" data-cw-preload="idle">`, { syntax: 'vue' }), [
-        ['action', 'data-cw-action', 'cart#add'],
-        ['props', 'data-cw-props', null],
-        ['preload', 'data-cw-preload', 'idle'],
+    assert.deepEqual(values(`<button :cw-action="'cart#add'" v-bind:cw-props="props" cw-preload="idle">`, { syntax: 'vue' }), [
+        ['action', 'cw-action', 'cart#add'],
+        ['props', 'cw-props', null],
+        ['preload', 'cw-preload', 'idle'],
     ]);
     assert.deepEqual(literal('`a${b}`'), null);
     assert.deepEqual(literal(" 'it\\'s' "), "it's");
 });
 
-test('the server helpers count as data-cw-action', () => {
+test('the server helpers count as cw-action', () => {
     assert.deepEqual(values(`<button @cw('cart#add', ['sku' => $sku])>`, { syntax: 'blade' }), [['action', '@cw', 'cart#add']]);
     assert.deepEqual(values(`<button <%= cw('cart#add', { sku: @sku }) %>> <form <%= cw "search", nil, trigger: 'visible' %>>`, { syntax: 'erb' }), [
         ['action', 'cw()', 'cart#add'],
@@ -67,12 +67,13 @@ test('the server helpers count as data-cw-action', () => {
 });
 
 test('comments are not checked, and similar attribute names are not matched', () => {
-    const source = `<!-- <button data-cw-action="gone"> -->\n{{-- <b data-cw-action="also-gone"> --}}\n<i data-cw-actions="x" x-data-cw-action="y" data-cw-action-extra="z" data-cw-action="kept"></i>`;
-    assert.deepEqual(values(source, { syntax: 'blade' }), [['action', 'data-cw-action', 'kept']]);
-    assert.deepEqual(values('// <a data-cw-action="gone">\nconst a = 1; /* data-cw-action="gone" */\n<a data-cw-action="kept">', { syntax: 'script' }), [['action', 'data-cw-action', 'kept']]);
+    const source = `<!-- <button cw-action="gone"> -->\n{{-- <b cw-action="also-gone"> --}}\n<i cw-actions="x" x-cw-action="y" cw-action-extra="z" cw-action="kept"></i>`;
+    assert.deepEqual(values(source, { syntax: 'blade' }), [['action', 'cw-action', 'kept']]);
+    assert.deepEqual(values('// <a cw-action="gone">\nconst a = 1; /* cw-action="gone" */\n<a cw-action="kept">', { syntax: 'script' }), [['action', 'cw-action', 'kept']]);
 });
 
 test('a custom prefix, or none', () => {
-    assert.deepEqual(values('<a data-x-action="a" data-cw-action="b">', { prefix: 'x-' }), [['action', 'data-x-action', 'a']]);
+    assert.deepEqual(values('<a x-action="a" cw-action="b" data-x-action="c">', { prefix: 'x-' }), [['action', 'x-action', 'a']]);
+    assert.deepEqual(values('<a data-cw-action="a" cw-action="b">', { prefix: 'data-cw-' }), [['action', 'data-cw-action', 'a']]);
     assert.deepEqual(values('<a data-action="a" data-trigger="load">', { prefix: '' }), [['action', 'data-action', 'a'], ['trigger', 'data-trigger', 'load']]);
 });

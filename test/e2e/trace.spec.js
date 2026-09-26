@@ -23,9 +23,9 @@ test.describe('trace', () => {
     test('the development build reports what it schedules, fetches, skips and runs', async ({ page }) => {
         await boot(page, {
             start: false,
-            html: `<button id="b" data-cw-action="gated">go</button>
-                   <div id="t" data-cw-action="log" data-cw-trigger="idle"></div>
-                   <button id="u" data-cw-action="nope">nope</button>`,
+            html: `<button id="b" cw-action="gated">go</button>
+                   <div id="t" cw-action="log" cw-trigger="idle"></div>
+                   <button id="u" cw-action="nope">nope</button>`,
         });
         await page.evaluate(record);
         await page.evaluate(() => window.CW.start({ preload: 'intent', actions: { gated: '/fixtures/actions/gated.js', log: '/fixtures/actions/log.js' } }));
@@ -50,7 +50,7 @@ test.describe('trace', () => {
     });
 
     test('the production build reports nothing', async ({ page }) => {
-        await boot(page, { build: 'esm', start: false, html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { build: 'esm', start: false, html: '<button id="b" cw-action="log">go</button>' });
         await page.evaluate(record);
         await page.evaluate(() => window.CW.start({ actions: { log: '/fixtures/actions/log.js' } }));
         await page.click('#b');

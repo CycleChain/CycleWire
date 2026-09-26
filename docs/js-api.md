@@ -15,14 +15,14 @@ Returns the API. Calling it again only registers the `actions` you pass.
 | Option | Default | |
 | --- | --- | --- |
 | `actions` | – | Registry entries, see [`register`](#registeractions) |
-| `prefix` | `'cw-'` | Attribute prefix; `''` leaves the attributes unprefixed |
+| `prefix` | `'cw-'` | Attribute prefix: `cw-action`. `'data-cw-'` gives names HTML validators accept; `''` means `data-` |
 | `events` | – | Extra event types to delegate |
 | `capture` | `false` | Delegate every event in the capture phase, before your own handlers (useful when an island calls `stopPropagation()` on everything) |
 | `rootMargin` | `'120px'` | IntersectionObserver margin for `visible` |
 | `idleTimeout` | `2000` | `requestIdleCallback` timeout for `idle`, in ms |
 | `mutations` | `true` | Watch for added and removed content with a MutationObserver |
 | `shadow` | `false` | Observe the open shadow roots found while scanning (declarative shadow DOM) |
-| `preload` | `'auto'` | What else fetches the modules of elements without `data-cw-preload`. `'auto'`: on screens that cannot hover (`(hover: none)`), the element nearing the viewport once the page is idle; `'visible'`: the same on every screen; `'intent'`: nothing but intent |
+| `preload` | `'auto'` | What else fetches the modules of elements without `cw-preload`. `'auto'`: on screens that cannot hover (`(hover: none)`), the element nearing the viewport once the page is idle; `'visible'`: the same on every screen; `'intent'`: nothing but intent |
 | `onError` | `console.error` | `(error, { action, element, event }) => void` for failed runs |
 | `plugins` | – | Plugins to install, e.g. `[signals()]` |
 
@@ -83,7 +83,7 @@ scanned automatically.
 class CartWidget extends HTMLElement {
     connectedCallback() {
         const root = this.attachShadow({ mode: 'open' });
-        root.innerHTML = '<form data-cw-action="cart#checkout">…</form>';
+        root.innerHTML = '<form cw-action="cart#checkout">…</form>';
         this.release = observe(root);
     }
     disconnectedCallback() {

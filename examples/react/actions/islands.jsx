@@ -1,4 +1,4 @@
-// Mounts React islands. CycleWire decides when (data-cw-trigger on the
+// Mounts React islands. CycleWire decides when (cw-trigger on the
 // island's element); this module, React and the component are downloaded
 // only then.
 import { hydrateRoot } from 'react-dom/client';

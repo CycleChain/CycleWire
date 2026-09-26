@@ -13,11 +13,11 @@ start({ actions, plugins: [signals()] });
 ## Resumable state in markup
 
 ```html
-<section data-cw-state='{"count": 2, "open": false}'>
-    <output data-cw-bind="text: count">2</output>
-    <button data-cw-action="counter#inc">+1</button>
-    <button data-cw-action="counter#toggle" data-cw-bind="attr.aria-expanded: open">Details</button>
-    <div data-cw-bind="show: open" hidden>…</div>
+<section cw-state='{"count": 2, "open": false}'>
+    <output cw-bind="text: count">2</output>
+    <button cw-action="counter#inc">+1</button>
+    <button cw-action="counter#toggle" cw-bind="attr.aria-expanded: open">Details</button>
+    <div cw-bind="show: open" hidden>…</div>
 </section>
 ```
 
@@ -36,28 +36,28 @@ bindings wired, the first time something touches it:
 
 A page with a hundred widgets pays only for the ones people use.
 
-### `data-cw-state`
+### `cw-state`
 
 Defines a **scope** for the element's subtree. The value is JSON, or `#id` of a
 `<script type="application/json">`:
 
 ```html
 <script type="application/json" id="filters-state">{"query": "", "tags": []}</script>
-<form data-cw-state="#filters-state">…</form>
+<form cw-state="#filters-state">…</form>
 ```
 
 Scopes nest. An element binds to its nearest scope, and scopes do not cross shadow root
 boundaries.
 
-### `data-cw-store`
+### `cw-store`
 
 A **named store**, shared by the whole page and reachable from inside shadow roots:
 
 ```html
-<script type="application/json" data-cw-store="cart">{"items": []}</script>
+<script type="application/json" cw-store="cart">{"items": []}</script>
 
-<header><span data-cw-bind="text: $cart.count">0</span> items</header>
-<button data-cw-action="cart#add" data-cw-props='{"sku": "w1", "price": 12}'>Add</button>
+<header><span cw-bind="text: $cart.count">0</span> items</header>
+<button cw-action="cart#add" cw-props='{"sku": "w1", "price": 12}'>Add</button>
 ```
 
 ```js
@@ -77,7 +77,7 @@ are derived values, are always installed.
 
 ## Bindings
 
-`data-cw-bind="directive: expression; directive: expression"`:
+`cw-bind="directive: expression; directive: expression"`:
 
 | Directive | Effect |
 | --- | --- |

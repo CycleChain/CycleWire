@@ -6,6 +6,6 @@ import { renderToString } from 'vue/server-renderer';
 import Counter from './components/Counter.vue';
 
 export const render = async () => ({
-    // The same props the page passes to the island in data-cw-props.
+    // The same props the page passes to the island in cw-props.
     counter: await renderToString(createSSRApp(Counter, { start: 3 })),
 });

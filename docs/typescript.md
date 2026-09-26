@@ -26,7 +26,7 @@ export function run({ props, element }) {
 }
 ```
 
-`props` is what `data-cw-props` holds, parsed; the type states what your markup
+`props` is what `cw-props` holds, parsed; the type states what your markup
 promises, since the page's HTML is not checked against it.
 
 ## Action names
@@ -67,5 +67,5 @@ the generated file to import them.
 ## Markup
 
 Types cannot see your templates. [`cyclewire check`](cli.md) reads them instead: every
-`data-cw-action` must name a registered module and one of its exports, and the other
-`data-cw-*` values must be ones CycleWire understands.
+`cw-action` must name a registered module and one of its exports, and the other
+`cw-*` values must be ones CycleWire understands.

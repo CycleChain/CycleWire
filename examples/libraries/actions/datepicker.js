@@ -1,4 +1,4 @@
-// Runs on the field's first focus (data-cw-on-focusin with data-cw-once).
+// Runs on the field's first focus (cw-on-focusin with cw-once).
 // Flatpickr and its stylesheet ({ module, css } in main.js) load only then;
 // until then the field is a plain text input that accepts a typed date.
 import flatpickr from 'flatpickr';

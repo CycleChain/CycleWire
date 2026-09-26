@@ -35,7 +35,7 @@ def cw(action, props=None, **options):
     """Return the attributes, escaped for HTML, to print inside a start tag.
 
     cw('cart#add', {'sku': 'wire-01'}, trigger='visible') returns
-    data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+    cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
 
     Raises ValueError for a bad name, option or value.
     """
@@ -53,10 +53,12 @@ def cw(action, props=None, **options):
     if on is not None and (not isinstance(on, str) or not _EVENT.fullmatch(on)):
         raise ValueError(f'CycleWire: invalid on {on!r}')
 
-    attributes = {f'data-{prefix}' + ('action' if on is None else f'on-{on}'): action}
+    # An empty prefix means data-: a bare "action" is already a form attribute.
+    base = prefix or 'data-'
+    attributes = {base + ('action' if on is None else f'on-{on}'): action}
     if props is not None:
         # NaN and Infinity are not JSON, so they raise instead of breaking JSON.parse().
-        attributes[f'data-{prefix}props'] = json.dumps(
+        attributes[f'{base}props'] = json.dumps(
             props, ensure_ascii=False, separators=(',', ':'), allow_nan=False
         )
     for name in _OPTIONS:
@@ -65,7 +67,7 @@ def cw(action, props=None, **options):
         value = options[name]
         if not _valid(name, value):
             raise ValueError(f'CycleWire: invalid {name} {value!r}')
-        attributes[f'data-{prefix}{name}'] = None if value is True else str(value)
+        attributes[f'{base}{name}'] = None if value is True else str(value)
     return ' '.join(
         name if value is None else f'{name}="{value.translate(_ESCAPES)}"'
         for name, value in attributes.items()

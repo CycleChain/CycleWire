@@ -1,7 +1,7 @@
 /**
  * The `cyclewire` command (tooling/bin.js runs it).
  *
- *   cyclewire check    checks the data-cw-* values in the templates against the actions
+ *   cyclewire check    checks the cw-* values in the templates against the actions
  *   cyclewire types    writes a declaration file with the action names and their props
  *
  * Exit status: 0 when nothing is wrong (warnings allowed), 1 when a check
@@ -18,7 +18,7 @@ import { writeDeclarations } from './types.js';
 const HELP = `Usage: cyclewire <command> [options]
 
 Commands:
-  check                 Check the data-cw-* values in your templates against your actions
+  check                 Check the cw-* values in your templates against your actions
   types                 Write a declaration file with your action names and their props
 
 Options:

@@ -1,11 +1,11 @@
 /**
- * The `data-cw-*` values in templates, found by scanning their text: HTML,
+ * The `cw-*` values in templates, found by scanning their text: HTML,
  * the server template languages (Blade, ERB, Django, Jinja, Twig, Liquid,
  * Handlebars), JavaScript and TypeScript with JSX, Vue, Svelte and Astro.
  * A value written in the template is reported with its position; a value the
  * template language builds is reported as dynamic (`value: null`), since only
  * the running app knows it. The helpers in docs/server-helpers.md (`@cw(…)`,
- * `cw(…)`, `cwAttrs(…)`, `{% cw … %}`) count as `data-cw-action`.
+ * `cw(…)`, `cwAttrs(…)`, `{% cw … %}`) count as `cw-action`.
  */
 
 /**
@@ -15,7 +15,7 @@
 /**
  * @typedef {object} Reference
  * @property {Kind} kind
- * @property {string} attribute     as written, or the helper: `data-cw-on-click`, `@cw`, `{% cw %}`
+ * @property {string} attribute     as written, or the helper: `cw-on-click`, `@cw`, `{% cw %}`
  * @property {string | null} value  null when the template builds the value
  * @property {number} line          1-based
  * @property {number} column        1-based
@@ -109,7 +109,7 @@ function closeBrace(source, open) {
 const kindOf = (name) => /** @type {Kind} */ (name.startsWith('on-') ? 'action' : name);
 
 /**
- * Every `data-cw-*` value and helper call in a template.
+ * Every `cw-*` value and helper call in a template.
  * @param {string} source
  * @param {object} [options]
  * @param {Syntax} [options.syntax] how to read it; `html` by default
@@ -132,8 +132,9 @@ export function referencesIn(source, { syntax = 'html', prefix = 'cw-' } = {}) {
         }
         return { line: low + 1, column: index - starts[low] + 1 };
     };
-    const quoted = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const attribute = new RegExp(`(?<![\\w:.-])(:|v-bind:)?(data-${quoted}(action|on-[a-z][\\w:.-]*|trigger|preload|concurrency|debounce|props|prevent|once))(?![\\w-])(?:\\s*=\\s*("[^"]*"|'[^']*'|\\{|[^\\s>"'=<\`]+))?`, 'gi');
+    // An empty prefix means data-, as in the browser.
+    const quoted = (prefix || 'data-').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const attribute = new RegExp(`(?<![\\w:.-])(:|v-bind:)?(${quoted}(action|on-[a-z][\\w:.-]*|trigger|preload|concurrency|debounce|props|prevent|once))(?![\\w-])(?:\\s*=\\s*("[^"]*"|'[^']*'|\\{|[^\\s>"'=<\`]+))?`, 'gi');
     for (const match of text.matchAll(attribute)) {
         const [, bound, name, suffix, raw] = match;
         const index = /** @type {number} */ (match.index) + (bound?.length ?? 0);

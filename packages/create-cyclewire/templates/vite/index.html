@@ -11,13 +11,13 @@
         <h1>Hello, CycleWire</h1>
         <p>This page is plain HTML. Watch the network panel: each action's code arrives when you reach for it.</p>
 
-        <button type="button" class="like" data-cw-action="like" aria-pressed="false">
+        <button type="button" class="like" cw-action="like" aria-pressed="false">
             ♥ Like <span class="like__count">12</span>
         </button>
 
         <label for="search">Filter the list</label>
-        <input id="search" type="search" autocomplete="off" data-cw-action="search" data-cw-debounce="100"
-               data-cw-props='{"list": "tools"}'>
+        <input id="search" type="search" autocomplete="off" cw-action="search" cw-debounce="100"
+               cw-props='{"list": "tools"}'>
         <ul id="tools">
             <li>Vite</li>
             <li>Astro</li>

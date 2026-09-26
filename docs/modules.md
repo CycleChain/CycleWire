@@ -12,7 +12,7 @@ action runs.
 | `cyclewire/css` | Stylesheets that arrive with the actions that need them | 0.6 kB |
 | `cyclewire/dom` | Safe `html` templates, inert fragments, `swap`, `transition` | 2.2 kB |
 | `cyclewire/morph` | Morphing to new server HTML while keeping focus and input | 1.8 kB |
-| `cyclewire/signals` | Signals, reactive stores, `data-cw-bind` resumed from server JSON | 3.1 kB |
+| `cyclewire/signals` | Signals, reactive stores, `cw-bind` resumed from server JSON | 3.1 kB |
 | `cyclewire/stream` | Server-sent HTML messages that change the page, over Server-Sent Events or in responses | 3.3 kB |
 | `cyclewire/bootstrap` | Bootstrap 5's data API without its JavaScript | 2.1 kB |
 
@@ -22,18 +22,18 @@ Everything below uses only `cyclewire`.
 
 | You want | Use |
 | --- | --- |
-| Run code on click, submit, input, change, … | `data-cw-action`, `data-cw-on-<event>` |
-| Pass server data to it | `data-cw-props='{…}'` |
-| Wake a widget when it scrolls into view, when idle, or at a breakpoint | `data-cw-trigger="visible"`, `idle`, `media:(…)` |
-| Fetch code before the click | `data-cw-preload` (intent by default) |
-| No double submits, no stale search results | `data-cw-concurrency`, `data-cw-debounce`, `ctx.signal` |
+| Run code on click, submit, input, change, … | `cw-action`, `cw-on-<event>` |
+| Pass server data to it | `cw-props='{…}'` |
+| Wake a widget when it scrolls into view, when idle, or at a breakpoint | `cw-trigger="visible"`, `idle`, `media:(…)` |
+| Fetch code before the click | `cw-preload` (intent by default) |
+| No double submits, no stale search results | `cw-concurrency`, `cw-debounce`, `ctx.signal` |
 | Components with shadow DOM | `observe(shadowRoot)`, `start({ shadow: true })` |
 | Analytics and error reporting | `cw:run`, `cw:done`, `cw:error`, `onError` |
 
 ### A toggle
 
 ```html
-<button data-cw-action="favorite" data-cw-props='{"id": 42}' aria-pressed="false">☆ Save</button>
+<button cw-action="favorite" cw-props='{"id": 42}' aria-pressed="false">☆ Save</button>
 ```
 
 ```js
@@ -49,7 +49,7 @@ export async function run({ element, props, signal }) {
 ### A form that submits without a reload, and still works without JavaScript
 
 ```html
-<form action="/newsletter" method="post" data-cw-action="newsletter">
+<form action="/newsletter" method="post" cw-action="newsletter">
     <input type="email" name="email" required>
     <button>Subscribe</button>
 </form>
@@ -69,7 +69,7 @@ Input runs in `restart` mode, so each keystroke aborts the previous request. Bui
 results with DOM APIs, or add [`cyclewire/dom`](dom.md) when markup gets richer.
 
 ```html
-<input type="search" data-cw-action="search" data-cw-debounce="150">
+<input type="search" cw-action="search" cw-debounce="150">
 <ul id="results"></ul>
 ```
 
@@ -89,7 +89,7 @@ export async function run({ element, signal }) {
 ### A widget that wakes up when it scrolls into view
 
 ```html
-<div data-cw-action="map" data-cw-trigger="visible" data-cw-props='{"lat": 41.0, "lng": 29.0}' style="aspect-ratio: 16 / 9">
+<div cw-action="map" cw-trigger="visible" cw-props='{"lat": 41.0, "lng": 29.0}' style="aspect-ratio: 16 / 9">
     <img src="/static/map-preview.png" alt="Map of our office">
 </div>
 ```
@@ -101,7 +101,7 @@ preview stays until the handler replaces it. If the map needs its own stylesheet
 ### Analytics once the page is idle
 
 ```html
-<div data-cw-action="analytics#pageview" data-cw-trigger="idle"></div>
+<div cw-action="analytics#pageview" cw-trigger="idle"></div>
 ```
 
 ### A dialog with no JavaScript, plus a custom command
@@ -111,7 +111,7 @@ The platform opens the dialog. CycleWire only handles the custom `--refresh` com
 ```html
 <button commandfor="cart" command="show-modal">Cart</button>
 <button commandfor="cart" command="--refresh">Refresh</button>
-<dialog id="cart" data-cw-on-command="cart#command">…</dialog>
+<dialog id="cart" cw-on-command="cart#command">…</dialog>
 ```
 
 ```js
@@ -124,7 +124,7 @@ export function command({ event }) {
 ### Behaviour for one breakpoint
 
 ```html
-<nav data-cw-action="menu#compact" data-cw-trigger="media:(max-width: 40em)"></nav>
+<nav cw-action="menu#compact" cw-trigger="media:(max-width: 40em)"></nav>
 ```
 
 ## When to add a module

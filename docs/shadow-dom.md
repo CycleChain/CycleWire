@@ -10,7 +10,7 @@ inside a component works with no extra code:
 ```html
 <x-card>
     <template shadowrootmode="open">
-        <button data-cw-action="cart#add">Add</button>
+        <button cw-action="cart#add">Add</button>
     </template>
 </x-card>
 ```
@@ -64,6 +64,6 @@ everything.
 
 ## Signals across shadow boundaries
 
-Scopes (`data-cw-state`) do not cross shadow boundaries. Named stores (`$cart.count`) do:
+Scopes (`cw-state`) do not cross shadow boundaries. Named stores (`$cart.count`) do:
 every observed shadow root is searched when a store comes alive, and when content is
 added to it later.

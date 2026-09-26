@@ -101,13 +101,13 @@ test.describe('connect()', () => {
             window.__second = window.CWX.stream.connect(url);
         }, `/sse/listen?channel=${channel}`);
         await expect.poll(() => stats(page, channel)).toMatchObject({ open: 1, connects: 1 });
-        await expect(page.locator('#status')).toHaveAttribute('data-cw-stream-state', 'open');
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'open');
 
         await sendTo(page, channel, event('<cw-stream op="append" target="feed"><template><li>one</li></template></cw-stream>\n<cw-stream op="append" target="feed"><template><li>two</li></template></cw-stream>'));
         await expect(page.locator('#feed li')).toHaveText(['one', 'two']);
 
         await page.evaluate(() => window.__first());
-        await expect(page.locator('#status')).toHaveAttribute('data-cw-stream-state', 'closed');
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'closed');
         expect((await stats(page, channel)).open).toBe(1);
         await page.evaluate(() => window.__second());
         await expect.poll(async () => (await stats(page, channel)).open).toBe(0);
@@ -128,8 +128,8 @@ test.describe('connect()', () => {
         const channel = channelFor(info, 'backoff');
         await boot(page, { html: '<div id="status"></div>' });
         await page.evaluate((url) => window.CWX.stream.connect(url, { element: document.getElementById('status') }), `/sse/fail?channel=${channel}&times=2`);
-        await expect(page.locator('#status')).toHaveAttribute('data-cw-stream-state', 'connecting');
-        await expect(page.locator('#status')).toHaveAttribute('data-cw-stream-state', 'open', { timeout: 15_000 });
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'connecting');
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'open', { timeout: 15_000 });
         expect((await stats(page, channel)).connects).toBe(1);
     });
 
@@ -156,20 +156,20 @@ test.describe('connect()', () => {
 });
 
 test.describe('streams() plugin', () => {
-    test('data-cw-stream opens only the channels it lists, on the same origin', async ({ page }, info) => {
+    test('cw-stream opens only the channels it lists, on the same origin', async ({ page }, info) => {
         const channel = channelFor(info, 'plugin');
         await boot(page, {
             start: false,
-            html: `<ul id="feed" data-cw-stream="feed"></ul>
-                   <div data-cw-stream="unknown"></div>
-                   <div data-cw-stream="elsewhere"></div>
-                   <div data-cw-ignore><div data-cw-stream="feed"></div></div>`,
+            html: `<ul id="feed" cw-stream="feed"></ul>
+                   <div cw-stream="unknown"></div>
+                   <div cw-stream="elsewhere"></div>
+                   <div cw-ignore><div cw-stream="feed"></div></div>`,
         });
         await page.evaluate((url) => {
             const { streams } = window.CWX.stream;
             window.CW.start({ plugins: [streams({ channels: { feed: url, elsewhere: 'https://example.com/events' } })] });
         }, `/sse/listen?channel=${channel}`);
-        await expect(page.locator('#feed')).toHaveAttribute('data-cw-stream-state', 'open');
+        await expect(page.locator('#feed')).toHaveAttribute('cw-stream-state', 'open');
         expect(await stats(page, channel)).toMatchObject({ open: 1, connects: 1 });
         await sendTo(page, channel, event('<cw-stream op="append" target="feed"><template><li>hi</li></template></cw-stream>'));
         await expect(page.locator('#feed li')).toHaveText(['hi']);
@@ -177,8 +177,8 @@ test.describe('streams() plugin', () => {
         expect(said.some((text) => text.includes('No stream channel is named "unknown"'))).toBe(true);
         expect(said.some((text) => text.includes('"elsewhere" points to another origin'))).toBe(true);
         // Content added later is scanned too.
-        await page.evaluate(() => document.getElementById('app').insertAdjacentHTML('beforeend', '<div id="late" data-cw-stream="feed"></div>'));
-        await expect(page.locator('#late')).toHaveAttribute('data-cw-stream-state', 'open');
+        await page.evaluate(() => document.getElementById('app').insertAdjacentHTML('beforeend', '<div id="late" cw-stream="feed"></div>'));
+        await expect(page.locator('#late')).toHaveAttribute('cw-stream-state', 'open');
         expect((await stats(page, channel)).connects).toBe(1);
     });
 });

@@ -114,7 +114,8 @@ const tracked = new Set();
 let watcher = null;
 let listening = false;
 
-const stateAttr = () => `data-${prefix}stream-state`;
+const base = () => prefix || 'data-';
+const stateAttr = () => `${base()}stream-state`;
 
 /** @param {Connection} connection @param {'connecting' | 'open'} state */
 function setState(connection, state) {
@@ -181,7 +182,7 @@ function shut(connection) {
  * @param {string | URL} url  resolved against the page
  * @param {object} [options]
  * @param {AbortSignal} [options.signal]      closes this subscription
- * @param {Element} [options.element]         closes it when the element leaves the page, and shows the connection's state in its `data-cw-stream-state`
+ * @param {Element} [options.element]         closes it when the element leaves the page, and shows the connection's state in its `cw-stream-state`
  * @param {ParentNode} [options.root]         where targets are looked up, the document by default
  * @param {boolean} [options.withCredentials] sends cookies to another origin
  * @returns {() => void} closes this subscription
@@ -237,7 +238,7 @@ export function connect(url, { signal, element, root = document, withCredentials
 }
 
 /**
- * The plugin behind `data-cw-stream="<channel>"`: while such an element is in
+ * The plugin behind `cw-stream="<channel>"`: while such an element is in
  * the page, it is subscribed to the channel's stream. Channels map names to
  * same-origin URLs, or to functions that build one from the element, so
  * markup can only open the streams you list.
@@ -254,13 +255,13 @@ export function streams({ channels = {} } = {}) {
             prefix = info.prefix;
         },
         scan(root) {
-            const attr = `data-${prefix}stream`;
+            const attr = `${base()}stream`;
             const found = /** @type {Element[]} */ ([...root.querySelectorAll(`[${attr}]`)]);
             if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(`[${attr}]`)) found.unshift(/** @type {Element} */ (root));
             for (const el of found) {
                 if (open.has(el) && el.hasAttribute(stateAttr()) && el.getAttribute(stateAttr()) !== 'closed') continue;
                 // Injected markup must not open streams.
-                if (el.closest(`[data-${prefix}ignore]`)) continue;
+                if (el.closest(`[${base()}ignore]`)) continue;
                 const name = /** @type {string} */ (el.getAttribute(attr)).trim();
                 const channel = Object.prototype.hasOwnProperty.call(channels, name) ? channels[name] : null;
                 const url = channel && new URL(typeof channel === 'function' ? channel(el) : channel, document.baseURI);

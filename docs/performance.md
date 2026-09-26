@@ -37,15 +37,15 @@ For the fastest possible activation, inline the 5.0 kB classic-script build in t
   downloads and compiles without running.
 - **Feedback paints first.** When the module is already in memory, CycleWire yields to
   the browser before calling your handler, with `scheduler.yield()` where available and
-  `setTimeout(0)` otherwise. The `data-cw-pending` style and the pressed state paint
+  `setTimeout(0)` otherwise. The `cw-pending` style and the pressed state paint
   before your code runs.
 - **Keep handlers short.** Split heavy work with `await scheduler.yield()` (feature
   detected) and pass `signal` to fetches so superseded work stops.
-- **Debounce chatty inputs:** `data-cw-debounce="150"`.
+- **Debounce chatty inputs:** `cw-debounce="150"`.
 
 ## Choose when to fetch
 
-| `data-cw-preload` | Use for |
+| `cw-preload` | Use for |
 | --- | --- |
 | `intent` (default) | Almost everything. On touch screens it also fetches what is in view once the page is idle |
 | `visible` | Below-the-fold features that are likely to be used |
@@ -59,7 +59,7 @@ connection. An explicit `preload()` call is not.
 A touch screen gives no warning before a tap: the finger lands and the click follows
 about 100 ms later, too soon for a module to arrive over a slow connection. So where the
 primary input cannot hover, the default looks ahead: once the page is idle, the modules
-of the `data-cw-action` elements that near the viewport are fetched (downloaded and
+of the `cw-action` elements that near the viewport are fetched (downloaded and
 compiled, not run). Choose with `start({ preload })`: `'auto'` (the default), `'visible'`
 to look ahead on every screen, or `'intent'` to fetch nothing before intent.
 

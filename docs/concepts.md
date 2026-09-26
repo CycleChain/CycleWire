@@ -12,7 +12,7 @@ feel dead. The page looks ready before it is.
 The server's HTML is already correct. The only thing missing is the ability to react.
 So CycleWire:
 
-1. **Writes intent into the markup.** `data-cw-action="cart#add"` says what should happen
+1. **Writes intent into the markup.** `cw-action="cart#add"` says what should happen
    and on which element.
 2. **Listens once per event type.** A single delegated `click` listener serves every
    button on the page. Content added later is covered automatically.
@@ -74,7 +74,7 @@ For each matched event, in order:
    anyway (a link navigates, a form submits).
 2. **`cw:run`.** This event is cancelable. Cancel it and CycleWire steps aside.
 3. **preventDefault.** Called only for bound submits, submit-button clicks, `href="#"` and
-   `data-cw-prevent`, and decided synchronously, before any `await`. Modified clicks
+   `cw-prevent`, and decided synchronously, before any `await`. Modified clicks
    (Ctrl/Cmd/Shift, middle button) on prevented links are left alone, so "open in new
    tab" works.
 4. **once, debounce, concurrency.** See [actions](actions.md#concurrency).
@@ -84,7 +84,7 @@ For each matched event, in order:
 
 ### Triggers
 
-`data-cw-trigger` runs an action without an event: `load` (at start), `idle` (after the
+`cw-trigger` runs an action without an event: `load` (at start), `idle` (after the
 window's load event, when the browser is idle), `visible` (when the element nears the
 viewport) or `media:(query)` (when a media query matches).
 
@@ -94,7 +94,7 @@ analytics.
 
 ### Preloading
 
-`data-cw-preload` chooses when to fetch: `intent` (the default: pointer over, focus or
+`cw-preload` chooses when to fetch: `intent` (the default: pointer over, focus or
 touch start), `visible`, `idle`, `load` or `none`. Screens that cannot hover give no
 warning before a tap, so there the default also fetches an action's module once the page
 is idle and its element nears the viewport. Speculative fetches are skipped under
@@ -107,10 +107,10 @@ CycleWire deliberately copies Qwik's loader, not its component model:
 | | Qwik | CycleWire |
 | --- | --- | --- |
 | Listener | `qwikloader`, capture listeners on document/window | One listener per event type; bubble phase unless the event does not bubble |
-| Binding in markup | `on:click` / `q-e:click` pointing at a generated `chunk#symbol` | `data-cw-action="cart#add"` (hand-written, registry-mapped) |
+| Binding in markup | `on:click` / `q-e:click` pointing at a generated `chunk#symbol` | `cw-action="cart#add"` (hand-written, registry-mapped) |
 | Who writes it | The Qwik optimizer (compiler) | You, in any template language |
 | Security boundary | Generated chunk URLs | An explicit registry: markup cannot name a URL |
-| State | Serialized into a `qwik/json` script, resumed by the framework | Optional: `data-cw-state` / `data-cw-store` JSON, resumed lazily by [signals](signals.md) |
+| State | Serialized into a `qwik/json` script, resumed by the framework | Optional: `cw-state` / `cw-store` JSON, resumed lazily by [signals](signals.md) |
 | Rendering | Components rendered on the client when state changes | None by default; `morph()` or `swap()` apply server HTML, and signals bindings update single nodes |
 | Tooling | Required (optimizer, Vite plugin) | None: a script tag works |
 

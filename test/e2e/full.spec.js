@@ -18,7 +18,7 @@ test.describe('full classic-script build', () => {
     });
 
     test('opens the stream channels the JSON config lists', async ({ page }) => {
-        await expect(page.locator('#feed')).toHaveAttribute('data-cw-stream-state', 'open');
+        await expect(page.locator('#feed')).toHaveAttribute('cw-stream-state', 'open');
     });
 
     test('applies an action\'s stylesheet from the JSON config before its handler', async ({ page }) => {

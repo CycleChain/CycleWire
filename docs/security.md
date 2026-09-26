@@ -10,32 +10,32 @@ module, and CycleWire:
 
 ```html
 <!-- Does nothing: neither is a registered name. -->
-<button data-cw-action="../../evil.js">x</button>
-<button data-cw-action="https://attacker.example/x.js">x</button>
+<button cw-action="../../evil.js">x</button>
+<button cw-action="https://attacker.example/x.js">x</button>
 ```
 
 ### Script gadgets: injected markup can still call registered actions
 
 If an attacker can inject HTML into your page, for example through a comment field
-rendered without sanitization, they can add `data-cw-*` attributes that call actions you
+rendered without sanitization, they can add `cw-*` attributes that call actions you
 registered. `load` and `visible` triggers even run without a click. Treat every export of
 an action module as reachable from markup (`module#export`) and defend in depth:
 
-1. **Wrap user-generated content in `data-cw-ignore`.** Nothing inside it activates, even
+1. **Wrap user-generated content in `cw-ignore`.** Nothing inside it activates, even
    an element that carries its own attributes: no event bindings, no `load` or `visible`
    triggers, no preloads, and with signals no bindings, no two-way inputs and no store
    seeds. Clicks inside it do not reach an outer binding either. This holds across shadow
    roots.
 
    ```html
-   <article class="comment" data-cw-ignore>{{ comment.html }}</article>
+   <article class="comment" cw-ignore>{{ comment.html }}</article>
    ```
 
 2. **Strip CycleWire attributes when you sanitize.** With DOMPurify:
 
    ```js
    DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
-       if (data.attrName.startsWith('data-cw-') || data.attrName === 'data-cyclewire') data.keepAttr = false;
+       if (data.attrName.startsWith('cw-') || data.attrName === 'data-cyclewire') data.keepAttr = false;
    });
    ```
 
@@ -94,7 +94,7 @@ your code, and never from markup.
 
 ## Streams open only the channels you list
 
-`data-cw-stream` names a channel, never a URL: the `streams()` plugin of
+`cw-stream` names a channel, never a URL: the `streams()` plugin of
 [`cyclewire/stream`](stream.md) maps channel names to same-origin URLs, so injected markup
 can only subscribe to streams you chose. Stream messages are HTML your server wrote,
 applied like `html.raw()`: `<script>` elements in them never run, and `<cw-stream>` is not

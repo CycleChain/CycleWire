@@ -27,13 +27,13 @@ const tools = ['Vite', 'Astro', 'Laravel', 'Rails', 'Django'];
             <h1>Hello, CycleWire</h1>
             <p>An Astro page with no islands: the actions in <code>src/actions/</code> load on demand.</p>
 
-            <button type="button" class="like" data-cw-action="like" aria-pressed="false">
+            <button type="button" class="like" cw-action="like" aria-pressed="false">
                 ♥ Like <span class="like__count">12</span>
             </button>
 
             <label for="search">Filter the list</label>
-            <input id="search" type="search" autocomplete="off" data-cw-action="search" data-cw-debounce="100"
-                   data-cw-props={JSON.stringify({ list: 'tools' })}>
+            <input id="search" type="search" autocomplete="off" cw-action="search" cw-debounce="100"
+                   cw-props={JSON.stringify({ list: 'tools' })}>
             <ul id="tools">{tools.map((tool) => <li>{tool}</li>)}</ul>
             <p id="tools-count" aria-live="polite">{tools.length} of {tools.length}</p>
         </main>

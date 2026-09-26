@@ -47,7 +47,7 @@ button:disabled { opacity: .55; cursor: default; }
 input { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 
 /* CycleWire marks elements while their action runs. */
-[data-cw-pending] { cursor: progress; }
+[cw-pending] { cursor: progress; }
 
 /* Islands: the server-rendered HTML is shown until the framework takes over. */
 .island { min-height: 150px; }

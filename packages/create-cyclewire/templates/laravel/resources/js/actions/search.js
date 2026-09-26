@@ -1,4 +1,4 @@
-// Runs as you type, 100 ms after the last key (data-cw-debounce="100"), and
+// Runs as you type, 100 ms after the last key (cw-debounce="100"), and
 // shows only the items that match.
 export function run({ element, props }) {
     const query = element.value.trim().toLowerCase();

@@ -2,9 +2,9 @@
  * cyclewire/signals — fine-grained reactivity that resumes from state the
  * server serialized into the page, instead of re-rendering it.
  *
- *   <section data-cw-state='{"count": 2}'>
- *     <output data-cw-bind="text: count">2</output>
- *     <button data-cw-action="counter#inc">+1</button>
+ *   <section cw-state='{"count": 2}'>
+ *     <output cw-bind="text: count">2</output>
+ *     <button cw-action="counter#inc">+1</button>
  *   </section>
  *
  * Nothing runs on page load: the server already rendered the right DOM. A
@@ -436,7 +436,7 @@ function create() {
 
     let prefix = 'cw-';
     /** @param {string} name */
-    const attr = (name) => `data-${prefix}${name}`;
+    const attr = (name) => (prefix || 'data-') + name;
     /** @type {WeakMap<Element, any>} */
     const scopes = new WeakMap();
     /** @type {Map<string, any>} */
@@ -451,7 +451,7 @@ function create() {
     let editing = null;
 
     /**
-     * Bindings, scopes and store seeds inside data-cw-ignore stay inert, like
+     * Bindings, scopes and store seeds inside cw-ignore stay inert, like
      * actions: user content must not be able to bind to the page's state.
      * @param {Node | null} node
      */
@@ -510,7 +510,7 @@ function create() {
 
     /**
      * The reactive scope an element belongs to: the nearest
-     * `data-cw-state` ancestor (the element itself included), created from its
+     * `cw-state` ancestor (the element itself included), created from its
      * JSON on first use. Undefined outside any scope.
      * @param {Element} el
      * @returns {any}
@@ -532,7 +532,7 @@ function create() {
 
     /**
      * A named store shared by the whole page, seeded from
-     * `<script type="application/json" data-cw-store="name">`. `init` adds
+     * `<script type="application/json" cw-store="name">`. `init` adds
      * defaults and getters: JSON from the server wins over plain defaults,
      * getters (derived values) are always installed.
      * @param {string} name

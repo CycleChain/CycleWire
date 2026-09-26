@@ -4,15 +4,15 @@ The package installs a `cyclewire` command. It reads your templates and your act
 without running either, needs Node 22 or later, and has no dependencies.
 
 ```sh
-npx cyclewire check          # the data-cw-* values in your templates, against your actions
+npx cyclewire check          # the cw-* values in your templates, against your actions
 npx cyclewire types          # a declaration file with your action names and their props
 ```
 
 ## `cyclewire check`
 
-Markup names its code in plain strings: `data-cw-action="cart#add"` fails silently when
+Markup names its code in plain strings: `cw-action="cart#add"` fails silently when
 the file is `cart.js` but the export is `addItem`, or when a template says `crat#add`.
-`check` finds every `data-cw-*` value in your templates and reports:
+`check` finds every `cw-*` value in your templates and reports:
 
 | Code | Problem |
 | --- | --- |
@@ -21,7 +21,7 @@ the file is `cart.js` but the export is `addItem`, or when a template says `crat
 | `no-handler` | A bare name, but the module has neither a `run` nor a default export |
 | `invalid-name` | Not a name the registry accepts (letters, digits, `_`, `-`, `.`, then `#export`) |
 | `invalid-trigger`, `invalid-preload`, `invalid-concurrency`, `invalid-debounce` | A value CycleWire does not understand |
-| `invalid-props` | `data-cw-props` that is not valid JSON |
+| `invalid-props` | `cw-props` that is not valid JSON |
 | `duplicate-name`, `invalid-file-name` | Warnings about the actions directory itself |
 | `unused-action` | With `--unused`: an export no template names (warning) |
 
@@ -33,10 +33,10 @@ resources/views/cart.blade.php:12:9  error  "cart" has no export "ad"; did you m
 
 It reads HTML and the server template languages (Blade, ERB, Django, Jinja, Twig,
 Liquid, Handlebars), JavaScript and TypeScript with JSX, Vue, Svelte and Astro, including
-string literals in expressions (`data-cw-action={'cart#add'}`,
-`:data-cw-action="'cart#add'"`), and the [server helpers](server-helpers.md) (`@cw(…)`,
+string literals in expressions (`cw-action={'cart#add'}`,
+`:cw-action="'cart#add'"`), and the [server helpers](server-helpers.md) (`@cw(…)`,
 `cw(…)`, `cwAttrs(…)`, `{% cw … %}`). Comments are skipped. A value the template language
-builds, such as `data-cw-action="{{ $action }}"`, cannot be known before the page runs,
+builds, such as `cw-action="{{ $action }}"`, cannot be known before the page runs,
 so it is counted rather than checked.
 
 Exit status: `0` when there is no error (warnings allowed), `1` when there is one, `2`

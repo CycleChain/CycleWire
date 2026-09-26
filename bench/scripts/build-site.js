@@ -181,7 +181,7 @@ function head(metrics) {
         if (metric.group && last?.name === metric.group) last.size++;
         else groups.push({ name: metric.group, size: 1, metric });
     }
-    const sortable = (metric, column, extra = '') => `<th scope="col" data-metric="${esc(metric.id)}" data-column="${column}" data-title="${esc(metric.title ?? metric.label)}"${extra}><button type="button" data-cw-action="sort">${esc(metric.short)}</button></th>`;
+    const sortable = (metric, column, extra = '') => `<th scope="col" data-metric="${esc(metric.id)}" data-column="${column}" data-title="${esc(metric.title ?? metric.label)}"${extra}><button type="button" cw-action="sort">${esc(metric.short)}</button></th>`;
     let column = 1;
     const top = groups.map((group) => {
         const start = column;
@@ -233,7 +233,7 @@ function chart({ stacks, metric }) {
         const shown = has(summary) ? metric.format(summary.median) : '–';
         return `<li class="bench__bar bench__bar--${kind}" data-stack="${esc(stack.id)}"><span class="bench__name">${esc(stack.name)}</span><span class="bench__track" aria-hidden="true"><span class="bench__fill" style="width:${percent(median)}"></span><span class="bench__ci" style="left:${percent(low)};width:${percent(high - low)}"></span></span><span class="bench__value">${esc(shown)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
     }).join('\n');
-    const buttons = KEY.map((item) => `<button type="button" data-cw-action="bench" data-metric="${esc(item.id)}" aria-pressed="${item.id === metric.id}">${esc(item.short)}</button>`).join('');
+    const buttons = KEY.map((item) => `<button type="button" cw-action="bench" data-metric="${esc(item.id)}" aria-pressed="${item.id === metric.id}">${esc(item.short)}</button>`).join('');
     return `<figure class="bench__chart card">
 <div class="bench__metrics" role="group" aria-label="Metric to chart">${buttons}</div>
 <figcaption><span class="bench__title" aria-live="polite">${esc(metric.title)}</span> <span class="muted">· median and 95% confidence interval · lower is better</span></figcaption>

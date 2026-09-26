@@ -36,8 +36,9 @@ there are no runtime dependencies.
 - **Good for INP.** Handlers run after the browser has painted the pressed state.
   Nothing heavy runs on load, and the page stays bfcache friendly.
 - **Works with anything.** Laravel, Rails, Django, plain PHP, Astro, Web Components,
-  React/Vue/Svelte islands, htmx or Turbo. The attributes are plain `data-*`, so they are
-  valid HTML and JSX safe.
+  React/Vue/Svelte islands, htmx or Turbo. The attributes are short (`cw-action`) and
+  pass through JSX and every template language; `start({ prefix: 'data-cw-' })` makes
+  them `data-cw-*` for HTML validators.
 - **Modern platform features where they exist:**
   - Shadow DOM and declarative shadow DOM
   - Invoker Commands
@@ -61,7 +62,7 @@ there are no runtime dependencies.
 fine before any JavaScript arrives.
 
 ```html
-<button data-cw-action="cart#add" data-cw-props='{"sku": "wire-01"}'>Add to cart</button>
+<button cw-action="cart#add" cw-props='{"sku": "wire-01"}'>Add to cart</button>
 ```
 
 **2. Write the action.** It is a plain ES module that is fetched on first use.
@@ -168,10 +169,10 @@ hash published with each [release](https://github.com/CycleChain/CycleWire/relea
                               │
          click / submit / … ──┴────► resolve element → import action → yield → run
                                              ▲
-         data-cw-trigger: load · idle · visible · media:(…) ─┘
+         cw-trigger: load · idle · visible · media:(…) ─┘
 ```
 
-Every interactive element carries its intent in markup (`data-cw-action="cart#add"`).
+Every interactive element carries its intent in markup (`cw-action="cart#add"`).
 One delegated listener per event type finds the element, looks the name up in the action
 registry, imports that module the first time, and calls the handler with a context object.
 This is Qwik's resumability without Qwik's compiler: the server is the source of truth,
@@ -182,22 +183,22 @@ through it.
 
 ## 🏷️ HTML attributes
 
-All attributes use the `data-cw-` prefix by default. `start({ prefix: 'x-' })` moves
+All attributes use the `cw-` prefix by default. `start({ prefix: 'x-' })` moves
 them to `data-x-action` and friends, and `prefix: ''` drops the prefix.
 
 | Attribute | Purpose |
 | --- | --- |
-| `data-cw-action="name"` | Runs `name` on the element's natural event: `submit` for forms, `input` or `change` for controls, `toggle` for `<details>`, `click` otherwise |
-| `data-cw-on-<event>="name"` | Runs `name` on any delegated event, e.g. `data-cw-on-keydown`, `data-cw-on-command` |
-| `data-cw-trigger` | Runs without an event: `load`, `idle`, `visible`, `media:(min-width: 60em)` |
-| `data-cw-preload` | When to fetch the module: `intent` (default), `visible`, `idle`, `load`, `none` |
-| `data-cw-props='{…}'` | JSON handed to the handler as `ctx.props` |
-| `data-cw-prevent` | `preventDefault()` for all bound events, or a list (`"click keydown"`); `none` disables the automatic prevent for forms and submit buttons |
-| `data-cw-once` | Only one successful run |
-| `data-cw-debounce="ms"` | Wait for a pause in events |
-| `data-cw-concurrency` | `drop` (clicks, submits), `restart` (input), `latest` (change, toggle), `parallel` |
-| `data-cw-ignore` | Stop looking for bindings above this element (use it on user-generated content) |
-| `data-cw-pending` | Set by CycleWire while a run is in flight; style it |
+| `cw-action="name"` | Runs `name` on the element's natural event: `submit` for forms, `input` or `change` for controls, `toggle` for `<details>`, `click` otherwise |
+| `cw-on-<event>="name"` | Runs `name` on any delegated event, e.g. `cw-on-keydown`, `cw-on-command` |
+| `cw-trigger` | Runs without an event: `load`, `idle`, `visible`, `media:(min-width: 60em)` |
+| `cw-preload` | When to fetch the module: `intent` (default), `visible`, `idle`, `load`, `none` |
+| `cw-props='{…}'` | JSON handed to the handler as `ctx.props` |
+| `cw-prevent` | `preventDefault()` for all bound events, or a list (`"click keydown"`); `none` disables the automatic prevent for forms and submit buttons |
+| `cw-once` | Only one successful run |
+| `cw-debounce="ms"` | Wait for a pause in events |
+| `cw-concurrency` | `drop` (clicks, submits), `restart` (input), `latest` (change, toggle), `parallel` |
+| `cw-ignore` | Stop looking for bindings above this element (use it on user-generated content) |
+| `cw-pending` | Set by CycleWire while a run is in flight; style it |
 
 Names are `module` or `module#export`. A module's `run` export, or its default export,
 handles bare names. The full reference is in [docs/html-api.md](docs/html-api.md).
@@ -212,7 +213,7 @@ export async function run(ctx) {
     ctx.target;   // the innermost event target
     ctx.element;  // the element that carries the binding
     ctx.signal;   // AbortSignal: a newer run, removal or stop() aborts it
-    ctx.props;    // parsed data-cw-props
+    ctx.props;    // parsed cw-props
     ctx.action;   // "module#export"
     ctx.wire;     // the CycleWire API
 }
@@ -220,7 +221,7 @@ export async function run(ctx) {
 
 Return values are dispatched with `cw:done`, and errors with `cw:error` or your `onError`.
 Because the handler runs after the event has been dispatched, calling
-`ctx.event.preventDefault()` there has no effect; use `data-cw-prevent` instead. Details,
+`ctx.event.preventDefault()` there has no effect; use `cw-prevent` instead. Details,
 patterns and caveats are in [docs/actions.md](docs/actions.md).
 
 ---
@@ -246,7 +247,7 @@ await morph(cart, html.raw(await res.text()), { transition: true }); // keeps fo
 
 import { start } from 'cyclewire';
 import { signals } from 'cyclewire/signals';
-start({ plugins: [signals()] }); // data-cw-state + data-cw-bind, resumed on first touch
+start({ plugins: [signals()] }); // cw-state + cw-bind, resumed on first touch
 
 import { bootstrap } from 'cyclewire/bootstrap';
 start({ plugins: [bootstrap({ global: true })] }); // Bootstrap data API, no bootstrap.js
@@ -313,7 +314,7 @@ and [live on GitHub Pages](https://cyclechain.github.io/CycleWire/examples/).
 ## 🛠️ Tools
 
 ```sh
-npx cyclewire check    # every data-cw-* value in your templates, against your actions
+npx cyclewire check    # every cw-* value in your templates, against your actions
 ```
 
 - **`cyclewire check`** reads HTML, Blade, ERB, Django, Jinja, Twig, JSX, Vue, Svelte and
@@ -418,7 +419,7 @@ Where another stack beats CycleWire here (the 95% confidence intervals do not ov
   `new Function`, and no URL is ever read from markup.
 - `html` escapes by context, refuses positions escaping cannot protect, and rejects
   `javascript:` URLs however the attribute value is put together.
-- Nothing inside `data-cw-ignore` activates: no actions, triggers, preloads or bindings.
+- Nothing inside `cw-ignore` activates: no actions, triggers, preloads or bindings.
 - Parsed fragments stay inert until they are inserted, and inserted `<script>` elements
   never run.
 - The library works under strict CSP and Trusted Types.

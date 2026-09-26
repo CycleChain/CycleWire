@@ -1,4 +1,4 @@
-// State the server serialized into <script data-cw-store="cart">. The badge
+// State the server serialized into <script cw-store="cart">. The badge
 // was rendered by the server; bindings only wake up when this runs.
 import { store } from 'cyclewire/signals';
 

@@ -22,7 +22,7 @@ const snapshot = (page) => page.evaluate(() => ({
 
 test.describe('devtools', () => {
     test('install() mounts one panel, and the function it returns removes it', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         await install(page);
         await install(page);
         await expect(panel(page)).toHaveCount(1);
@@ -39,7 +39,7 @@ test.describe('devtools', () => {
     });
 
     test('Alt+Shift+W and Escape open and close the panel, and focus returns', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         await install(page);
         await page.focus('#b');
         await page.keyboard.press('Alt+Shift+KeyW');
@@ -82,9 +82,9 @@ test.describe('devtools', () => {
 
     test('Actions lists the registered names, their elements and runs, and names nobody registered', async ({ page }) => {
         await boot(page, {
-            html: `<button id="b" data-cw-action="log">go</button>
-                   <button id="c" data-cw-on-keydown="log#second" data-cw-action="gated">gated</button>
-                   <button id="m" data-cw-action="missing">missing</button>`,
+            html: `<button id="b" cw-action="log">go</button>
+                   <button id="c" cw-on-keydown="log#second" cw-action="gated">gated</button>
+                   <button id="m" cw-action="missing">missing</button>`,
         });
         await install(page, { open: true });
         const row = (name) => rows(page, 'actions').filter({ has: page.getByRole('rowheader', { name, exact: true }) });
@@ -108,7 +108,7 @@ test.describe('devtools', () => {
     });
 
     test('Runs shows each run with its status, and clicking one outlines its element', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button> <button id="e" data-cw-action="log#boom">boom</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button> <button id="e" cw-action="log#boom">boom</button>' });
         await install(page, { open: true });
         await tab(page, 'Runs').click();
         await page.click('#b');
@@ -127,7 +127,7 @@ test.describe('devtools', () => {
     });
 
     test('the Log shows the trace with the development build', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         await install(page, { open: true });
         await tab(page, 'Log').click();
         await page.click('#b');
@@ -157,8 +157,8 @@ test.describe('devtools', () => {
     test('with the production build, the Log and Runs come from the cw:* events', async ({ page }) => {
         await boot(page, {
             build: 'esm',
-            html: `<button id="b" data-cw-action="log">go</button> <button id="e" data-cw-action="log#boom">boom</button>
-                   <input id="q" data-cw-action="log#value" data-cw-debounce="500">`,
+            html: `<button id="b" cw-action="log">go</button> <button id="e" cw-action="log#boom">boom</button>
+                   <input id="q" cw-action="log#value" cw-debounce="500">`,
         });
         await install(page, { open: true }, '/dist/esm/devtools.js');
         await tab(page, 'Log').click();
@@ -179,8 +179,8 @@ test.describe('devtools', () => {
 
     test('Inspect picks an element without running it, and Element shows its bindings', async ({ page }) => {
         await boot(page, {
-            html: `<button id="b" data-cw-action="log" data-cw-props='{"id": 42}' data-cw-debounce="50" data-cw-prevent="click"><b id="label">go</b></button>
-                   <div data-cw-ignore><input id="i" data-cw-on-keydown="log#second" data-cw-props='{oops' data-cw-concurrency="latest" data-cw-once></div>`,
+            html: `<button id="b" cw-action="log" cw-props='{"id": 42}' cw-debounce="50" cw-prevent="click"><b id="label">go</b></button>
+                   <div cw-ignore><input id="i" cw-on-keydown="log#second" cw-props='{oops' cw-concurrency="latest" cw-once></div>`,
         });
         await install(page, { open: true });
         const inspect = page.getByRole('button', { name: 'Inspect' });
@@ -193,7 +193,7 @@ test.describe('devtools', () => {
         await expect(tab(page, 'Element')).toHaveAttribute('aria-selected', 'true');
         await expect(inspect).toHaveAttribute('aria-pressed', 'false');
         const details = panel(page).locator('#element');
-        await expect(details.locator('dt')).toHaveText(['Element', 'Actions', 'Trigger', 'Preload', 'Props', 'Concurrency', 'Once', 'Debounce', 'Prevent', 'Pending', 'Inside data-cw-ignore', 'Runs']);
+        await expect(details.locator('dt')).toHaveText(['Element', 'Actions', 'Trigger', 'Preload', 'Props', 'Concurrency', 'Once', 'Debounce', 'Prevent', 'Pending', 'Inside cw-ignore', 'Runs']);
         await expect(details.locator('dd')).toHaveText(['button#b Outline', 'click → log (drop)', 'none', 'intent', '{\n  "id": 42\n}', 'default', 'no', '50 ms', 'click', 'no', 'no', 'none']);
         // Neither the click nor the hover reached the page: nothing ran, nothing was fetched.
         await page.waitForTimeout(200);
@@ -218,7 +218,7 @@ test.describe('devtools', () => {
     });
 
     test('nothing is added to the page outside the panel element', async ({ page }) => {
-        await boot(page, { html: '<button id="b" class="cta" style="color: red" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" class="cta" style="color: red" cw-action="log">go</button>' });
         const before = await snapshot(page);
         await install(page, { open: true });
         await page.getByRole('button', { name: 'Outline the elements of log' }).click();
@@ -232,9 +232,9 @@ test.describe('devtools', () => {
     test('devtools() works as a plugin, and sees the triggers from the start', async ({ page }) => {
         await boot(page, {
             start: false,
-            html: `<button id="b" data-cw-action="log">go</button>
+            html: `<button id="b" cw-action="log">go</button>
                    <div class="spacer"></div>
-                   <div id="t" data-cw-action="log#second" data-cw-trigger="visible">later</div>`,
+                   <div id="t" cw-action="log#second" cw-trigger="visible">later</div>`,
         });
         await page.evaluate(async () => {
             const { devtools } = await import('/dist/esm-dev/devtools.js');
@@ -262,7 +262,7 @@ test.describe('devtools', () => {
     });
 
     test('install() waits for CycleWire to start', async ({ page }) => {
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="log">go</button>' });
         await install(page, { open: true });
         await expect(panel(page).locator('#status')).toHaveText('Waiting for CycleWire to start');
         await page.evaluate(() => window.CW.start({ actions: { log: '/fixtures/actions/log.js' } }));
@@ -271,7 +271,7 @@ test.describe('devtools', () => {
     });
 
     test('an older CycleWire without registered() still shows what the page binds', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         await page.evaluate(async () => {
             const { install } = await import('/dist/esm-dev/devtools.js');
             // 1.0.x: the same API, minus registered().
@@ -285,7 +285,7 @@ test.describe('devtools', () => {
     });
 
     test('keeps the last 500 log entries and 200 runs', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         await install(page, { open: true });
         await page.evaluate(async () => {
             const button = document.getElementById('b');
@@ -303,7 +303,7 @@ test.describe('devtools', () => {
             headers: { 'Content-Security-Policy': "require-trusted-types-for 'script'; script-src 'self' 'nonce-devtools'; style-src 'self'" },
             body: `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>CSP</title>
                 <script src="/fixtures/harness.js"></script></head>
-                <body><button id="b" data-cw-action="log">go</button>
+                <body><button id="b" cw-action="log">go</button>
                 <script type="module" nonce="devtools">
                     window.__violations = [];
                     document.addEventListener('securitypolicyviolation', (event) => window.__violations.push(event.violatedDirective));

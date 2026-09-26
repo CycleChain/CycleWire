@@ -24,12 +24,12 @@ class CycleWireTest < Minitest::Test
   end
 
   def test_symbol_keys_in_props
-    assert_equal 'data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}"',
+    assert_equal 'cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}"',
                  CycleWire.cw('cart#add', { sku: 'wire-01' })
   end
 
   def test_options_as_keywords
-    assert_equal 'data-cw-action="menu" data-cw-trigger="idle"', CycleWire.cw('menu', nil, trigger: 'idle')
+    assert_equal 'cw-action="menu" cw-trigger="idle"', CycleWire.cw('menu', nil, trigger: 'idle')
   end
 
   def test_an_action_that_is_not_a_string
@@ -61,12 +61,12 @@ class CycleWireHelperTest < Minitest::Test
 
   def test_props_and_keyword_options
     html = @view.cw('cart#add', { sku: 'wire-01' }, trigger: 'visible')
-    assert_equal 'data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"', html
+    assert_equal 'cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"', html
     assert_predicate html, :html_safe?
   end
 
   def test_options_without_props
-    assert_equal 'data-cw-on-keydown="search#keys"', @view.cw('search#keys', on: 'keydown')
+    assert_equal 'cw-on-keydown="search#keys"', @view.cw('search#keys', on: 'keydown')
   end
 
   def test_props_without_braces_are_options

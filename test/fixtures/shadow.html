@@ -9,10 +9,10 @@
     <!-- Declarative shadow DOM: the browser attaches these roots while parsing. -->
     <x-card id="host">
         <template shadowrootmode="open">
-            <button id="inner" data-cw-action="log">Inside</button>
-            <form id="inner-form" data-cw-action="log"><input name="q" value="x"><button id="inner-submit">Go</button></form>
-            <select id="inner-select" data-cw-action="log"><option>a</option><option>b</option></select>
-            <span id="inner-load" data-cw-action="log#second" data-cw-trigger="load"></span>
+            <button id="inner" cw-action="log">Inside</button>
+            <form id="inner-form" cw-action="log"><input name="q" value="x"><button id="inner-submit">Go</button></form>
+            <select id="inner-select" cw-action="log"><option>a</option><option>b</option></select>
+            <span id="inner-load" cw-action="log#second" cw-trigger="load"></span>
         </template>
     </x-card>
     <script type="module">

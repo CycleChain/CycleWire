@@ -25,7 +25,7 @@ it in Chromium, Firefox and WebKit ([`libraries.spec.js`](../test/e2e/libraries.
    actions have loaded so far.
 2. **Keep the server HTML useful without it:** a text field that takes a typed date, a
    plain table, a form that posts. The library improves it when it arrives.
-3. **Set it up once.** Use `data-cw-once` for setup bound to an event. Triggers
+3. **Set it up once.** Use `cw-once` for setup bound to an event. Triggers
    (`visible`, `idle`, `load`) run once per element anyway.
 4. **Ship its CSS with it:** `{ module, css }` entries with the `styles()` plugin of
    [`cyclewire/css`](css.md), `css()` from the action, or your bundler's CSS splitting.
@@ -38,7 +38,7 @@ it in Chromium, Firefox and WebKit ([`libraries.spec.js`](../test/e2e/libraries.
 ## Flatpickr, and other inputs
 
 ```html
-<input name="due" placeholder="YYYY-MM-DD" autocomplete="off" data-cw-on-focusin="datepicker" data-cw-once>
+<input name="due" placeholder="YYYY-MM-DD" autocomplete="off" cw-on-focusin="datepicker" cw-once>
 ```
 
 ```js
@@ -70,8 +70,8 @@ Tagify and input masks: create the widget on the first focus.
 ## SweetAlert2, and other dialogs
 
 ```html
-<form method="post" action="/projects/42/delete" data-cw-action="confirm"
-      data-cw-props='{"title": "Delete project Atlas?", "text": "This cannot be undone.", "confirm": "Delete"}'>
+<form method="post" action="/projects/42/delete" cw-action="confirm"
+      cw-props='{"title": "Delete project Atlas?", "text": "This cannot be undone.", "confirm": "Delete"}'>
     <button>Delete project</button>
 </form>
 ```
@@ -110,11 +110,11 @@ Toast libraries (Notyf, Toastify) work the same way: call them from an action, o
 ## DataTables, and other table enhancers
 
 ```html
-<table data-cw-action="table" data-cw-trigger="visible">
+<table cw-action="table" cw-trigger="visible">
     <thead><tr><th>Project</th><th></th></tr></thead>
     <tbody>
         <!-- every row rendered on the server, each with its own button -->
-        <tr><td>Granite</td><td><button data-cw-action="projects#archive" data-cw-props='{"id": "p7"}'>Archive</button></td></tr>
+        <tr><td>Granite</td><td><button cw-action="projects#archive" cw-props='{"id": "p7"}'>Archive</button></td></tr>
     </tbody>
 </table>
 ```
@@ -154,7 +154,7 @@ CycleWire and jQuery work side by side, so a page can adopt CycleWire without re
 its jQuery code first.
 
 - **Markup that jQuery inserts is live.** After `$('#list').append('<button
-  data-cw-action="…">')`, delegation handles the button's events and the
+  cw-action="…">')`, delegation handles the button's events and the
   MutationObserver activates any trigger in it. There is nothing to wire up.
 - **jQuery hears CycleWire's events:**
 
@@ -173,7 +173,7 @@ its jQuery code first.
   skips the submit event, and with it any action on the form, such as a confirmation.
   Call `form.requestSubmit()` instead.
 - **Plugins that fire jQuery-only events**, like Select2's `change`, never reach
-  `data-cw-on-change`. Listen with jQuery and run the action yourself:
+  `cw-on-change`. Listen with jQuery and run the action yourself:
 
   ```js
   import { run } from 'cyclewire';
@@ -189,12 +189,12 @@ These are not part of the test suite. The patterns are the ones the tested examp
 
 | Library | Pattern |
 | --- | --- |
-| Chart.js, ApexCharts, ECharts | A `visible` trigger on a placeholder with reserved height; data from `data-cw-props` or a fetch |
+| Chart.js, ApexCharts, ECharts | A `visible` trigger on a placeholder with reserved height; data from `cw-props` or a fetch |
 | Swiper, Splide, Embla | A `visible` trigger; render the slides as a scrollable row, so they work before the library |
 | Leaflet, Mapbox GL | A `visible` trigger on a static map image of the same size, the map's CSS through `{ module, css }` |
-| GLightbox, PhotoSwipe | Links to the full images, which work without JavaScript, with `data-cw-prevent` so the action opens the lightbox instead |
+| GLightbox, PhotoSwipe | Links to the full images, which work without JavaScript, with `cw-prevent` so the action opens the lightbox instead |
 | Quill, TinyMCE, CKEditor | Create the editor on the first focus of a `<textarea>`, which still submits without it |
-| Alpine.js | Both read their own attributes (`x-*`, `data-cw-*`), so they share a page. An Alpine handler with `.stop` hides the event from CycleWire, as in [frameworks](frameworks.md#events-who-runs-first) |
+| Alpine.js | Both read their own attributes (`x-*`, `cw-*`), so they share a page. An Alpine handler with `.stop` hides the event from CycleWire, as in [frameworks](frameworks.md#events-who-runs-first) |
 | htmx, Turbo | See [integrations](integrations.md#htmx-and-turbo) |
 | Bootstrap | [`cyclewire/bootstrap`](plugins.md) for the data API, or Bootstrap's own JavaScript |
 | Lodash, Day.js, Axios | Import them in the actions that use them |

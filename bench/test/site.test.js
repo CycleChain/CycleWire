@@ -86,7 +86,7 @@ test('the chart starts on JavaScript, lowest first, and every metric it offers i
     const bars = [...html.matchAll(/<li class="bench__bar[^"]*" data-stack="([^"]+)"/g)].map((match) => match[1]);
     assert.deepEqual(bars, ['light', 'cyclewire']);
     const panel = html.slice(html.indexOf('data-bench="mobile"'));
-    const metrics = [...panel.matchAll(/data-cw-action="bench" data-metric="([^"]+)"/g)].map((match) => match[1]);
+    const metrics = [...panel.matchAll(/cw-action="bench" data-metric="([^"]+)"/g)].map((match) => match[1]);
     for (const metric of metrics) assert.match(panel, new RegExp(`<th scope="col" data-metric="${metric}" data-column="\\d+"`), metric);
     // The chart's button for JavaScript is pressed, and the table's JavaScript column is the first after the stack.
     assert.match(panel, /data-metric="js" aria-pressed="true"/);

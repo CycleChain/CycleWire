@@ -15,7 +15,7 @@ Everything newer is feature-detected. Without it, CycleWire falls back as below.
 | `scheduler.yield()` | Yielding before a handler runs off a cached module | Chrome 129+, Firefox 142+ | `setTimeout(0)` |
 | `requestIdleCallback` | `idle` triggers and preloads | Chrome, Firefox | A short timeout after `load` (Safari) |
 | `<link rel="modulepreload">` | Fetching URL actions without running them | All current browsers | – |
-| Invoker Commands (`command` event) | `data-cw-on-command` | Chrome 135+, Firefox 144+, Safari 26.2+ | The event never fires; other bindings work |
+| Invoker Commands (`command` event) | `cw-on-command` | Chrome 135+, Firefox 144+, Safari 26.2+ | The event never fires; other bindings work |
 | View Transitions (`startViewTransition`) | `transition()`, `morph(…, { transition: true })` | Chrome 111+, Safari 18+, Firefox 144+ | The update runs without animation |
 | `Element.moveBefore()` | Moving elements in `morph()` without resetting iframes, media or focus | Chrome 133+, Firefox 144+ | `insertBefore`, with focus and selection restored |
 | `setHTMLUnsafe()` | Declarative shadow DOM in fetched markup | Current Chrome, Safari and Firefox | Shadow templates stay plain `<template>` elements |

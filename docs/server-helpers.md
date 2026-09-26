@@ -1,7 +1,7 @@
 # Server helpers
 
-CycleWire reads plain `data-cw-*` attributes, so any template can write them by hand. Two
-things can go wrong when it does. `data-cw-props` holds JSON inside an HTML attribute, so
+CycleWire reads plain `cw-*` attributes, so any template can write them by hand. Two
+things can go wrong when it does. `cw-props` holds JSON inside an HTML attribute, so
 one quote in a product name can end the attribute early. And a misspelt action or option
 does nothing, without an error.
 
@@ -13,7 +13,7 @@ the same contract in each.
 ```
 
 ```html
-<button data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}">Add to cart</button>
+<button cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}">Add to cart</button>
 ```
 
 They are copy-in snippets, not packages: copy the file for your stack into your project and
@@ -26,10 +26,10 @@ byte. CI also checks that the code on this page is the code it tests.
 `cw(action, props = null, options = {})` returns the attributes as one string, to print
 inside an HTML start tag.
 
-**`action`** is `module` or `module#export`, as in `data-cw-action`. Module names are made of
+**`action`** is `module` or `module#export`, as in `cw-action`. Module names are made of
 ASCII letters, digits, `_`, `.` and `-`; exports of ASCII letters, digits, `_` and `$`.
 
-**`props`** becomes `data-cw-props`, unless it is null (`None` in Python, `nil` in Ruby). It
+**`props`** becomes `cw-props`, unless it is null (`None` in Python, `nil` in Ruby). It
 is encoded as compact JSON: map keys keep their order, and non-ASCII text, `/` and the line
 separators U+2028 and U+2029 stay as they are. Strings, integers, booleans, null, lists and
 maps nest as deep as you like. Floats work too, but each language prints them its own way
@@ -39,14 +39,14 @@ maps nest as deep as you like. Floats work too, but each language prints them it
 
 | Option | Takes | Prints |
 | --- | --- | --- |
-| `on` | an event name: lowercase letters, digits, `:`, `_` and `-` | `data-cw-on-<event>` in place of `data-cw-action` |
-| `trigger` | `load`, `idle`, `visible` or `media:<query>` | `data-cw-trigger` |
-| `preload` | `intent`, `visible`, `idle`, `load` or `none` | `data-cw-preload` |
-| `concurrency` | `drop`, `restart`, `latest` or `parallel` | `data-cw-concurrency` |
-| `debounce` | a whole number of milliseconds, 0 or more | `data-cw-debounce` |
-| `once` | `true` | `data-cw-once`, with no value |
-| `prevent` | `true`, or event names separated by single spaces: `click submit`, `none` | `data-cw-prevent`, with no value for `true` |
-| `prefix` | the prefix you give `start()`: `''`, or lowercase letters, digits and `-`, ending in `-` | the `cw-` in every name (`cw-` by default) |
+| `on` | an event name: lowercase letters, digits, `:`, `_` and `-` | `cw-on-<event>` in place of `cw-action` |
+| `trigger` | `load`, `idle`, `visible` or `media:<query>` | `cw-trigger` |
+| `preload` | `intent`, `visible`, `idle`, `load` or `none` | `cw-preload` |
+| `concurrency` | `drop`, `restart`, `latest` or `parallel` | `cw-concurrency` |
+| `debounce` | a whole number of milliseconds, 0 or more | `cw-debounce` |
+| `once` | `true` | `cw-once`, with no value |
+| `prevent` | `true`, or event names separated by single spaces: `click submit`, `none` | `cw-prevent`, with no value for `true` |
+| `prefix` | the prefix you give `start()`: `''`, or lowercase letters, digits and `-`, ending in `-` | the `cw-` in every name (`cw-` by default; `''` means `data-`) |
 
 An option set to null or `false` is left out, so a value can come straight from a variable.
 An unknown option, or a name or value the table does not allow, throws the language's
@@ -55,8 +55,8 @@ Python and `TypeError` in JavaScript. A typo fails where you wrote it, not silen
 browser. An event outside CycleWire's default list still needs
 [`listen()`](js-api.md#listentypes-options).
 
-The output has a fixed shape: `data-cw-action` (or `data-cw-on-<event>`), then
-`data-cw-props`, then the options in the table's order. Each value is in double quotes and
+The output has a fixed shape: `cw-action` (or `cw-on-<event>`), then
+`cw-props`, then the options in the table's order. Each value is in double quotes and
 escaped: `&`, `"`, `'`, `<` and `>` become `&amp;`, `&quot;`, `&#39;`, `&lt;` and `&gt;`.
 One space separates the attributes, with none before or after them. The
 [HTML API](html-api.md) explains what each attribute does.
@@ -68,9 +68,9 @@ The helpers escape for one place: between the attributes of an HTML start tag, a
 attribute or another attribute's value, so print it nowhere else.
 
 Escaping keeps your props from breaking the markup around them. It does not make HTML that
-users wrote safe to render, and it cannot stop injected markup from carrying `data-cw-*`
+users wrote safe to render, and it cannot stop injected markup from carrying `cw-*`
 attributes of its own. [Security](security.md) covers both: sanitize user content, and wrap
-it in `data-cw-ignore`.
+it in `cw-ignore`.
 
 Props are public. Everything you pass ends up in the page source, so pass the values an
 action needs, not a whole model.
@@ -108,7 +108,7 @@ namespace CycleWire;
 /**
  * The attributes, escaped for HTML, to print inside a start tag.
  * cw('cart#add', ['sku' => 'wire-01'], ['trigger' => 'visible']) returns
- * data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+ * cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
  *
  * @param string $action "module" or "module#export"
  * @param mixed $props anything json_encode() takes, or null for none; [] is a list,
@@ -148,10 +148,12 @@ function cw(string $action, mixed $props = null, array $options = []): string
         throw new \InvalidArgumentException('CycleWire: invalid on ' . var_export($on, true));
     }
 
-    $attributes = ["data-$prefix" . ($on === null ? 'action' : "on-$on") => $action];
+    // An empty prefix means data-: a bare "action" is already a form attribute.
+    $base = $prefix === '' ? 'data-' : $prefix;
+    $attributes = [$base . ($on === null ? 'action' : "on-$on") => $action];
     if ($props !== null) {
         $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_THROW_ON_ERROR;
-        $attributes["data-{$prefix}props"] = json_encode($props, $flags);
+        $attributes["{$base}props"] = json_encode($props, $flags);
     }
     foreach ($strings as $name => $pattern) {
         if (!array_key_exists($name, $options)) {
@@ -166,7 +168,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
         if (!$valid) {
             throw new \InvalidArgumentException("CycleWire: invalid $name " . var_export($value, true));
         }
-        $attributes["data-$prefix$name"] = $value === true ? null : (string) $value;
+        $attributes[$base . $name] = $value === true ? null : (string) $value;
     }
 
     $escapes = ['&' => '&amp;', '"' => '&quot;', "'" => '&#39;', '<' => '&lt;', '>' => '&gt;'];
@@ -255,7 +257,7 @@ module CycleWire
 
   # The attributes, escaped for HTML, to print inside a start tag.
   # CycleWire.cw('cart#add', { sku: 'wire-01' }, trigger: 'visible') returns
-  # data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+  # cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
   # Raises ArgumentError for a bad name, option or value.
   def self.cw(action, props = nil, options = {})
     options.each_key do |name|
@@ -273,16 +275,18 @@ module CycleWire
     on = options[:on]
     raise ArgumentError, "CycleWire: invalid on #{on.inspect}" unless on.nil? || (on.is_a?(String) && EVENT.match?(on))
 
+    # An empty prefix means data-: a bare "action" is already a form attribute.
+    base = prefix.empty? ? 'data-' : prefix
     binds = on.nil? ? 'action' : "on-#{on}"
-    attributes = { "data-#{prefix}#{binds}" => action }
-    attributes["data-#{prefix}props"] = JSON.generate(props) unless props.nil?
+    attributes = { "#{base}#{binds}" => action }
+    attributes["#{base}props"] = JSON.generate(props) unless props.nil?
     OPTIONS.each_key do |name|
       next unless options.key?(name)
 
       value = options[name]
       raise ArgumentError, "CycleWire: invalid #{name} #{value.inspect}" unless valid?(name, value)
 
-      attributes["data-#{prefix}#{name}"] = value == true ? nil : value.to_s
+      attributes["#{base}#{name}"] = value == true ? nil : value.to_s
     end
     attributes.map { |name, value| value.nil? ? name : %(#{name}="#{value.gsub(/[&"'<>]/, ESCAPES)}") }.join(' ')
   end
@@ -377,7 +381,7 @@ def cw(action, props=None, **options):
     """Return the attributes, escaped for HTML, to print inside a start tag.
 
     cw('cart#add', {'sku': 'wire-01'}, trigger='visible') returns
-    data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" data-cw-trigger="visible"
+    cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}" cw-trigger="visible"
 
     Raises ValueError for a bad name, option or value.
     """
@@ -395,10 +399,12 @@ def cw(action, props=None, **options):
     if on is not None and (not isinstance(on, str) or not _EVENT.fullmatch(on)):
         raise ValueError(f'CycleWire: invalid on {on!r}')
 
-    attributes = {f'data-{prefix}' + ('action' if on is None else f'on-{on}'): action}
+    # An empty prefix means data-: a bare "action" is already a form attribute.
+    base = prefix or 'data-'
+    attributes = {base + ('action' if on is None else f'on-{on}'): action}
     if props is not None:
         # NaN and Infinity are not JSON, so they raise instead of breaking JSON.parse().
-        attributes[f'data-{prefix}props'] = json.dumps(
+        attributes[f'{base}props'] = json.dumps(
             props, ensure_ascii=False, separators=(',', ':'), allow_nan=False
         )
     for name in _OPTIONS:
@@ -407,7 +413,7 @@ def cw(action, props=None, **options):
         value = options[name]
         if not _valid(name, value):
             raise ValueError(f'CycleWire: invalid {name} {value!r}')
-        attributes[f'data-{prefix}{name}'] = None if value is True else str(value)
+        attributes[f'{base}{name}'] = None if value is True else str(value)
     return ' '.join(
         name if value is None else f'{name}="{value.translate(_ESCAPES)}"'
         for name, value in attributes.items()
@@ -493,7 +499,7 @@ const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': 
 
 /**
  * @typedef {object} Options  null or false leaves an option out
- * @property {string | null | false} [on]  an event name: data-cw-on-<on> replaces data-cw-action
+ * @property {string | null | false} [on]  an event name: cw-on-<on> replaces cw-action
  * @property {string | null | false} [trigger]  load, idle, visible or media:<query>
  * @property {string | null | false} [preload]  intent, visible, idle, load or none
  * @property {string | null | false} [concurrency]  drop, restart, latest or parallel
@@ -545,24 +551,26 @@ export function cw(action, props = null, options = {}) {
     }
 
     /** @type {Record<string, string>} */
-    const attributes = { [`data-${prefix}${on === undefined ? 'action' : `on-${on}`}`]: action };
+    // An empty prefix means data-: a bare "action" is already a form attribute.
+    const base = prefix || 'data-';
+    const attributes = { [`${base}${on === undefined ? 'action' : `on-${on}`}`]: action };
     if (props != null) {
         const json = JSON.stringify(props);
         if (json === undefined) throw new TypeError('CycleWire: props must be something JSON can hold');
-        attributes[`data-${prefix}props`] = json;
+        attributes[`${base}props`] = json;
     }
     for (const name of ORDER) {
         const value = given[name];
         if (value === undefined) continue;
         if (!valid(name, value)) throw new TypeError(`CycleWire: invalid ${name} ${JSON.stringify(value)}`);
-        attributes[`data-${prefix}${name}`] = value === true ? '' : String(value);
+        attributes[`${base}${name}`] = value === true ? '' : String(value);
     }
     return attributes;
 }
 
 /**
  * The attributes as one string, escaped for HTML, to print inside a start tag:
- * data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}".
+ * cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}".
  * @param {string} action `module` or `module#export`
  * @param {unknown} [props] anything JSON.stringify() takes, or null for none
  * @param {Options} [options]
@@ -600,4 +608,4 @@ const search = `<input type="search" ${cwAttrs('search#keys', null, { on: 'keydo
 
 `html` from [`cyclewire/dom`](dom.md) is the exception: it refuses an interpolation where
 attribute names go, and escapes quoted values itself, so write the attributes out there:
-`` html`<button data-cw-action="cart#add" data-cw-props="${JSON.stringify({ sku })}">…</button>` ``.
+`` html`<button cw-action="cart#add" cw-props="${JSON.stringify({ sku })}">…</button>` ``.

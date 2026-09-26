@@ -1,7 +1,9 @@
 /**
  * The attribute vocabulary and the per-event defaults every other module
- * reads. All names derive from one prefix: `cw-` by default, so a page can
- * move CycleWire into its own namespace (`x-` gives `data-x-action`).
+ * reads. All names derive from one prefix, `cw-` by default: `cw-action`,
+ * `cw-props` and so on. `data-cw-` gives names HTML validators accept, and
+ * `x-` moves CycleWire into its own namespace. An empty prefix means
+ * `data-`, since a bare `action` is already a form attribute.
  */
 
 /** @typedef {'drop' | 'restart' | 'latest' | 'parallel'} Concurrency */
@@ -9,7 +11,7 @@
 /** @param {string} prefix */
 export function attrNames(prefix) {
     /** @param {string} name */
-    const attr = (name) => `data-${prefix}${name}`;
+    const attr = (name) => (prefix || 'data-') + name;
     return {
         action: attr('action'),
         on: attr('on-'),
@@ -52,7 +54,7 @@ const CHANGE_INPUTS = /^(?:checkbox|radio|file|range|color|date|datetime-local|m
 const CLICK_INPUTS = /^(?:button|submit|reset|image)$/;
 
 /**
- * The event a bare `data-cw-action` listens for on this element.
+ * The event a bare `cw-action` listens for on this element.
  * @param {Element} el
  * @returns {string}
  */
@@ -98,7 +100,7 @@ export function splitName(name) {
 }
 
 /**
- * Whether an element sits inside `data-cw-ignore` (itself included), across
+ * Whether an element sits inside `cw-ignore` (itself included), across
  * shadow roots. Nothing in there activates: no actions, triggers or preloads.
  * @param {Element} el
  * @param {Attrs} attrs
@@ -111,8 +113,8 @@ export function ignored(el, attrs) {
 }
 
 /**
- * Every action name bound on an element, through `data-cw-action` or any
- * `data-cw-on-<event>` attribute.
+ * Every action name bound on an element, through `cw-action` or any
+ * `cw-on-<event>` attribute.
  * @param {Element} el
  * @param {Attrs} attrs
  * @returns {string[]}

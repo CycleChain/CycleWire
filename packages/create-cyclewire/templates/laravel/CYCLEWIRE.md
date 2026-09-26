@@ -41,7 +41,7 @@ The files are in place: two actions in `resources/js/actions/` and a demo view,
 Then run `npm run dev` and `php artisan serve`, and open `/cyclewire`. Press Alt+Shift+W
 for the devtools.
 
-Check every `data-cw-*` value in your views against your actions, in CI too:
+Check every `cw-*` value in your views against your actions, in CI too:
 
 ```sh
 npx cyclewire check --actions resources/js/actions --templates "resources/views/**/*.blade.php"

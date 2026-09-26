@@ -58,8 +58,8 @@ A page whose Content Security Policy does not allow scripts from jsDelivr blocks
 | Actions | Every registered action module: whether it is loaded, how many elements bind it, its runs and errors so far, with buttons to preload it and to outline its elements. Names the markup uses but nobody registered are flagged. |
 | Runs | Every run, newest first: action, element, event, concurrency mode, duration and status. Selecting one outlines its element. |
 | Log | Every trace event and every `cw:run`, `cw:done` and `cw:error`, in order. Filter by type, pause, clear. |
-| Triggers | Elements with a `data-cw-trigger` or a scheduled `data-cw-preload`, what they wait for, and whether they fired. |
-| Element | The bindings of an element you pick: its actions per event with their concurrency mode, trigger, preload, props (parsed, or the JSON error), concurrency, once, debounce, prevent, pending state, whether it sits inside `data-cw-ignore`, and its runs. |
+| Triggers | Elements with a `cw-trigger` or a scheduled `cw-preload`, what they wait for, and whether they fired. |
+| Element | The bindings of an element you pick: its actions per event with their concurrency mode, trigger, preload, props (parsed, or the JSON error), concurrency, once, debounce, prevent, pending state, whether it sits inside `cw-ignore`, and its runs. |
 
 To pick an element, press **Inspect**, then click one. The panel takes the bound element
 rather than the text or icon inside it. While you pick, the page receives no hover, press
@@ -107,7 +107,7 @@ dark colours to match `prefers-color-scheme` and drops its animation for
 
 One `<cyclewire-devtools>` element at the end of `<html>`, with all its markup and styles
 in an open shadow root, and nothing else: page elements are neither restyled nor given
-attributes. It carries `data-cw-ignore`, so CycleWire never runs an action from inside it.
+attributes. It carries `cw-ignore`, so CycleWire never runs an action from inside it.
 
 It talks to CycleWire only through the public API, the `cw:*` events and the DOM, so a
 bundled copy and a CDN copy never disagree. It keeps the last 500 log entries and 200

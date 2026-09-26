@@ -1,6 +1,6 @@
 <script setup>
 // A Vue component with a CycleWire action inside it: "Save" is a plain
-// data-cw-action, and its props are whatever Vue rendered last.
+// cw-action, and its props are whatever Vue rendered last.
 import { onMounted, ref } from 'vue';
 
 const props = defineProps({ start: { type: Number, default: 0 } });
@@ -23,7 +23,7 @@ function done(event) {
     <div class="counter" :data-ready="ready || undefined" @cw:done="done">
         <output class="counter__value">{{ count }}</output>
         <button type="button" class="counter__inc" @click="count++">+1</button>
-        <button type="button" class="counter__save primary" data-cw-action="counter#save" :data-cw-props="JSON.stringify({ count })">Save</button>
+        <button type="button" class="counter__save primary" cw-action="counter#save" :cw-props="JSON.stringify({ count })">Save</button>
         <p class="counter__status" role="status">{{ saved === null ? 'Not saved yet' : `Saved ${saved}` }}</p>
     </div>
 </template>

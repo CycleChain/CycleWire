@@ -9,6 +9,6 @@ npm start        # serves this folder at http://localhost:3000/
 ```
 
 To add an action, write `actions/name.js` with an exported `run` function, list it in the
-`start()` call in `index.html`, and put `data-cw-action="name"` on an element.
+`start()` call in `index.html`, and put `cw-action="name"` on an element.
 
 Learn more in the [documentation](https://cyclechain.github.io/CycleWire/docs/).

@@ -13,8 +13,8 @@ import { fragment, isSafeHTML, transition } from './dom.js';
 /**
  * @typedef {object} MorphOptions
  * @property {boolean} [children]  morph the target's children (default) or, when false, the target element itself
- * @property {string} [key]        attribute that pairs siblings without ids. Default "data-cw-key"
- * @property {string} [preserve]   attribute marking elements to leave untouched. Default "data-cw-preserve"
+ * @property {string} [key]        attribute that pairs siblings without ids. Default "cw-key"
+ * @property {string} [preserve]   attribute marking elements to leave untouched. Default "cw-preserve"
  * @property {(from: Element, to: Element) => boolean | void} [beforeUpdate]  return false to leave `from` as it is
  * @property {(node: Node) => boolean | void} [beforeRemove]  return false to keep the node
  * @property {boolean} [transition]  run inside a View Transition where supported
@@ -66,8 +66,8 @@ export function morph(target, content, options = {}) {
  *   insertBefore() (no moveBefore) blurs it, so the live activeElement cannot be trusted
  */
 function run(root, next, options, focused) {
-    const keyAttr = options.key || 'data-cw-key';
-    const preserveAttr = options.preserve || 'data-cw-preserve';
+    const keyAttr = options.key || 'cw-key';
+    const preserveAttr = options.preserve || 'cw-preserve';
 
     // Old elements whose id reappears in the new content are paired by id,
     // wherever they sit, and moved into place rather than recreated.

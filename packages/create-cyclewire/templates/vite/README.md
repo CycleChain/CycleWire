@@ -6,10 +6,10 @@ A server-rendered page activated by [CycleWire](https://cyclechain.github.io/Cyc
 npm install
 npm run dev      # then press Alt+Shift+W for the devtools
 npm run build
-npm run check    # checks every data-cw-* value against src/actions/
+npm run check    # checks every cw-* value against src/actions/
 ```
 
-- Each file in `src/actions/` is an action: `src/actions/like.js` is `data-cw-action="like"`,
+- Each file in `src/actions/` is an action: `src/actions/like.js` is `cw-action="like"`,
   `src/actions/cart/add.js` is `cart.add`. Its code loads when someone reaches for it.
 - Edit an action while `npm run dev` runs: the next click runs the new code, and the page
   keeps its state.

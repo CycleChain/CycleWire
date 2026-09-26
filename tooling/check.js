@@ -1,5 +1,5 @@
 /**
- * Checks the `data-cw-*` values in templates against the registry: every
+ * Checks the `cw-*` values in templates against the registry: every
  * action must be registered and export what the markup names, and triggers,
  * preloads, concurrency, debounce and props must hold values CycleWire
  * understands. Values the template language builds cannot be checked and are

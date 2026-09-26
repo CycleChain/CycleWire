@@ -4,7 +4,7 @@ import { boot, expectLog, log } from './helpers.js';
 test.describe('registry and preloading', () => {
     test('relative URLs resolve against the page, not against the library', async ({ page }) => {
         // The page lives under /fixtures/, the library under /dist/esm-dev/.
-        await boot(page, { actions: { rel: './actions/log.js' }, html: '<button id="b" data-cw-action="rel">go</button>' });
+        await boot(page, { actions: { rel: './actions/log.js' }, html: '<button id="b" cw-action="rel">go</button>' });
         await page.click('#b');
         await expectLog(page, [{ fn: 'run', el: 'b', type: 'click', target: 'b', props: null }]);
     });
@@ -17,7 +17,7 @@ test.describe('registry and preloading', () => {
     });
 
     test('registered() lists every registered name, loaded() only the imported ones', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="log">go</button>' });
         expect(await page.evaluate(() => window.CW.registered())).toEqual(['log', 'gated', 'evaluated']);
         expect(await page.evaluate(() => window.CW.loaded())).toEqual([]);
         await page.evaluate(() => window.CW.register({ extra: '/fixtures/actions/log.js' }));
@@ -34,7 +34,7 @@ test.describe('registry and preloading', () => {
     test('names that are not registered are never imported', async ({ page }) => {
         const requests = [];
         page.on('request', (request) => requests.push(request.url()));
-        await boot(page, { html: '<button id="b" data-cw-action="../../evil.js">go</button><button id="c" data-cw-action="https://example.com/x.js">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="../../evil.js">go</button><button id="c" cw-action="https://example.com/x.js">go</button>' });
         await page.click('#b');
         await page.click('#c');
         await page.waitForTimeout(150);
@@ -46,7 +46,7 @@ test.describe('registry and preloading', () => {
 
     test('a module that failed to load is retried on the next interaction', async ({ page }, info) => {
         const url = `/fail-once/${token(info, 'retry')}/fixtures/actions/log.js`;
-        await boot(page, { actions: { flaky: url }, html: '<button id="b" data-cw-action="flaky" data-cw-preload="none">go</button>' });
+        await boot(page, { actions: { flaky: url }, html: '<button id="b" cw-action="flaky" cw-preload="none">go</button>' });
         await page.click('#b');
         await page.waitForTimeout(200);
         expect(await log(page)).toEqual([]);
@@ -56,7 +56,7 @@ test.describe('registry and preloading', () => {
 
     test('a failed preload does not break the first click', async ({ page }, info) => {
         const url = `/fail-once/${token(info, 'preload')}/fixtures/actions/log.js`;
-        await boot(page, { actions: { flaky: url }, html: '<button id="b" data-cw-action="flaky">go</button>' });
+        await boot(page, { actions: { flaky: url }, html: '<button id="b" cw-action="flaky">go</button>' });
         await page.hover('#b');
         await page.waitForTimeout(200);
         await page.click('#b');
@@ -64,7 +64,7 @@ test.describe('registry and preloading', () => {
     });
 
     test('hovering preloads URL modules with modulepreload, without evaluating them', async ({ page }) => {
-        await boot(page, { html: '<button id="b" data-cw-action="evaluated">go</button>' });
+        await boot(page, { html: '<button id="b" cw-action="evaluated">go</button>' });
         await page.hover('#b');
         await expect(page.locator('link[rel="modulepreload"][href$="/fixtures/actions/evaluated.js"]')).toHaveCount(1);
         await page.waitForTimeout(150);
@@ -73,8 +73,8 @@ test.describe('registry and preloading', () => {
         await expectLog(page, [['evaluated'], ['run']]);
     });
 
-    test('hovering inside data-cw-ignore preloads nothing', async ({ page }) => {
-        await boot(page, { html: '<div data-cw-ignore><button id="b" data-cw-action="evaluated">go</button></div>' });
+    test('hovering inside cw-ignore preloads nothing', async ({ page }) => {
+        await boot(page, { html: '<div cw-ignore><button id="b" cw-action="evaluated">go</button></div>' });
         await page.hover('#b');
         await page.waitForTimeout(300);
         expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
@@ -82,14 +82,14 @@ test.describe('registry and preloading', () => {
     });
 
     test('loader functions are imported on intent', async ({ page }) => {
-        await boot(page, { actions: {}, html: '<button id="b" data-cw-action="fn">go</button>' });
+        await boot(page, { actions: {}, html: '<button id="b" cw-action="fn">go</button>' });
         await page.evaluate(() => window.CW.register({ fn: () => import('/fixtures/actions/evaluated.js') }));
         await page.hover('#b');
         await expectLog(page, [['evaluated']]);
     });
 
-    test('Save-Data and data-cw-preload="none" turn intent preloading off', async ({ page }) => {
-        await boot(page, { start: false, html: '<button id="a" data-cw-action="log">a</button><button id="b" data-cw-action="evaluated" data-cw-preload="none">b</button>' });
+    test('Save-Data and cw-preload="none" turn intent preloading off', async ({ page }) => {
+        await boot(page, { start: false, html: '<button id="a" cw-action="log">a</button><button id="b" cw-action="evaluated" cw-preload="none">b</button>' });
         await page.evaluate(() => {
             window.CW.start({ actions: { log: '/fixtures/actions/log.js', evaluated: '/fixtures/actions/evaluated.js' } });
         });
@@ -105,8 +105,8 @@ test.describe('registry and preloading', () => {
         expect(await page.locator('link[rel="modulepreload"]').count()).toBe(1);
     });
 
-    test('data-cw-preload="visible" fetches when the element nears the viewport', async ({ page }) => {
-        await boot(page, { html: '<div class="spacer"></div><button id="b" data-cw-action="evaluated" data-cw-preload="visible">b</button>' });
+    test('cw-preload="visible" fetches when the element nears the viewport', async ({ page }) => {
+        await boot(page, { html: '<div class="spacer"></div><button id="b" cw-action="evaluated" cw-preload="visible">b</button>' });
         await page.waitForTimeout(150);
         expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
         await page.locator('#b').scrollIntoViewIfNeeded();
@@ -114,7 +114,7 @@ test.describe('registry and preloading', () => {
     });
 
     test('intent fetches a module whose scheduled preload has not happened yet', async ({ page }) => {
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated" data-cw-preload="idle">b</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="evaluated" cw-preload="idle">b</button>' });
         // The browser never goes idle.
         await page.evaluate(() => {
             window.requestIdleCallback = () => 0;
@@ -135,10 +135,10 @@ test.describe('registry and preloading', () => {
     test('on screens that cannot hover, actions in view are fetched once the page is idle', async ({ page }) => {
         await boot(page, {
             start: false,
-            html: `<button id="near" data-cw-action="evaluated">near</button>
-                   <button id="own" data-cw-action="log" data-cw-preload="none">own choice</button>
+            html: `<button id="near" cw-action="evaluated">near</button>
+                   <button id="own" cw-action="log" cw-preload="none">own choice</button>
                    <div class="spacer"></div>
-                   <button id="far" data-cw-action="state">far</button>`,
+                   <button id="far" cw-action="state">far</button>`,
         });
         await page.evaluate(touchScreen);
         await page.evaluate(() => window.CW.start({ actions: { evaluated: '/fixtures/actions/evaluated.js', log: '/fixtures/actions/log.js', state: '/fixtures/actions/state.js' } }));
@@ -153,19 +153,19 @@ test.describe('registry and preloading', () => {
     });
 
     test('preload: "intent" keeps every fetch waiting for intent, and "visible" looks ahead on every screen', async ({ page }) => {
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="evaluated">b</button>' });
         await page.evaluate(touchScreen);
         await page.evaluate(() => window.CW.start({ preload: 'intent', actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
         await page.waitForTimeout(300);
         expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
 
         // A screen that can hover.
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="evaluated">b</button>' });
         await page.evaluate(() => window.CW.start({ actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
         await page.waitForTimeout(300);
         expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
 
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="evaluated">b</button>' });
         await page.evaluate(() => window.CW.start({ preload: 'visible', actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
         await expect(page.locator('link[rel="modulepreload"]')).toHaveCount(1);
     });

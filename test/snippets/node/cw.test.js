@@ -36,17 +36,17 @@ for (const c of cases) {
 
 test('cw() gives JSX raw values, and bare attributes as empty strings', () => {
     assert.deepEqual(cw('cart#add', { sku: 'wire-01', note: '<b>"hi"</b>' }, { trigger: 'visible', once: true, prevent: true }), {
-        'data-cw-action': 'cart#add',
-        'data-cw-props': '{"sku":"wire-01","note":"<b>\\"hi\\"</b>"}',
-        'data-cw-trigger': 'visible',
-        'data-cw-once': '',
-        'data-cw-prevent': '',
+        'cw-action': 'cart#add',
+        'cw-props': '{"sku":"wire-01","note":"<b>\\"hi\\"</b>"}',
+        'cw-trigger': 'visible',
+        'cw-once': '',
+        'cw-prevent': '',
     });
 });
 
 test('undefined leaves props and options out', () => {
-    assert.equal(cwAttrs('cart', undefined, { trigger: undefined, on: undefined, prefix: undefined }), 'data-cw-action="cart"');
-    assert.equal(cwAttrs('cart'), 'data-cw-action="cart"');
+    assert.equal(cwAttrs('cart', undefined, { trigger: undefined, on: undefined, prefix: undefined }), 'cw-action="cart"');
+    assert.equal(cwAttrs('cart'), 'cw-action="cart"');
 });
 
 test('props that JSON cannot hold throw', () => {

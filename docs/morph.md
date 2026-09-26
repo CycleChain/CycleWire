@@ -28,7 +28,7 @@ export async function run({ element, signal }) {
 ```
 
 ```html
-<button data-cw-action="refresh" data-url="/partials/leaderboard" data-target="#leaderboard">Refresh</button>
+<button cw-action="refresh" data-url="/partials/leaderboard" data-target="#leaderboard">Refresh</button>
 ```
 
 ## `morph(target, content, options?)`
@@ -40,8 +40,8 @@ updated. Without `transition`, the update itself is synchronous.
 | Option | Default | |
 | --- | --- | --- |
 | `children` | `true` | Morph the target's children. `false` morphs the target element itself (its attributes too) |
-| `key` | `'data-cw-key'` | Attribute that pairs siblings without ids |
-| `preserve` | `'data-cw-preserve'` | Attribute marking elements to leave untouched |
+| `key` | `'cw-key'` | Attribute that pairs siblings without ids |
+| `preserve` | `'cw-preserve'` | Attribute marking elements to leave untouched |
 | `beforeUpdate(from, to)` | – | Return `false` to leave `from` as it is |
 | `beforeRemove(node)` | – | Return `false` to keep a node the new HTML no longer has |
 | `transition` | `false` | Run inside a View Transition where supported |
@@ -53,7 +53,7 @@ For each node in the new content, in order:
 1. **Same `id`, anywhere in the old tree.** The old element is moved into place.
    `Element.moveBefore()` (Chrome 133+, Firefox 144+) moves it without resetting iframes,
    media or focus. Safari falls back to `insertBefore`.
-2. **Same `data-cw-key`** among the remaining siblings.
+2. **Same `cw-key`** among the remaining siblings.
 3. **Same tag at the current position**, unless the old element is reserved by an id or
    key needed elsewhere.
 
@@ -74,17 +74,17 @@ changed the attribute, and never on the element that has focus:
 
 Focus and the text selection are restored if an update moved the focused element.
 
-## `data-cw-preserve`
+## `cw-preserve`
 
 ```html
-<div id="player" data-cw-preserve>…third-party widget…</div>
+<div id="player" cw-preserve>…third-party widget…</div>
 ```
 
 The element is kept exactly as it is, contents included. Give it an id so it is matched.
 
 ## Scripts and triggers
 
-`<script>` elements in morphed-in content do not run. Triggers (`data-cw-trigger`) in
+`<script>` elements in morphed-in content do not run. Triggers (`cw-trigger`) in
 new content activate automatically, and runs on removed elements are aborted.
 
 ## Shadow roots

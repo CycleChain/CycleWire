@@ -22,7 +22,7 @@ const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': 
 
 /**
  * @typedef {object} Options  null or false leaves an option out
- * @property {string | null | false} [on]  an event name: data-cw-on-<on> replaces data-cw-action
+ * @property {string | null | false} [on]  an event name: cw-on-<on> replaces cw-action
  * @property {string | null | false} [trigger]  load, idle, visible or media:<query>
  * @property {string | null | false} [preload]  intent, visible, idle, load or none
  * @property {string | null | false} [concurrency]  drop, restart, latest or parallel
@@ -74,24 +74,26 @@ export function cw(action, props = null, options = {}) {
     }
 
     /** @type {Record<string, string>} */
-    const attributes = { [`data-${prefix}${on === undefined ? 'action' : `on-${on}`}`]: action };
+    // An empty prefix means data-: a bare "action" is already a form attribute.
+    const base = prefix || 'data-';
+    const attributes = { [`${base}${on === undefined ? 'action' : `on-${on}`}`]: action };
     if (props != null) {
         const json = JSON.stringify(props);
         if (json === undefined) throw new TypeError('CycleWire: props must be something JSON can hold');
-        attributes[`data-${prefix}props`] = json;
+        attributes[`${base}props`] = json;
     }
     for (const name of ORDER) {
         const value = given[name];
         if (value === undefined) continue;
         if (!valid(name, value)) throw new TypeError(`CycleWire: invalid ${name} ${JSON.stringify(value)}`);
-        attributes[`data-${prefix}${name}`] = value === true ? '' : String(value);
+        attributes[`${base}${name}`] = value === true ? '' : String(value);
     }
     return attributes;
 }
 
 /**
  * The attributes as one string, escaped for HTML, to print inside a start tag:
- * data-cw-action="cart#add" data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}".
+ * cw-action="cart#add" cw-props="{&quot;sku&quot;:&quot;wire-01&quot;}".
  * @param {string} action `module` or `module#export`
  * @param {unknown} [props] anything JSON.stringify() takes, or null for none
  * @param {Options} [options]

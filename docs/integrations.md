@@ -15,11 +15,11 @@ start({
 ```
 
 ```blade
-<button data-cw-action="favorites.toggle" data-cw-props='@json(["type" => "firm", "id" => $firm->id])'>
+<button cw-action="favorites.toggle" cw-props='@json(["type" => "firm", "id" => $firm->id])'>
     Favorite
 </button>
 
-<form action="{{ route('newsletter') }}" method="post" data-cw-action="newsletter">
+<form action="{{ route('newsletter') }}" method="post" cw-action="newsletter">
     @csrf
     <input type="email" name="email" required>
     <button>Subscribe</button>
@@ -50,7 +50,7 @@ export async function run({ element, signal }) {
 
 ## Ruby on Rails
 
-Rails turns `data: { cw_action: … }` into `data-cw-action`:
+Rails turns `data: { cw_action: … }` into `cw-action`:
 
 ```erb
 <%= button_tag "Add to cart", data: { cw_action: "cart#add", cw_props: { sku: product.sku }.to_json } %>
@@ -66,12 +66,12 @@ attributes, escaped: `<button <%= cw('cart#add', { sku: product.sku }) %>>`.
 
 ```django
 {{ filters|json_script:"filters-state" }}
-<form data-cw-state="#filters-state" data-cw-action="filters#apply">…</form>
+<form cw-state="#filters-state" cw-action="filters#apply">…</form>
 
-<button data-cw-action="cart#add" data-cw-props='{"sku": "{{ product.sku|escapejs }}"}'>Add</button>
+<button cw-action="cart#add" cw-props='{"sku": "{{ product.sku|escapejs }}"}'>Add</button>
 ```
 
-`json_script` pairs naturally with `data-cw-state="#id"` from [signals](signals.md).
+`json_script` pairs naturally with `cw-state="#id"` from [signals](signals.md).
 
 The [`{% cw %}` tag](server-helpers.md#python-and-django) builds the JSON from a dictionary
 in the context and escapes it: `<button {% cw 'cart#add' props %}>`.
@@ -79,8 +79,8 @@ in the context and escapes it: `<button {% cw 'cart#add' props %}>`.
 ## Plain PHP
 
 ```php
-<button data-cw-action="cart#add"
-        data-cw-props="<?= htmlspecialchars(json_encode(['sku' => $sku]), ENT_QUOTES) ?>">
+<button cw-action="cart#add"
+        cw-props="<?= htmlspecialchars(json_encode(['sku' => $sku]), ENT_QUOTES) ?>">
     Add
 </button>
 ```
@@ -136,11 +136,11 @@ islands. CycleWire can load the islands themselves (a `visible` trigger hydrates
 server-rendered component when it scrolls into view), and components can use CycleWire
 actions:
 
-- The attributes are valid in JSX and templates (`data-cw-action="…"`). In JSX, you can
+- The attributes are valid in JSX and templates (`cw-action="…"`). In JSX, you can
   also spread [`cw()`](server-helpers.md#javascript-and-jsx): `<button {...cw('cart#add', { sku })}>`.
 - CycleWire listens in the bubble phase, so your framework's handlers run first and its
   `stopPropagation()` is respected. `start({ capture: true })` flips that.
-- CycleWire writes nothing into markup except `data-cw-pending` / `aria-busy` during a
+- CycleWire writes nothing into markup except `cw-pending` / `aria-busy` during a
   run, so hydration does not see foreign attributes on load.
 
 [Frameworks](frameworks.md) has the recipes, and [examples/](../examples/README.md) has

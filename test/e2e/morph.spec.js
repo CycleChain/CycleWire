@@ -54,16 +54,16 @@ test.describe('cyclewire/morph', () => {
         await expect(page.locator('#c')).not.toBeChecked();
     });
 
-    test('data-cw-key pairs siblings without ids', async ({ page }) => {
-        await boot(page, { html: '<div data-cw-key="1" class="row">one</div><div data-cw-key="2" class="row">two</div>' });
-        await page.evaluate(() => document.querySelectorAll('.row').forEach((el) => { el.__key = el.dataset.cwKey; }));
-        await morph(page, '<div data-cw-key="2" class="row">two</div><div data-cw-key="1" class="row">one</div>');
+    test('cw-key pairs siblings without ids', async ({ page }) => {
+        await boot(page, { html: '<div cw-key="1" class="row">one</div><div cw-key="2" class="row">two</div>' });
+        await page.evaluate(() => document.querySelectorAll('.row').forEach((el) => { el.__key = el.getAttribute('cw-key'); }));
+        await morph(page, '<div cw-key="2" class="row">two</div><div cw-key="1" class="row">one</div>');
         expect(await page.evaluate(() => [...document.querySelectorAll('.row')].map((el) => el.__key))).toEqual(['2', '1']);
     });
 
-    test('data-cw-preserve leaves an element alone', async ({ page }) => {
-        await boot(page, { html: '<div id="widget" data-cw-preserve class="client">client state</div>' });
-        await morph(page, '<div id="widget" data-cw-preserve class="server">server</div>');
+    test('cw-preserve leaves an element alone', async ({ page }) => {
+        await boot(page, { html: '<div id="widget" cw-preserve class="client">client state</div>' });
+        await morph(page, '<div id="widget" cw-preserve class="server">server</div>');
         await expect(page.locator('#widget')).toHaveText('client state');
         await expect(page.locator('#widget')).toHaveClass('client');
     });
@@ -127,7 +127,7 @@ test.describe('cyclewire/morph', () => {
 
     test('triggers in morphed-in content are activated, and transition() is supported', async ({ page }) => {
         await boot(page, { html: '<p>before</p>' });
-        await morph(page, '<div id="fresh" data-cw-action="log" data-cw-trigger="load"></div>', { transition: true });
+        await morph(page, '<div id="fresh" cw-action="log" cw-trigger="load"></div>', { transition: true });
         await expect.poll(async () => (await log(page)).map((entry) => entry.el)).toEqual(['fresh']);
     });
 });

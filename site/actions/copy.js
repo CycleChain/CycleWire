@@ -1,6 +1,6 @@
 // The upgrade pattern: the clipboard needs a user gesture, and a slow first
 // import can outlive it in Safari. The first run copies and attaches a direct
-// listener; data-cw-once hands every later click to that listener.
+// listener; cw-once hands every later click to that listener.
 export async function run({ element, signal }) {
     const label = element.querySelector('.copy__label');
     const text = element.dataset.copy;

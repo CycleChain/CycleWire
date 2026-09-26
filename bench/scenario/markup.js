@@ -67,7 +67,7 @@ export function cartSummary(items, products) {
 
 /**
  * Attribute hooks let a stack that renders with this markup add its own
- * attributes (for example data-cw-action) without changing anything visible.
+ * attributes (for example cw-action) without changing anything visible.
  * Each returns a string that starts with a space, or ''.
  * @typedef {object} Attrs
  * @property {() => string} [searchForm]

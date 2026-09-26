@@ -17,14 +17,14 @@ async function styled(page, html, actions = { styled: STYLED }) {
 
 test.describe('cyclewire/css: action stylesheets', () => {
     test('apply before the handler runs', async ({ page }) => {
-        await styled(page, '<button id="b" data-cw-action="styled">go</button>');
+        await styled(page, '<button id="b" cw-action="styled">go</button>');
         expect(await links(page, 'stylesheet')).toBe(0);
         await page.click('#b');
         await expect.poll(() => log(page)).toEqual([{ fn: 'styled', el: 'b', color: 'rgb(1, 2, 3)' }]);
     });
 
     test('are preloaded on intent without being applied', async ({ page }) => {
-        await styled(page, '<button id="b" data-cw-action="styled">go</button>');
+        await styled(page, '<button id="b" cw-action="styled">go</button>');
         await page.hover('#b');
         await expect.poll(() => links(page, 'preload')).toBe(1);
         expect(await page.locator('link[rel="preload"][as="style"]').count()).toBe(1);
@@ -34,7 +34,7 @@ test.describe('cyclewire/css: action stylesheets', () => {
     test('are shared, and reuse a stylesheet the server already rendered', async ({ page }) => {
         await boot(page, {
             start: false,
-            html: '<button id="a" data-cw-action="one">a</button><button id="b" data-cw-action="two">b</button>',
+            html: '<button id="a" cw-action="one">a</button><button id="b" cw-action="two">b</button>',
         });
         await page.evaluate(async (css) => {
             const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: css });
@@ -52,7 +52,7 @@ test.describe('cyclewire/css: action stylesheets', () => {
     });
 
     test('go before the page\'s own styles, so the page wins at equal specificity', async ({ page }) => {
-        await boot(page, { start: false, html: '<button id="b" data-cw-action="styled#order">go</button>' });
+        await boot(page, { start: false, html: '<button id="b" cw-action="styled#order">go</button>' });
         await page.evaluate(() => {
             const style = document.createElement('style');
             style.textContent = '.order { color: rgb(9, 9, 9); }';
@@ -69,7 +69,7 @@ test.describe('cyclewire/css: action stylesheets', () => {
         await styled(page, '<div id="host"></div>');
         await page.evaluate(() => {
             const root = document.getElementById('host').attachShadow({ mode: 'open' });
-            root.innerHTML = '<button id="inside" data-cw-action="styled#shadow">go</button>';
+            root.innerHTML = '<button id="inside" cw-action="styled#shadow">go</button>';
         });
         await page.locator('#host').locator('#inside').click();
         await expect.poll(() => log(page)).toEqual([{ fn: 'shadow', color: 'rgb(1, 2, 3)' }]);
@@ -80,7 +80,7 @@ test.describe('cyclewire/css: action stylesheets', () => {
 
     test('a stylesheet that fails to load fails the run, and the next one retries', async ({ page }, info) => {
         const css = `/fail-once/styles-${info.project.name}-${Date.now()}/fixtures/styles/widget.css`;
-        await styled(page, '<button id="b" data-cw-action="flaky" data-cw-preload="none">go</button>', {
+        await styled(page, '<button id="b" cw-action="flaky" cw-preload="none">go</button>', {
             flaky: { module: '/fixtures/actions/styled.js', css },
         });
         await page.evaluate(() => {
@@ -106,7 +106,7 @@ test.describe('cyclewire/css: action stylesheets', () => {
     });
 
     test('without the plugin, the core runs the action, skips the css and says why', async ({ page }) => {
-        await boot(page, { actions: { styled: STYLED }, html: '<button id="b" data-cw-action="styled">go</button>' });
+        await boot(page, { actions: { styled: STYLED }, html: '<button id="b" cw-action="styled">go</button>' });
         await page.click('#b');
         await expect.poll(async () => (await log(page)).length).toBe(1);
         expect((await log(page))[0].color).not.toBe('rgb(1, 2, 3)');

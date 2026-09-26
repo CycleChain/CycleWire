@@ -210,7 +210,7 @@ function mount(options) {
     const cleanup = [];
 
     /** @param {string} name */
-    const at = (name) => `data-${prefix}${name}`;
+    const at = (name) => (prefix || 'data-') + name;
 
     /**
      * Errors in the panel must never reach the page or the core that called a hook.

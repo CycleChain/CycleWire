@@ -106,9 +106,9 @@ test.describe('popular libraries', () => {
                 event.preventDefault();
             });
             const select = document.createElement('select');
-            select.setAttribute('data-cw-on-change', 'projects#archive');
+            select.setAttribute('cw-on-change', 'projects#archive');
             const button = document.createElement('button');
-            button.setAttribute('data-cw-action', 'projects#archive');
+            button.setAttribute('cw-action', 'projects#archive');
             document.body.append(select, button);
             window.jQuery(button).trigger('click'); // calls button.click(): a real click event
             window.jQuery(select).trigger('change'); // jQuery handlers only

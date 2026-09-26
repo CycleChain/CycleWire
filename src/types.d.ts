@@ -36,7 +36,7 @@ export interface Context<P = any, E extends Element = Element> {
     element: E;
     /** Aborted when a newer run supersedes this one, when the element is removed, or on `stop()`. */
     signal: AbortSignal;
-    /** The parsed `data-cw-props` JSON; null when absent. */
+    /** The parsed `cw-props` JSON; null when absent. */
     props: P;
     /** The action name, e.g. "cart#add". */
     action: string;
@@ -66,7 +66,7 @@ export type TraceEvent =
     | { type: 'schedule'; element: Element; when: string; kind: 'trigger' | 'preload'; action?: string }
     /** A trigger fired before its action was registered. */
     | { type: 'wait'; element: Element; action: string }
-    /** A module is being fetched ahead of use: `intent`, a `data-cw-preload` value, or none for `preload()`. */
+    /** A module is being fetched ahead of use: `intent`, a `cw-preload` value, or none for `preload()`. */
     | { type: 'preload'; name: string; reason?: string }
     /** A module import started, and settled. */
     | { type: 'import'; name: string }

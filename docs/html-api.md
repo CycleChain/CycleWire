@@ -1,15 +1,22 @@
 # HTML API
 
-Attribute names below use the default prefix `cw-`. With `start({ prefix: 'x-' })` they
-become `data-x-action` and so on. `prefix: ''` drops the prefix (`data-action`,
-`data-trigger`, `data-once`, …); only do that when no other library on the page uses
-those names (Stimulus uses `data-action`, for example). The attributes are plain `data-*`,
-so they are valid HTML and pass through JSX, Blade, ERB, Twig, Jinja and friends
-unchanged.
+Attribute names below use the default prefix `cw-`, as in `cw-action`: short to write,
+like htmx's `hx-*` or Alpine's `x-*`, and passed through unchanged by JSX, Blade, ERB,
+Twig, Jinja and friends. The prefix is yours to choose with `start({ prefix })`:
+
+| `prefix` | Names | |
+| --- | --- | --- |
+| `'cw-'` (default) | `cw-action`, `cw-props`, … | |
+| `'data-cw-'` | `data-cw-action`, `data-cw-props`, … | Names HTML validators accept |
+| `'x-'` | `x-action`, `x-props`, … | Your own namespace |
+| `''` | `data-action`, `data-props`, … | Only when no other library on the page uses those names (Stimulus uses `data-action`) |
+
+An empty prefix means `data-`, since a bare `action` is already a form attribute. The
+server helpers, `cyclewire check` and the Vite plugin take the same `prefix`.
 
 ## Binding actions
 
-### `data-cw-action="name"`
+### `cw-action="name"`
 
 Runs `name` on the element's natural event:
 
@@ -22,16 +29,16 @@ Runs `name` on the element's natural event:
 | `<details>` | `toggle` |
 | everything else | `click` |
 
-If the element also has `data-cw-trigger`, the action runs on the trigger only.
+If the element also has `cw-trigger`, the action runs on the trigger only.
 
-### `data-cw-on-<event>="name"`
+### `cw-on-<event>="name"`
 
 Runs `name` on any delegated event type. An element can carry several of these, next to a
-`data-cw-action`:
+`cw-action`:
 
 ```html
-<input data-cw-action="search" data-cw-on-keydown="search#keys" data-cw-on-focusin="search#open">
-<dialog id="cart" data-cw-on-command="cart#command"></dialog>
+<input cw-action="search" cw-on-keydown="search#keys" cw-on-focusin="search#open">
+<dialog id="cart" cw-on-command="cart#command"></dialog>
 <button commandfor="cart" command="--refresh">Refresh</button>
 ```
 
@@ -50,22 +57,22 @@ Module names may contain letters, digits, `_`, `-` and `.`, and must be
 
 ## Data
 
-### `data-cw-props='{…}'`
+### `cw-props='{…}'`
 
 JSON parsed on first access and handed to the handler as `ctx.props`. Invalid JSON makes
 the run fail with a `SyntaxError` naming the attribute.
 
 ```html
-<button data-cw-action="cart#add" data-cw-props='{"sku": "wire-01", "qty": 1}'>Add</button>
+<button cw-action="cart#add" cw-props='{"sku": "wire-01", "qty": 1}'>Add</button>
 ```
 
-Escape it for the attribute. In Blade, `data-cw-props='@json($props)'` is safe. Laravel's
+Escape it for the attribute. In Blade, `cw-props='@json($props)'` is safe. Laravel's
 `@json` escapes quotes, `<`, `>` and `&` by default. The [server helpers](server-helpers.md)
 write and escape it in PHP, Ruby, Python and JavaScript.
 
 ## Activation without events
 
-### `data-cw-trigger`
+### `cw-trigger`
 
 | Value | Runs |
 | --- | --- |
@@ -79,7 +86,7 @@ the page is prerendered by speculation rules.
 
 ## Loading
 
-### `data-cw-preload`
+### `cw-preload`
 
 | Value | Fetches the element's action modules |
 | --- | --- |
@@ -91,7 +98,7 @@ the page is prerendered by speculation rules.
 
 Intent also fetches the modules of an element whose `visible` or `idle` preload has not
 happened yet; only `none` turns it off. The look-ahead on screens that cannot hover
-applies to elements with `data-cw-action` and no `data-cw-preload`; `start({ preload })`
+applies to elements with `cw-action` and no `cw-preload`; `start({ preload })`
 changes it (see the [JavaScript API](js-api.md#startoptions)).
 
 URL entries are fetched with `<link rel="modulepreload">`, which downloads and compiles
@@ -101,32 +108,32 @@ under Save-Data and on 2G connections.
 
 ## Behaviour
 
-### `data-cw-prevent`
+### `cw-prevent`
 
 CycleWire calls `preventDefault()` synchronously, before importing anything, for:
 - a bound `submit`,
 - a bound `click` on a submit button that belongs to a form,
 - a bound `click` on `<a href="#">`,
-- anything `data-cw-prevent` asks for:
-  - `data-cw-prevent` (empty): every event type bound on the element.
-  - `data-cw-prevent="click keydown"`: only those types.
-  - `data-cw-prevent="none"`: never, not even the automatic cases above.
+- anything `cw-prevent` asks for:
+  - `cw-prevent` (empty): every event type bound on the element.
+  - `cw-prevent="click keydown"`: only those types.
+  - `cw-prevent="none"`: never, not even the automatic cases above.
 
 Links are otherwise never prevented. A prevented link still opens in a new tab on
 Ctrl/Cmd/Shift-click or middle click, and the action does not run in that case.
 
-### `data-cw-once`
+### `cw-once`
 
 The action runs until one run succeeds, then never again. A failed run can be retried.
 Later events are still consumed and prevented, so a finished form never falls back to a
 native submission.
 
-### `data-cw-debounce="ms"`
+### `cw-debounce="ms"`
 
 Runs only after events pause for `ms` milliseconds. With `restart` (the default for
 `input`), an in-flight run is aborted the moment a new event arrives.
 
-### `data-cw-concurrency`
+### `cw-concurrency`
 
 What happens when an event arrives while a run for the same element and action is in
 flight:
@@ -138,12 +145,12 @@ flight:
 | `latest` | `change`, `toggle` | Queue the newest event and run it when the current run ends |
 | `parallel` | everything else | Start another run |
 
-### `data-cw-ignore`
+### `cw-ignore`
 
 Nothing inside this element activates: event bindings (even on elements inside it),
 `load` and `visible` triggers, preloads, and signals bindings. Events from inside it do
 not reach an outer binding either. Put it around user-generated content so injected
-`data-cw-*` attributes do nothing. See [security](security.md).
+`cw-*` attributes do nothing. See [security](security.md).
 
 ### Disabled elements
 
@@ -152,7 +159,7 @@ Its action does not run, and no ancestor's action runs either.
 
 ## Runtime state
 
-### `data-cw-pending`
+### `cw-pending`
 
 Present while a run is in flight. For `drop` runs (clicks, submits) `aria-busy="true"` is
 set too. Both are reference counted, and whatever values the server rendered are put back
@@ -179,6 +186,6 @@ script. The full build also accepts `"signals": false`, `"bootstrap": true` (or
 ## Module attributes
 
 These belong to the optional modules and are documented with them:
-- [signals](signals.md): `data-cw-state`, `data-cw-store`, `data-cw-bind`.
-- [morph](morph.md): `data-cw-key`, `data-cw-preserve`.
-- [stream](stream.md): `data-cw-stream`, and the `data-cw-stream-state` it sets.
+- [signals](signals.md): `cw-state`, `cw-store`, `cw-bind`.
+- [morph](morph.md): `cw-key`, `cw-preserve`.
+- [stream](stream.md): `cw-stream`, and the `cw-stream-state` it sets.

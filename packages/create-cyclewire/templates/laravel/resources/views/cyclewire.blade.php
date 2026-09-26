@@ -18,14 +18,14 @@
         <h1>Hello, CycleWire</h1>
         <p>A Blade view: the actions in <code>resources/js/actions/</code> load when someone reaches for them.</p>
 
-        <button type="button" class="like" data-cw-action="like" aria-pressed="false">
+        <button type="button" class="like" cw-action="like" aria-pressed="false">
             ♥ Like <span class="like__count">12</span>
         </button>
 
         @php($tools = ['Vite', 'Astro', 'Laravel', 'Rails', 'Django'])
         <label for="search">Filter the list</label>
-        <input id="search" type="search" autocomplete="off" data-cw-action="search" data-cw-debounce="100"
-               data-cw-props='@json(['list' => 'tools'])'>
+        <input id="search" type="search" autocomplete="off" cw-action="search" cw-debounce="100"
+               cw-props='@json(['list' => 'tools'])'>
         <ul id="tools">
             @foreach ($tools as $tool)
                 <li>{{ $tool }}</li>

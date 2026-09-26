@@ -7,10 +7,10 @@ import { boot, log, open, waitForLog } from './helpers.js';
 test('CycleWire only toggles pending state, and leaves the markup as it found it', async ({ page }) => {
     await boot(page, {
         start: false,
-        html: `<button id="b" data-cw-action="gated" aria-busy="false">go</button>
-               <div id="t" data-cw-action="log" data-cw-trigger="load"></div>
-               <div id="v" data-cw-action="log" data-cw-trigger="visible"></div>
-               <button id="stale" data-cw-action="log" data-cw-pending>server-rendered pending</button>`,
+        html: `<button id="b" cw-action="gated" aria-busy="false">go</button>
+               <div id="t" cw-action="log" cw-trigger="load"></div>
+               <div id="v" cw-action="log" cw-trigger="visible"></div>
+               <button id="stale" cw-action="log" cw-pending>server-rendered pending</button>`,
     });
     const before = await page.evaluate(() => {
         window.__mutations = [];
@@ -23,7 +23,7 @@ test('CycleWire only toggles pending state, and leaves the markup as it found it
     });
     await expect.poll(async () => (await log(page)).length).toBe(2);
 
-    // A server-rendered data-cw-pending does not block the element (it used to).
+    // A server-rendered cw-pending does not block the element (it used to).
     await page.click('#stale');
     await expect.poll(async () => (await log(page)).length).toBe(3);
 
@@ -35,5 +35,5 @@ test('CycleWire only toggles pending state, and leaves the markup as it found it
 
     await expect.poll(() => page.evaluate(() => document.getElementById('app').innerHTML)).toBe(before);
     const touched = new Set(await page.evaluate(() => window.__mutations));
-    expect([...touched].sort()).toEqual(['aria-busy', 'data-cw-pending']);
+    expect([...touched].sort()).toEqual(['aria-busy', 'cw-pending']);
 });

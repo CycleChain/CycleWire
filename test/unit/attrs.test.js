@@ -13,12 +13,14 @@ function el(localName, attributes = {}, type) {
 }
 
 test('attribute names derive from one prefix', () => {
-    assert.equal(attrNames('cw-').action, 'data-cw-action');
-    assert.equal(attrNames('cw-').on, 'data-cw-on-');
-    // An empty prefix leaves the attributes unprefixed.
+    assert.equal(attrNames('cw-').action, 'cw-action');
+    assert.equal(attrNames('cw-').on, 'cw-on-');
+    // data-cw- gives names HTML validators accept.
+    assert.equal(attrNames('data-cw-').props, 'data-cw-props');
+    assert.equal(attrNames('x-').pending, 'x-pending');
+    // An empty prefix means data-: a bare "action" is already a form attribute.
     assert.equal(attrNames('').action, 'data-action');
     assert.equal(attrNames('').trigger, 'data-trigger');
-    assert.equal(attrNames('x-').pending, 'data-x-pending');
 });
 
 test('the shorthand listens for the event natural to the element', () => {
@@ -66,12 +68,12 @@ test('only non-cancelable, high-frequency events are passive', () => {
 test('actionsOf collects every binding on an element', () => {
     const attrs = attrNames('cw-');
     const node = el('button', {
-        'data-cw-action': ' cart#add ',
-        'data-cw-on-pointerenter': 'cart#peek',
-        'data-cw-once': '',
+        'cw-action': ' cart#add ',
+        'cw-on-pointerenter': 'cart#peek',
+        'cw-once': '',
         class: 'btn',
     });
     assert.deepEqual(actionsOf(node, attrs), ['cart#add', 'cart#peek']);
     // A binding left blank binds nothing.
-    assert.deepEqual(actionsOf(el('button', { 'data-cw-action': '  ', 'data-cw-on-click': '' }), attrs), []);
+    assert.deepEqual(actionsOf(el('button', { 'cw-action': '  ', 'cw-on-click': '' }), attrs), []);
 });

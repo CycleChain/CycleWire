@@ -136,11 +136,11 @@ in Safari, so CycleWire uses `<link>` elements, which work everywhere.
 ## Style CycleWire's states
 
 ```css
-[data-cw-pending] { cursor: progress; opacity: .7; }
+[cw-pending] { cursor: progress; opacity: .7; }
 [aria-busy="true"] { pointer-events: none; }
 
 /* Reserve space for widgets that wake up later, so nothing jumps. */
-[data-cw-trigger="visible"] { min-height: 240px; }
+[cw-trigger="visible"] { min-height: 240px; }
 ```
 
 ## Let HTML and CSS do the interaction when they can
@@ -155,5 +155,5 @@ JavaScript:
 - **Enter animations** for dialogs and popovers: `@starting-style`.
 - **Scroll effects:** scroll-driven animations.
 
-CycleWire still sees these: `data-cw-on-command` receives custom commands, and a
-`data-cw-action` on a `<details>` runs on `toggle`.
+CycleWire still sees these: `cw-on-command` receives custom commands, and a
+`cw-action` on a `<details>` runs on `toggle`.

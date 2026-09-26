@@ -7,7 +7,7 @@ An [Astro](https://astro.build/) site whose pages are activated by
 npm install
 npm run dev      # then press Alt+Shift+W for the devtools
 npm run build
-npm run check    # checks every data-cw-* value in src/**/*.astro against src/actions/
+npm run check    # checks every cw-* value in src/**/*.astro against src/actions/
 ```
 
 Each file in `src/actions/` is an action, named after its path (`src/actions/cart/add.js`

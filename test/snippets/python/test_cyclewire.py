@@ -35,7 +35,7 @@ class VectorTest(unittest.TestCase):
 
     def test_python_values(self):
         # Tuples are lists, and bool is never an integer, even though Python says it is one.
-        self.assertEqual(cyclewire.cw('pick', (1, 2)), 'data-cw-action="pick" data-cw-props="[1,2]"')
+        self.assertEqual(cyclewire.cw('pick', (1, 2)), 'cw-action="pick" cw-props="[1,2]"')
         with self.assertRaises(ValueError):
             cyclewire.cw('search', debounce=True)
         with self.assertRaises(ValueError):
@@ -82,18 +82,18 @@ class DjangoTagTest(unittest.TestCase):
         )
         self.assertEqual(
             html,
-            '<button data-cw-action="cart#add"'
-            ' data-cw-props="{&quot;sku&quot;:&quot;wire-01&quot;,&quot;name&quot;:&quot;Say \\&quot;hi\\&quot; &lt;3&quot;}"'
-            ' data-cw-trigger="visible" data-cw-once>Add</button>',
+            '<button cw-action="cart#add"'
+            ' cw-props="{&quot;sku&quot;:&quot;wire-01&quot;,&quot;name&quot;:&quot;Say \\&quot;hi\\&quot; &lt;3&quot;}"'
+            ' cw-trigger="visible" cw-once>Add</button>',
         )
 
     def test_on_and_integers(self):
         html = self.render("<input {% cw 'search#keys' on='keydown' debounce=200 %}>")
-        self.assertEqual(html, '<input data-cw-on-keydown="search#keys" data-cw-debounce="200">')
+        self.assertEqual(html, '<input cw-on-keydown="search#keys" cw-debounce="200">')
 
     def test_values_from_the_context(self):
         html = self.render("<div {% cw 'menu' None trigger=when %}></div>", when=None)
-        self.assertEqual(html, '<div data-cw-action="menu"></div>')
+        self.assertEqual(html, '<div cw-action="menu"></div>')
 
     def test_errors_reach_the_view(self):
         with self.assertRaises(ValueError):

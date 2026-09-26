@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 /**
  * A React component with a CycleWire action inside it: "Save" is a plain
- * data-cw-action, and its props are whatever React rendered last.
+ * cw-action, and its props are whatever React rendered last.
  */
 export function Counter({ start = 0 }) {
     const [count, setCount] = useState(start);
@@ -26,7 +26,7 @@ export function Counter({ start = 0 }) {
         <div className="counter" ref={root} data-ready={ready || undefined}>
             <output className="counter__value">{count}</output>
             <button type="button" className="counter__inc" onClick={() => setCount(count + 1)}>+1</button>
-            <button type="button" className="counter__save primary" data-cw-action="counter#save" data-cw-props={JSON.stringify({ count })}>
+            <button type="button" className="counter__save primary" cw-action="counter#save" cw-props={JSON.stringify({ count })}>
                 Save
             </button>
             <p className="counter__status" role="status">{saved === null ? 'Not saved yet' : `Saved ${saved}`}</p>

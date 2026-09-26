@@ -1,5 +1,5 @@
 // Search as you type. Input defaults to the `restart` concurrency mode, so a
-// new keystroke aborts the previous run's signal; data-cw-debounce waits for
+// new keystroke aborts the previous run's signal; cw-debounce waits for
 // a pause. cyclewire/dom arrives with this module, not before.
 import { html, swap } from 'cyclewire/dom';
 

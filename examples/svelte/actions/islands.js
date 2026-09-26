@@ -1,4 +1,4 @@
-// Mounts Svelte islands. CycleWire decides when (data-cw-trigger on the
+// Mounts Svelte islands. CycleWire decides when (cw-trigger on the
 // island's element); this module, Svelte's runtime and the component are
 // downloaded only then.
 import { hydrate, unmount } from 'svelte';

@@ -24,12 +24,12 @@ CycleWire never renders anything on load. Whatever your server outputs is the UI
 should work as plain HTML: links link, forms submit.
 
 ```html
-<button data-cw-action="like" data-cw-props='{"id": 42}'>
+<button cw-action="like" cw-props='{"id": 42}'>
     ♡ Like <span class="count">128</span>
 </button>
 ```
 
-`data-cw-action` names an action. Because this is a `<button>`, it runs on `click`.
+`cw-action` names an action. Because this is a `<button>`, it runs on `click`.
 Forms run on `submit`, text inputs on `input`, checkboxes and selects on `change`.
 
 ## 3. Write the action
@@ -56,8 +56,8 @@ export function share(ctx) { /* … */ }
 ```
 
 ```html
-<button data-cw-action="post#like">Like</button>
-<button data-cw-action="post#share">Share</button>
+<button cw-action="post#like">Like</button>
+<button cw-action="post#share">Share</button>
 ```
 
 ## 4. Register and start
@@ -113,21 +113,21 @@ Some elements should wake up on their own: a map when it scrolls into view, anal
 when the browser is idle.
 
 ```html
-<div data-cw-action="map" data-cw-trigger="visible" data-cw-props='{"lat": 41.0, "lng": 29.0}'>
+<div cw-action="map" cw-trigger="visible" cw-props='{"lat": 41.0, "lng": 29.0}'>
     <img src="/static-map.png" alt="Map of our office">
 </div>
 
-<div data-cw-action="analytics" data-cw-trigger="idle"></div>
-<nav data-cw-action="menu#compact" data-cw-trigger="media:(max-width: 40em)"></nav>
+<div cw-action="analytics" cw-trigger="idle"></div>
+<nav cw-action="menu#compact" cw-trigger="media:(max-width: 40em)"></nav>
 ```
 
 ## 6. Style the pending state
 
-While an action runs, its element carries `data-cw-pending`. For clicks and submits it
+While an action runs, its element carries `cw-pending`. For clicks and submits it
 also gets `aria-busy="true"`.
 
 ```css
-[data-cw-pending] { opacity: .6; cursor: progress; }
+[cw-pending] { opacity: .6; cursor: progress; }
 ```
 
 ## 7. Check what loaded

@@ -8,7 +8,7 @@ two fit together in two ways, and one page can use both:
   component download and hydrate: when it scrolls into view, when the browser is idle, at
   a breakpoint. Pages and visitors that never reach an island never download the
   framework.
-- **Components use CycleWire actions.** A `data-cw-action` inside JSX or a template works
+- **Components use CycleWire actions.** A `cw-action` inside JSX or a template works
   as it does anywhere else. Server-driven behaviour (save, delete, load a partial) stays
   in plain action modules that server-rendered pages and components share.
 
@@ -25,7 +25,7 @@ The island's element carries the action, the trigger and the props. Its content 
 component, rendered on the server with the same props:
 
 ```html
-<div data-cw-action="islands#counter" data-cw-trigger="visible" data-cw-props='{"start": 3}'>
+<div cw-action="islands#counter" cw-trigger="visible" cw-props='{"start": 3}'>
     <!-- <Counter start={3} />, rendered on the server -->
 </div>
 ```
@@ -87,7 +87,7 @@ export function counter({ element, props }) {
 
 ### When an island loads
 
-| `data-cw-trigger` | The island loads | Astro equivalent |
+| `cw-trigger` | The island loads | Astro equivalent |
 | --- | --- | --- |
 | `visible` | As it approaches the viewport | `client:visible` |
 | `idle` | Once the page has settled | `client:idle` |
@@ -99,7 +99,7 @@ to the component.
 
 ### Server rendering
 
-Render the component with the props you put in `data-cw-props`: `renderToString()` from
+Render the component with the props you put in `cw-props`: `renderToString()` from
 `react-dom/server` or `vue/server-renderer`, or `render()` from `svelte/server`. The
 renderer can be your Node server, or a small render service next to Laravel, Rails or
 Django. Each example's `server.js` (`server.jsx` for React) shows the call. Without server rendering, put a
@@ -125,17 +125,17 @@ The attributes work in JSX and templates as they are:
 
 ```jsx
 // React
-<button data-cw-action="counter#save" data-cw-props={JSON.stringify({ count })}>Save</button>
+<button cw-action="counter#save" cw-props={JSON.stringify({ count })}>Save</button>
 ```
 
 ```vue
 <!-- Vue -->
-<button data-cw-action="counter#save" :data-cw-props="JSON.stringify({ count })">Save</button>
+<button cw-action="counter#save" :cw-props="JSON.stringify({ count })">Save</button>
 ```
 
 ```svelte
 <!-- Svelte -->
-<button data-cw-action="counter#save" data-cw-props={JSON.stringify({ count })}>Save</button>
+<button cw-action="counter#save" cw-props={JSON.stringify({ count })}>Save</button>
 ```
 
 - **Props are read when the action runs**, so the action gets what the component rendered
@@ -182,7 +182,7 @@ element one owner per event: a component handler or a CycleWire action, not both
 
 ## Hydration
 
-CycleWire changes markup only while an action runs: it sets `data-cw-pending` on the
+CycleWire changes markup only while an action runs: it sets `cw-pending` on the
 action's element, and `aria-busy` in `drop` mode. The island's own element gets these
 while the islands action runs, but frameworks hydrate an element's content, not the
 element itself, so hydration never sees them.

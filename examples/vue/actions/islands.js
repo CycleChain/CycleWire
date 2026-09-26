@@ -1,4 +1,4 @@
-// Mounts Vue islands. CycleWire decides when (data-cw-trigger on the
+// Mounts Vue islands. CycleWire decides when (cw-trigger on the
 // island's element); this module, Vue and the component are downloaded only
 // then.
 import { createSSRApp } from 'vue';

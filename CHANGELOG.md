@@ -32,7 +32,7 @@ All notable changes to CycleWire are documented here. The format follows
   messages, over Server-Sent Events (`connect()`) or in any response (`apply()`).
   Connections are shared per URL, reconnect with the last event id and a growing delay,
   close when their element leaves the page, and step aside for the back/forward cache and
-  prerendering. The `streams({ channels })` plugin subscribes `data-cw-stream` elements
+  prerendering. The `streams({ channels })` plugin subscribes `cw-stream` elements
   to the channels you list, on your own origin only. `<cw-stream>` is not a custom
   element, so markup that reaches the page any other way does nothing. The full
   classic-script build includes it.
@@ -46,7 +46,7 @@ All notable changes to CycleWire are documented here. The format follows
   about 7 kB brotli).
 - Server helpers (`docs/server-helpers.md`): a copy-in `cw()` for PHP (with a Blade
   directive), Ruby (with a Rails helper), Python (with a Django template tag) and
-  JavaScript (for template literals and JSX). It writes the `data-cw-*` attributes,
+  JavaScript (for template literals and JSX). It writes the `cw-*` attributes,
   escapes them for HTML and throws on a misspelt name, option or value. Each helper is
   tested in its own language against one set of shared cases, and CI checks that the
   docs quote the tested files.
@@ -57,9 +57,16 @@ All notable changes to CycleWire are documented here. The format follows
 
 ### Changed
 
+- **Attributes are written `cw-action`, not `data-cw-action`.** Every name in the
+  vocabulary drops `data-`: `cw-action`, `cw-on-click`, `cw-props`, `cw-trigger`,
+  `cw-preload`, `cw-pending`, `cw-state`, `cw-bind`, `cw-store`, `cw-key`, and so on,
+  as short to write as htmx's `hx-*` or Alpine's `x-*`. The prefix now names the whole
+  start of the attribute: `start({ prefix: 'data-cw-' })` keeps the 1.0 names, which HTML
+  validators accept, `'x-'` gives `x-action`, and `''` still means `data-action`. The
+  helpers, `cyclewire check` and the Vite plugin follow the same prefix.
 - **Touch screens look ahead.** Where the primary input cannot hover, intent arrives
   with the tap, too late for a module to load over a slow connection. By default the
-  modules of `data-cw-action` elements without `data-cw-preload` are now also fetched
+  modules of `cw-action` elements without `cw-preload` are now also fetched
   once the page is idle, as their elements near the viewport. `start({ preload })`
   chooses: `'auto'` (the default), `'visible'` (on every screen) or `'intent'` (the 1.0
   behaviour). The benchmark's mobile profile showed the first category filter and quick
@@ -67,7 +74,7 @@ All notable changes to CycleWire are documented here. The format follows
 - Size budgets: `stream.min.js` 4096 B, and `cyclewire.full.global.min.js` 14336 B
   (brotli), which now includes `cyclewire/stream`.
 - **Intent fetches modules whose scheduled preload has not happened yet.** Hovering,
-  focusing or touching an element with `data-cw-preload="idle"` or `"visible"` now
+  focusing or touching an element with `cw-preload="idle"` or `"visible"` now
   fetches its modules at once; only `none` opts out.
 
 ### Performance
