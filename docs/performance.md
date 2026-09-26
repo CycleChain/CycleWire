@@ -143,17 +143,21 @@ and what to do about it:
 
 - **Loading costs about what plain HTML costs.** The core is the only script on load and
   nothing runs, so first paint, layout shift and blocking time stay close to the page
-  without JavaScript.
-- **An action's first use waits for its code.** On a slow network that is a round trip
-  before the handler runs. On touch screens there is no hover, so intent preloading only
-  starts when the finger lands; the default now also fetches what is in view once the page
-  is idle. A tap that comes sooner than that still waits:
-  [preload the action people reach for first](#preload-the-action-people-reach-for-first).
-- **Code, then data.** A handler that fetches data after its module arrives pays two round
-  trips on its first use: [fetch them together](#fetch-code-and-data-together).
+  without JavaScript. Preloading the first action and fetching the code of actions in
+  view on touch screens cost a few kilobytes and a few milliseconds of script; on the
+  phone profile the largest paint lands about 5% after the fastest stack's.
+- **Interactions land as fast as hand-written code.** With the defaults and the two
+  steps below, a filter, a search, an add to cart and a tap in the first frame after
+  paint take as long as the page's vanilla control, and the quick view is the fastest of
+  all the stacks: the code of the actions in view is fetched before the tap on touch
+  screens, [the action people reach for first](#preload-the-action-people-reach-for-first)
+  comes with the page, and [code and data travel together](#fetch-code-and-data-together).
 - **Let the bundler preload an action's imports.** Vite fetches the chunks an action
   imports together with the action; a bundler that does not makes the browser find them
   one import at a time.
+- **Every choice has a variant that measures it.** The benchmark also runs the CycleWire
+  app with nothing fetched ahead of intent, and with its core inlined in `<head>`, so the
+  cost and the gain of each recommendation above are numbers, not claims.
 
 ## Triggers
 

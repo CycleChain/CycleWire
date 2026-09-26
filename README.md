@@ -381,37 +381,37 @@ Medians, lower is better. Time to effect runs from the input to the frame that s
 [website](https://cyclechain.github.io/CycleWire/#benchmark) charts each metric with its 95% confidence
 interval, and lists more metrics and how each app is built.
 
-**Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-25, INTEL(R) XEON(R) PLATINUM 8573C (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
+**Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-26, AMD EPYC 7763 64-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
 | Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Static HTML (control) | 0.0 kB | 1,580 ms | 0 ms | 1,355 ms | 750 ms | 787 ms | 769 ms | 1,371 ms | by a page load, 1,606 ms |
-| Vanilla JS (control) | 1.2 kB | 1,588 ms | 0 ms | 698 ms | 114 ms | 11 ms | 697 ms | 701 ms | in the page, 818 ms |
-| Alpine.js | 17.9 kB | 1,728 ms | 27 ms | 700 ms | 128 ms | 20 ms | 700 ms | 703 ms | by a page load, 1,683 ms |
-| Astro + Preact | 13.1 kB | 1,580 ms | 0 ms | 703 ms | 116 ms | 13 ms | 707 ms | 701 ms | by a page load, 1,649 ms |
-| CycleWire | 8.7 kB | 1,612 ms | 0 ms | 717 ms | 606 ms | 32 ms | 1,189 ms | 714 ms | in the page, 1,835 ms |
-| htmx | 15.4 kB | 1,540 ms | 0 ms | 712 ms | 741 ms | 834 ms | 710 ms | 711 ms | in the page, 855 ms |
-| Next.js | 120.1 kB | 2,012 ms | 76 ms | 759 ms | 729 ms | 832 ms | 1,303 ms | 717 ms | by a page load, 988 ms |
-| Qwik City | 37.4 kB | 1,724 ms | 0 ms | 790 ms | 176 ms | 28 ms | 766 ms | 798 ms | in the page, 2,466 ms |
-| SvelteKit | 32.8 kB | 1,804 ms | 0 ms | 1,299 ms | 136 ms | 18 ms | 632 ms | 1,295 ms | by a page load, 946 ms |
+| Static HTML (control) | 0.0 kB | 1,588 ms | 0 ms | 1,384 ms | 770 ms | 803 ms | 808 ms | 1,402 ms | by a page load, 1,625 ms |
+| Vanilla JS (control) | 1.2 kB | 1,596 ms | 0 ms | 699 ms | 120 ms | 11 ms | 699 ms | 700 ms | in the page, 835 ms |
+| Alpine.js | 18.0 kB | 1,776 ms | 67 ms | 700 ms | 129 ms | 18 ms | 701 ms | 712 ms | by a page load, 1,747 ms |
+| Astro + Preact | 13.1 kB | 1,588 ms | 0 ms | 703 ms | 121 ms | 12 ms | 713 ms | 707 ms | by a page load, 1,674 ms |
+| CycleWire | 11.9 kB | 1,652 ms | 0 ms | 705 ms | 122 ms | 13 ms | 618 ms | 710 ms | in the page, 854 ms |
+| htmx | 15.4 kB | 1,568 ms | 0 ms | 713 ms | 754 ms | 846 ms | 717 ms | 715 ms | in the page, 860 ms |
+| Next.js | 120.1 kB | 1,880 ms | 113 ms | 770 ms | 742 ms | 841 ms | 1,307 ms | 720 ms | by a page load, 1,002 ms |
+| Qwik City | 37.5 kB | 1,728 ms | 0 ms | 816 ms | 198 ms | 28 ms | 787 ms | 836 ms | in the page, 2,466 ms |
+| SvelteKit | 32.8 kB | 1,844 ms | 8 ms | 1,297 ms | 145 ms | 20 ms | 636 ms | 1,304 ms | by a page load, 961 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,200 ms, CycleWire 1,248 ms); Largest Contentful Paint (htmx 1,540 ms, CycleWire 1,612 ms); Requests (Alpine.js 24, CycleWire 26); Category filter (Astro + Preact 116 ms, CycleWire 606 ms); Live search (Astro + Preact 13 ms, CycleWire 32 ms); Quick view (SvelteKit 632 ms, CycleWire 1,189 ms); Early tap (htmx 855 ms, CycleWire 1,835 ms); Event listeners (Qwik City 17, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,208 ms, CycleWire 1,280 ms); Largest Contentful Paint (htmx 1,568 ms, CycleWire 1,652 ms); Requests (Alpine.js 24, CycleWire 28); Script (Qwik City 15 ms, CycleWire 24 ms); Event listeners (Qwik City 17, CycleWire 18).
 
-**Desktop**: fast connection, no CPU slowdown, mouse. 15 iterations on 2026-09-25, AMD EPYC 9V74 80-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
+**Desktop**: fast connection, no CPU slowdown, mouse. 15 iterations on 2026-09-26, AMD EPYC 9V45 96-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
 | Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Static HTML (control) | 0.0 kB | 364 ms | 0 ms | 419 ms | 260 ms | 311 ms | 264 ms | 421 ms | by a page load, 501 ms |
-| Vanilla JS (control) | 1.2 kB | 364 ms | 0 ms | 250 ms | 85 ms | 10 ms | 250 ms | 251 ms | in the page, 284 ms |
-| Alpine.js | 17.9 kB | 364 ms | 0 ms | 250 ms | 100 ms | 25 ms | 251 ms | 251 ms | in the page, 290 ms |
-| Astro + Preact | 13.1 kB | 368 ms | 0 ms | 251 ms | 86 ms | 9 ms | 251 ms | 251 ms | by a page load, 512 ms |
-| CycleWire | 8.7 kB | 364 ms | 0 ms | 251 ms | 116 ms | 29 ms | 266 ms | 251 ms | in the page, 384 ms |
-| htmx | 15.3 kB | 408 ms | 0 ms | 250 ms | 252 ms | 370 ms | 251 ms | 251 ms | in the page, 284 ms |
-| Next.js | 120.1 kB | 368 ms | 0 ms | 252 ms | 250 ms | 367 ms | 404 ms | 250 ms | in the page 13/15, by a page load 2/15, 439 ms |
-| Qwik City | 37.4 kB | 368 ms | 0 ms | 283 ms | 101 ms | 27 ms | 267 ms | 283 ms | in the page, 500 ms |
-| SvelteKit | 32.7 kB | 376 ms | 0 ms | 400 ms | 113 ms | 10 ms | 89 ms | 401 ms | in the page, 522 ms |
+| Static HTML (control) | 0.0 kB | 352 ms | 0 ms | 417 ms | 258 ms | 306 ms | 261 ms | 418 ms | by a page load, 502 ms |
+| Vanilla JS (control) | 1.2 kB | 360 ms | 0 ms | 250 ms | 86 ms | 9 ms | 251 ms | 251 ms | in the page, 284 ms |
+| Alpine.js | 17.9 kB | 356 ms | 0 ms | 251 ms | 100 ms | 28 ms | 251 ms | 251 ms | in the page, 285 ms |
+| Astro + Preact | 13.1 kB | 360 ms | 0 ms | 251 ms | 87 ms | 10 ms | 250 ms | 251 ms | by a page load, 514 ms |
+| CycleWire | 9.2 kB | 360 ms | 0 ms | 250 ms | 99 ms | 5 ms | 115 ms | 251 ms | in the page, 284 ms |
+| htmx | 15.3 kB | 400 ms | 0 ms | 250 ms | 250 ms | 368 ms | 251 ms | 251 ms | in the page, 284 ms |
+| Next.js | 120.1 kB | 356 ms | 0 ms | 252 ms | 250 ms | 370 ms | 404 ms | 250 ms | in the page 13/15, by a page load 2/15, 450 ms |
+| Qwik City | 37.4 kB | 360 ms | 0 ms | 284 ms | 101 ms | 31 ms | 267 ms | 284 ms | in the page, 501 ms |
+| SvelteKit | 32.7 kB | 368 ms | 0 ms | 401 ms | 116 ms | 12 ms | 100 ms | 401 ms | in the page, 525 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 336 ms, CycleWire 364 ms); Requests (Alpine.js 40, CycleWire 42); Category filter (Astro + Preact 86 ms, CycleWire 116 ms); Live search (Astro + Preact 9 ms, CycleWire 29 ms); Quick view (SvelteKit 89 ms, CycleWire 266 ms); Early tap (htmx 284 ms, CycleWire 384 ms); Event listeners (Qwik City 17, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 332 ms, CycleWire 360 ms); Requests (Alpine.js 40, CycleWire 42); Layout (htmx 6.6 ms, CycleWire 7.1 ms); Quick view (SvelteKit 100 ms, CycleWire 115 ms); Event listeners (Qwik City 17, CycleWire 18).
 
 <!-- bench:end -->
 
