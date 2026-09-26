@@ -1,0 +1,97 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "next--searchparams",
+  "name": "Next.js, client filtering",
+  "kind": "meta-framework",
+  "summary": "The Next.js app with the list filtered in the browser: a Client Component gets the catalog from the page, keeps ?category= and ?q= in the URL with the native History API and reads them with useSearchParams(). The cart, the newsletter and the quick view are the next app's.",
+  "variant": {
+    "of": "next",
+    "differs": "A category or a search does not render the page again on the server: one Client Component holds the whole catalog, filters it in the browser, and updates the URL with window.history.pushState() and replaceState(), which Next.js syncs with useSearchParams(). It shows what filtering in the browser saves a filter and a search, and what moving the list into a Client Component changes in a load."
+  },
+  "build": "npm run build",
+  "start": "npm start",
+  "search": "live",
+  "packages": [
+    "next",
+    "react",
+    "react-dom"
+  ],
+  "idioms": [
+    {
+      "choice": "Built with next build (Turbopack, the default bundler) and served by next start, the Node.js server of the deployment docs. --hostname 127.0.0.1 binds it to the loopback address; the port comes from $PORT, which next start reads.",
+      "docs": "https://nextjs.org/docs/app/getting-started/deploying#nodejs-server"
+    },
+    {
+      "choice": "turbopack.root is bench/, the documented setting when a project imports files from outside its folder: the app imports the shared catalog, cart and markup modules from bench/scenario/, and the next app's files from apps/next/. The config is the next app's, re-exported: it works the root out from its own folder, two levels up, the same as from this one. Next.js uses the same root for output file tracing.",
+      "docs": "https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory"
+    },
+    {
+      "choice": "The root layout, the Server Actions, the Add to cart and newsletter forms and the quick view's routes, modal and content are the next app's files: this app's route files re-export them, and its components import them, through a jsconfig paths alias, @apps/* for apps/. Their own @/ and @scenario/ imports resolve through the next app's jsconfig, and the build takes next and react from this folder alone. The two pages and the catalog are this app's, since they render the Client Component.",
+      "docs": "https://nextjs.org/docs/app/getting-started/installation#set-up-absolute-imports-and-module-path-aliases"
+    },
+    {
+      "choice": "Every request renders on the server (dynamic rendering, the default for request-time APIs): the root layout reads the cart cookie with cookies(). On a dynamically rendered route useSearchParams() holds the request's search params during the server render, so the Client Component renders each URL's state into the HTML with no Suspense boundary, and the page does not read searchParams itself. Cache Components, opt-in in Next.js 16, is not enabled.",
+      "docs": "https://nextjs.org/docs/app/api-reference/functions/use-search-params#dynamic-rendering"
+    },
+    {
+      "choice": "The header with the cart is in the root layout, the UI every page shares. A filter or a search changes only the URL, so neither the layout nor the page is rendered again for it.",
+      "docs": "https://nextjs.org/docs/app/getting-started/layouts-and-pages#creating-a-layout"
+    },
+    {
+      "choice": "The search box, the category links, the result count and the product list are one Client Component, to which the page's Server Component passes the catalog as a prop: the id, name, category and price of the 50 products, serialized in the RSC payload. The intro and the newsletter section stay in the Server Component.",
+      "docs": "https://nextjs.org/docs/app/getting-started/server-and-client-components#passing-data-from-server-to-client-components"
+    },
+    {
+      "choice": "The component filters in the browser and keeps its state in the URL with the native History API, as the navigation docs show: a category calls window.history.pushState() with /?category=… and clears the search, and every change in the search box calls window.history.replaceState() with ?q= and the category, with no debounce, since nothing is fetched. It reads the state with useSearchParams(), which Next.js syncs with both, so the list follows without a request, and Back and Forward bring it back.",
+      "docs": "https://nextjs.org/docs/app/getting-started/linking-and-navigating#native-history-api"
+    },
+    {
+      "choice": "Category filters are plain <a href=\"/?category=…\"> elements, which Next.js does not prefetch, rather than <Link>s, which would prefetch pages this one never asks the server for: a click calls pushState() unless it opens the link elsewhere (a modifier key, another button), and before hydration or without JavaScript the link navigates. The Quick view links stay <Link>s with the default prefetching, as in the next app.",
+      "docs": "https://nextjs.org/docs/app/getting-started/linking-and-navigating#prefetching"
+    },
+    {
+      "choice": "The search form is a plain GET form to /, the reference's, rather than next/form, which navigates on the client when it is sent: without JavaScript it sends ?q= and the selected category from a hidden field, and with it the results already follow the box, so sending it is prevented. The box is uncontrolled, as in the next app, and shows the query when a category or Back and Forward change it.",
+      "docs": "https://nextjs.org/docs/app/api-reference/components/form"
+    },
+    {
+      "choice": "While the quick view is open over the shop, the URL is /products/<id>, whose search params are empty: the component keeps the filters of the shop's last URL in state, set during render as React describes for information from previous renders, so the list behind the dialog stays as it was, as the next app's page keeps the props it was rendered with.",
+      "docs": "https://react.dev/reference/react/useState#storing-information-from-previous-renders"
+    },
+    {
+      "choice": "On a quick view loaded as a page (app/products/[id]), the route on screen is the product's, and pushState() would keep it, dialog and all, under the shop's URL, for Back to bring back. There a category calls router.push() and a search router.replace() 200 ms after the last key, as the next app's links and search do, and the dialog goes with the route (app/@modal/page.js).",
+      "docs": "https://nextjs.org/docs/app/api-reference/functions/use-router#userouter"
+    },
+    {
+      "choice": "Add to cart is the next app's form, a Server Action passed to <form action> with the product id in a hidden input, here rendered by the Client Component, which imports the action from its 'use server' file. React renders the action's id into the form, so before hydration and without JavaScript the browser posts it, and the server answers with the page.",
+      "docs": "https://nextjs.org/docs/app/getting-started/mutating-data#client-components"
+    },
+    {
+      "choice": "The action sets the cart cookie with cookies().set(). Setting a cookie makes Next.js render the current route again and send it in the action's response, so it calls neither refresh() nor revalidatePath(). After a filter, the route is rendered for the filtered URL and the list keeps its state.",
+      "docs": "https://nextjs.org/docs/app/guides/server-actions#a-single-response-carries-data-and-ui"
+    },
+    {
+      "choice": "The newsletter form is the next app's Client Component with useActionState and a Server Action that returns the message, as the forms guide shows for messages from the server; before hydration the form posts and the page comes back with the message. The button is disabled while the action is pending, as in the guide.",
+      "docs": "https://nextjs.org/docs/app/guides/forms#validation-errors"
+    },
+    {
+      "choice": "No loading.js, although the navigation docs suggest one for dynamic routes. With it, every full page load sends the page behind the loading fallback and reveals it with an inline script, so without JavaScript only the fallback shows, and the first product images, the page's LCP element, would sit inside the boundary. The streaming guide advises keeping LCP elements outside Suspense boundaries and not adding boundaries you don't need; the catalog renders from memory in one pass.",
+      "docs": "https://nextjs.org/docs/app/guides/streaming#lcp-largest-contentful-paint"
+    },
+    {
+      "choice": "The quick view uses the docs' pattern for modals, with the next app's files: an @modal parallel route with the intercepting route (.)products/[id]. A Quick view link to /products/<id> opens the product in a modal over the list, with its own URL; back closes it and forward reopens it. On a full page load, /products/<id> renders the shop with the dialog open, which is how the reference shows a quick view without JavaScript, and @modal/page.js renders nothing, so a navigation to / closes that one.",
+      "docs": "https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes#modals"
+    },
+    {
+      "choice": "The modal is a native <dialog id=\"quick-view\"> opened with showModal() in an effect, as in the docs' nextgram example. Its Close button (a method=\"dialog\" form) and Escape close it, and the close event calls router.back().",
+      "docs": "https://nextjs.org/docs/app/api-reference/file-conventions/parallel-routes#closing-the-modal"
+    },
+    {
+      "choice": "Scenario-forced: the stylesheet is a plain <link rel=\"stylesheet\" href=\"/assets/app.css\"> in the root layout's <head>, not an imported CSS file (the docs' default); the docs note that React's <link rel=\"stylesheet\"> can be used. React adds a preload for it.",
+      "docs": "https://nextjs.org/docs/app/getting-started/css#external-stylesheets"
+    },
+    {
+      "choice": "Scenario-forced: product images are plain <img> elements with the reference's src, width, height, loading and decoding, not next/image, which serves resized copies from its image optimizer. React preloads the four eager ones; since a Client Component renders them, the preloads come in a Link response header, where the next app's Server Components send hints that become <link> tags.",
+      "docs": "https://nextjs.org/docs/app/getting-started/images"
+    }
+  ]
+}

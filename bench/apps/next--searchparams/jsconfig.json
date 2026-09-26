@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@scenario/*": ["../../scenario/*"],
+      "@apps/*": ["../*"]
+    }
+  }
+}
