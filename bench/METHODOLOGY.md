@@ -215,8 +215,12 @@ where long tasks run late; FCP, LCP and CLS should agree within the noise.
 ## 11. Limitations
 
 - Chromium only: the measurements rely on the Chrome DevTools Protocol.
-- Throttling is per request in the browser, not at the packet level. Packet-level
-  shaping is planned as a cross-check.
+- Throttling is per request in the browser, not at the packet level, as in Lighthouse's
+  DevTools mode. A separate workflow, "Benchmark network cross-check", measures the
+  stacks both ways on one Linux runner, the second time with the network shaped per
+  packet by netem (`--shaping=netem`: the profile's round trip and rates on the proxy's
+  ports, a 1500-byte MTU, so TCP's slow start and the TLS handshake cost what they
+  would), and reports whether the two rank the stacks alike (`scripts/compare.js`).
 - Shared CI machines are noisier than a dedicated one. Every result records the machine,
   its load average and a CPU speed index.
 - The input model (tap duration, hover time, typing speed) is a choice; it is stated

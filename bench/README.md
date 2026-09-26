@@ -63,6 +63,7 @@ node run.js                  # measure: mobile profile, 15 iterations
 | `--kinds=journeys,early,repeat` | Which visits to make |
 | `--journeys=cart,filter,search,quickview,newsletter` | Which interactions |
 | `--offsets=0,1000,2000` | When the early taps land, in ms after the button is first painted |
+| `--shaping=devtools` | How the network is slowed: `devtools`, per request, or `netem`, per packet (Linux and sudo) |
 | `--seed=1` | Seeds the shuffled run order |
 | `--out=<file>` | Where to write results (default: `results/<date>-<profile>.local.json`) |
 | `--channel=chrome` | Use an installed Chrome instead of Playwright's Chromium |
@@ -111,7 +112,8 @@ repository's README.
 
 - Chromium only, because the measurements rely on the Chrome DevTools Protocol.
 - The network is throttled per request inside the browser, the way Lighthouse's
-  DevTools mode does it, not at the packet level.
+  DevTools mode does it, not at the packet level. The "Benchmark network cross-check"
+  workflow measures the stacks per packet with netem too, and compares the rankings.
 - Results from shared CI machines vary more than results from a dedicated one; the
   machine and a CPU speed index are recorded with every run.
 - Input is modelled: a tap rests on the screen for 80 ms, and on desktop the pointer

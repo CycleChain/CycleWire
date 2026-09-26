@@ -12,6 +12,7 @@
  *
  * Options: --kinds=journeys,early,repeat  --journeys=cart,filter,search,quickview,newsletter
  *          --offsets=0,1000,2000 (ms after first paint that the early taps wait)
+ *          --shaping=devtools|netem (netem: per packet, Linux and sudo; see runner/netem.js)
  *          --seed=1  --out=<file>  --channel=chrome  --headed  --skip-build  --skip-conformance
  */
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
@@ -21,6 +22,7 @@ import { parseArgs } from 'node:util';
 import { certificate } from './proxy/cert.js';
 import { POLICY } from './proxy/server.js';
 import { launch } from './runner/browser.js';
+import { shape, unshape } from './runner/netem.js';
 import { conformance } from './runner/conformance.js';
 import { cpuIndex, environment } from './runner/environment.js';
 import { JOURNEYS } from './runner/journeys.js';
@@ -49,6 +51,7 @@ const { values: args } = parseArgs({
         kinds: { type: 'string', default: KINDS.join(',') },
         journeys: { type: 'string', default: JOURNEYS.join(',') },
         offsets: { type: 'string', default: OFFSETS.join(',') },
+        shaping: { type: 'string', default: 'devtools' },
         seed: { type: 'string', default: '1' },
         out: { type: 'string' },
         channel: { type: 'string' },
@@ -72,7 +75,8 @@ const list = (value, allowed, name) => {
     return items;
 };
 
-const profile = PROFILES[args.profile] ?? fail(`Unknown profile "${args.profile}". Choose from ${Object.keys(PROFILES).join(', ')}.`);
+if (!['devtools', 'netem'].includes(args.shaping)) fail('--shaping must be devtools or netem');
+const profile = { ...(PROFILES[args.profile] ?? fail(`Unknown profile "${args.profile}". Choose from ${Object.keys(PROFILES).join(', ')}.`)), shaping: args.shaping };
 const stacks = list(args.stacks ?? available().join(','), available(), 'stacks').map(load);
 const kinds = list(args.kinds, KINDS, 'kinds');
 const journeys = list(args.journeys, JOURNEYS, 'journeys');
@@ -88,6 +92,7 @@ const { spki } = certificate();
 for (const stack of stacks) await prepare(stack, { build: !args['skip-build'], log });
 const servers = await start(stacks, { log });
 const shutdown = async (code) => {
+    unshape();
     await servers.stop();
     process.exit(code);
 };
@@ -117,6 +122,8 @@ try {
         exitCode = [...checked.values()].every((result) => result.passed) ? 0 : 1;
     } else {
         const measured = stacks.filter((stack) => checked.get(stack.id).passed || args['skip-conformance']);
+        // Conformance ran at full speed; from here on, the proxy's ports are shaped.
+        if (profile.shaping === 'netem') shape(stacks.map((stack) => Number(new URL(stack.url).port)), profile.network);
         const environmentInfo = { ...environment(browser), cpuIndex: await cpuIndex(browser) };
         const startedAt = new Date();
 
@@ -215,6 +222,7 @@ try {
         log(`Wrote ${relative(process.cwd(), out)}${failures.length ? ` (${failures.length} failed visits)` : ''}`);
     }
 } finally {
+    unshape();
     await browser.close();
     await servers.stop();
 }

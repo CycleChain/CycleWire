@@ -10,3 +10,4 @@ results/*.local.json
 parts/
 merged/
 crosscheck/out/
+network/

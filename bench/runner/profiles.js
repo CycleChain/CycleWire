@@ -62,15 +62,20 @@ export function contextOptions(profile, browserVersion) {
     return userAgent ? { ...rest, userAgent: userAgent.replace('{version}', `${major}.0.0.0`) } : rest;
 }
 
-/** What results record about a profile. */
+/**
+ * What results record about a profile. `shaping` says how the network was
+ * slowed: by DevTools, per request (the default), or by netem, per packet.
+ */
 export function describe(profile) {
-    const { id, label, cpuSlowdown, network, context, input } = profile;
+    const { id, label, cpuSlowdown, network, context, input, shaping = 'devtools' } = profile;
     const conditions = networkConditions(profile);
     return {
         id,
         label,
         cpuSlowdown,
-        network: { ...network, requestLatencyMs: conditions.latency, downloadBytesPerSecond: conditions.downloadThroughput, uploadBytesPerSecond: conditions.uploadThroughput },
+        network: shaping === 'netem'
+            ? { ...network, shaping }
+            : { ...network, shaping, requestLatencyMs: conditions.latency, downloadBytesPerSecond: conditions.downloadThroughput, uploadBytesPerSecond: conditions.uploadThroughput },
         viewport: context.viewport,
         deviceScaleFactor: context.deviceScaleFactor,
         input,

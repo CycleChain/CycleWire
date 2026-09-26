@@ -1,0 +1,76 @@
+name: Benchmark network cross-check
+
+# By hand: measures the stacks twice on one runner, first with DevTools
+# throttling per request (the benchmark's method), then with the network
+# shaped per packet by netem (bench/runner/netem.js), and compares the two
+# (bench/scripts/compare.js): do both methods rank the stacks the same way,
+# and find the same stacks beating CycleWire? The table is in the job's
+# summary; both runs are kept as artifacts. Neither is published.
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Profile
+        type: choice
+        options: [mobile, desktop]
+        default: mobile
+      iterations:
+        description: Iterations per stack and visit, for each method
+        default: '5'
+      stacks:
+        description: Stacks, comma-separated (empty for all)
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bench-network-${{ github.ref }}
+
+defaults:
+  run:
+    working-directory: bench
+
+jobs:
+  compare:
+    name: DevTools and netem (${{ inputs.profile }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            bench/package-lock.json
+            bench/apps/*/package-lock.json
+      - name: Build CycleWire, which the CycleWire app links to
+        working-directory: .
+        run: npm ci && npm run build
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: DevTools throttling, per request
+        timeout-minutes: 160
+        env:
+          PROFILE: ${{ inputs.profile }}
+          ITERATIONS: ${{ inputs.iterations }}
+          STACKS: ${{ inputs.stacks }}
+        run: node run.js --profile="$PROFILE" --iterations="$ITERATIONS" --kinds=journeys,early --offsets=0 ${STACKS:+--stacks="$STACKS"} --out=network/devtools.json
+      - name: netem, per packet
+        timeout-minutes: 160
+        env:
+          PROFILE: ${{ inputs.profile }}
+          ITERATIONS: ${{ inputs.iterations }}
+          STACKS: ${{ inputs.stacks }}
+        run: node run.js --profile="$PROFILE" --iterations="$ITERATIONS" --kinds=journeys,early --offsets=0 --shaping=netem --skip-build ${STACKS:+--stacks="$STACKS"} --out=network/netem.json
+      - name: Compare
+        run: node scripts/compare.js network/devtools.json network/netem.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench-network-${{ inputs.profile }}
+          path: bench/network/*.json
+          if-no-files-found: ignore
+          retention-days: 90

@@ -39,7 +39,8 @@ export async function latest(dir, { local = false } = {}) {
     const found = {};
     for (const file of files) {
         const results = JSON.parse(await readFile(join(dir, file), 'utf8'));
-        if (results.schema !== 'cyclewire-bench/results@1') continue;
+        // Runs with the network shaped per packet check the method; they are not published.
+        if (results.schema !== 'cyclewire-bench/results@1' || results.profile.network?.shaping === 'netem') continue;
         const id = results.profile.id;
         if (!found[id] || results.startedAt > found[id].results.startedAt) found[id] = { file, results };
     }

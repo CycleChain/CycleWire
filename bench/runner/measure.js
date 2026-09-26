@@ -35,7 +35,8 @@ export async function open({ browser, profile, throttle = true, javaScript = tru
     const cdp = await context.newCDPSession(page);
     const network = await recordNetwork(cdp);
     if (throttle) {
-        await cdp.send('Network.emulateNetworkConditions', networkConditions(profile));
+        // With netem the network is shaped below the browser (runner/netem.js).
+        if (profile.shaping !== 'netem') await cdp.send('Network.emulateNetworkConditions', networkConditions(profile));
         if (profile.cpuSlowdown > 1) await cdp.send('Emulation.setCPUThrottlingRate', { rate: profile.cpuSlowdown });
     }
     await cdp.send('Performance.enable');

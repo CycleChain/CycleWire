@@ -106,3 +106,11 @@ test('a navigation cancels what the page being left was still loading', async ()
     assert.equal(network.inflight, 0);
     assert.equal(bytes(network.requests).total.count, 2);
 });
+
+test('Spearman\'s rho is 1 for the same order, -1 for the reverse, and handles ties', async () => {
+    const { spearman } = await import('../scripts/compare.js');
+    assert.equal(spearman([1, 2, 3, 4], [10, 20, 30, 40]), 1);
+    assert.equal(spearman([1, 2, 3, 4], [40, 30, 20, 10]), -1);
+    assert.ok(Math.abs(spearman([1, 2, 2, 3], [1, 2, 3, 4]) - 0.9486832980505138) < 1e-9);
+    assert.equal(spearman([1, 2], [2, 1]), null);
+});
