@@ -8,6 +8,9 @@ All notable changes to CycleWire are documented here. The format follows
 
 ### Changed
 
+- `cw-debounce` no longer holds up a submit: it runs at once, and a run still waiting for
+  the pause is dropped. On a search form with `cw-on-input` and `cw-debounce`, Enter
+  answers without the delay.
 - `cyclewire/request`: the newest request for a target wins. A request still on its way
   to a target stops when another one sets out for it, from any element, and ends quietly,
   so a late answer never covers a newer one.

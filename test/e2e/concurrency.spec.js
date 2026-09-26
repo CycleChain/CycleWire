@@ -86,6 +86,19 @@ test.describe('concurrency', () => {
         await expectLog(page, [{ fn: 'value', el: 'i', type: 'input', target: 'i', value: 'abc' }]);
     });
 
+    test('debounce: a submit runs at once, in place of the run still waiting', async ({ page }) => {
+        await boot(page, { html: '<form id="f" cw-action="log" cw-on-input="log" cw-debounce="1000"><input id="i" name="q"></form>' });
+        await page.focus('#i');
+        await page.keyboard.type('ab');
+        const pressed = Date.now();
+        await page.keyboard.press('Enter');
+        await expect.poll(async () => (await log(page)).map((entry) => `${entry.el}:${entry.type}`)).toEqual(['f:submit']);
+        // Well before the debounce would have let it through, and nothing runs after it.
+        expect(Date.now() - pressed).toBeLessThan(800);
+        await page.waitForTimeout(1200);
+        expect((await log(page)).map((entry) => `${entry.el}:${entry.type}`)).toEqual(['f:submit']);
+    });
+
     test('removing an element aborts its run', async ({ page }) => {
         await boot(page, { html: '<button id="r" cw-action="gated">go</button>' });
         await page.click('#r');

@@ -139,6 +139,10 @@ native submission.
 Runs only after events pause for `ms` milliseconds. With `restart` (the default for
 `input`), an in-flight run is aborted the moment a new event arrives.
 
+A submit is not a burst to wait out: it runs at once, and a run still waiting for the
+pause is dropped, since the submit sends the same form. On a search form with
+`cw-on-input` and `cw-debounce`, Enter answers without the delay.
+
 ### `cw-concurrency`
 
 What happens when an event arrives while a run for the same element and action is in

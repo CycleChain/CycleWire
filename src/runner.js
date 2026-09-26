@@ -235,12 +235,13 @@ export function dispatch(el, action, event, target, type) {
         return Promise.resolve();
     }
     const mode = once ? 'drop' : concurrency(el.getAttribute(attrs.concurrency), type);
-    const wait = Number(el.getAttribute(attrs.debounce)) || 0;
+    // A submit is no burst to wait out: it runs at once, in place of a run still waiting.
+    const wait = type === 'submit' ? 0 : Number(el.getAttribute(attrs.debounce)) || 0;
+    clearTimeout(state.timer);
+    state.settle?.(undefined);
     if (wait <= 0) return admit(el, action, event, target, mode, state);
     if (__DEV__) trace({ type: 'debounce', element: el, action, event, wait });
 
-    clearTimeout(state.timer);
-    state.settle?.(undefined);
     // Under `restart`, stale work stops the moment new input arrives, not
     // when the debounce expires.
     if (mode === 'restart' && state.running) state.controller?.abort();
