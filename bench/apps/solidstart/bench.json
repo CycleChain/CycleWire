@@ -1,0 +1,109 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "solidstart",
+  "name": "SolidStart",
+  "kind": "meta-framework",
+  "summary": "The page rendered per request by SolidStart 2 on Nitro's Node server and hydrated by Solid. Queries whose bodies run on the server load the products and the cart; search and category live in the URL and filter the list in the browser; the forms post to server actions and are sent by the router once hydrated, with the new cart in the same response; the quick view is a dialog on ?view=.",
+  "build": "npm run build",
+  "start": "node .output/server/index.mjs",
+  "search": "live",
+  "packages": [
+    "@solidjs/start",
+    "solid-js",
+    "@solidjs/router"
+  ],
+  "idioms": [
+    {
+      "choice": "The project is laid out the way `npm init solid` writes it for SolidStart 2 (the basic template): vite.config.ts with solidStart() and nitro(), src/app.tsx with the router, the file routes, a MetaProvider and a Suspense boundary, and the template's entry-client.tsx, entry-server.tsx, tsconfig.json and scripts. Its dependency ranges are pinned to what they install: SolidStart 2.0.5, Solid 1.9.15, Solid Router 1.0.0, Vite 8.3.1 and Nitro 3.0.260610-beta, the Nitro that SolidStart 2.0.5 is tested with. The template's public/ folder and its icon link are left out: /favicon.ico is answered by the shared server.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/getting-started#create-a-project"
+    },
+    {
+      "choice": "Built with `vite build` (the starter's `npm run build`) and started with `node .output/server/index.mjs` (its `npm start`): nitro() after solidStart(), as the deployment guide shows, with Nitro's default node_server preset. The server reads PORT and HOST (127.0.0.1) from the environment. SolidStart 2 asks for Node.js 24 or newer.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/guides/deployment-plugins#nitro"
+    },
+    {
+      "choice": "Server rendering on every request, SolidStart's default (ssr: true), in its default streaming mode. Nothing is prerendered (no Nitro prerender routes) and nothing is cached.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/reference/config/solid-start#ssr"
+    },
+    {
+      "choice": "A `#scenario` alias (resolve.alias in vite.config.ts) points at the shared modules in bench/scenario/. The server functions import the catalog and the cart from them; the components import only the markup helpers (prices, result counts, query matching), so no product data is bundled for the browser. server.fs.allow lets the dev server serve them.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/reference/entrypoints/vite-config"
+    },
+    {
+      "choice": "The shop is src/routes/index.tsx, a file route, with the header (and its cart) and the footer in the router's root, which every page shares. The starter's catch-all [...404].tsx route stays, so an unknown address answers 404.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/routing"
+    },
+    {
+      "choice": "Data is loaded with Solid Router's query and createAsync, with \"use server\" inside each query so that its body runs only on the server: the product listing (without descriptions), the cart from the `cart` cookie, and the quick view's product. While the page renders they run in-process, and their results reach the browser with the page, so hydration fetches nothing.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/data-fetching#keep-the-data-function-on-the-server"
+    },
+    {
+      "choice": "The route exports route.preload, which starts its queries before it renders, as the data-fetching guide shows. The router also runs it when a link to the page is hovered (after 20 ms) or touched, its default, so a Quick view link starts loading its product before the click.",
+      "docs": "https://docs.solidjs.com/solid-router/advanced-concepts/preloading#how-solid-router-detects-intent"
+    },
+    {
+      "choice": "The page's data is read with deferStream: true, the documented way to keep data out of streaming when it must be in the first HTML: the page has to be complete without JavaScript, and streamed sections are put in place by a script. With the data in memory the HTML is the same either way.",
+      "docs": "https://docs.solidjs.com/solid-router/data-fetching/streaming#when-to-disable-streaming"
+    },
+    {
+      "choice": "Search and category are search parameters, read with useSearchParams. The list is a memo over the listing the page already has, so a filter change is a client-side navigation with no request, and no debounce.",
+      "docs": "https://docs.solidjs.com/solid-router/concepts/search-parameters"
+    },
+    {
+      "choice": "The search box is a GET form (action=\"/\") that loads the results without JavaScript. With it, every input calls setSearchParams with the new query and replace: true, which keeps the category and adds no history entry per key; submitting would only show what is already shown, so the submit is prevented.",
+      "docs": "https://docs.solidjs.com/solid-router/reference/primitives/use-search-params"
+    },
+    {
+      "choice": "Categories are plain links to /?category=…, which the router follows in the page and which load the page without JavaScript (the docs plan to deprecate the A component in favour of native links). They leave ?q= out, so choosing a category clears the search, and the current one has aria-current.",
+      "docs": "https://docs.solidjs.com/solid-router/getting-started/linking-routes"
+    },
+    {
+      "choice": "Add to cart and the newsletter are Solid Router actions whose bodies run on the server (\"use server\"), passed to <form action={…} method=\"post\">. The form's action attribute is the server function's address (/_server?id=…), so without JavaScript, or before hydration, the browser posts the form there and SolidStart redirects back to the page it came from; once hydrated, the router sends the same form with fetch. The product id is a hidden input, as in the reference markup.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/data-mutation#handle-form-submissions-with-actions"
+    },
+    {
+      "choice": "There are no /cart or /newsletter endpoints: the docs prefer queries and actions to an API route for data that only the page's UI needs. (The benchmark's proxy sends /api/ to the shared server; the page uses none of the shared JSON endpoints.)",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/api-routes#when-to-use-an-api-route"
+    },
+    {
+      "choice": "Add to cart returns reload({ revalidate: getCart.key }): only the cart changed, so only the cart query is revalidated, rather than every query on the page (the default after an action), which would also send the whole listing again.",
+      "docs": "https://docs.solidjs.com/solid-router/concepts/actions#customizing-revalidation"
+    },
+    {
+      "choice": "Single-flight mutations, the router's default, are kept: after the action, SolidStart renders the revalidated cart query on the server and sends it in the action's own response, so the header updates without a second request. The header waits for that response: there is no optimistic update.",
+      "docs": "https://docs.solidjs.com/solid-router/reference/components/router#singleflight"
+    },
+    {
+      "choice": "The newsletter action returns json({ message }, { revalidate: [] }), with the scenario's message for a valid or a rejected address, and the page shows it with useSubmission(subscribe).result; nothing needs revalidating. Without JavaScript, SolidStart carries the result in a short-lived `flash` cookie on its redirect, and the server renders the same message from it.",
+      "docs": "https://docs.solidjs.com/solid-router/reference/response-helpers/json"
+    },
+    {
+      "choice": "The cart cookie is written with setCookie from @solidjs/start/http in the shared format (URL-encoded JSON, Path=/, SameSite=Lax, HttpOnly), and read from the Cookie header of getRequestEvent().request with the scenario's readCart. Reading it from the request event matters for single flight: the re-render after an action runs with a request that carries the cookie the action has just set, while the @solidjs/start/http helpers read the original request.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/advanced/request-events"
+    },
+    {
+      "choice": "The quick view is a native <dialog id=\"quick-view\">. Each Quick view link is a plain link to ?view=<id> that keeps the search and the category, with noScroll so that the page stays where it is; the dialog's product, with the description the listing leaves out, comes from a query on that id. Loaded with ?view=<id>, the server renders the dialog open, which is how it shows without JavaScript.",
+      "docs": "https://docs.solidjs.com/solid-router/reference/components/a"
+    },
+    {
+      "choice": "Opened in the page, the dialog is shown with showModal() once its product has arrived, which makes the page behind it inert and lets Escape close it. Closing it (its Close button is a <form method=\"dialog\">) goes back with navigate(-1) when the page opened it, so Back and Forward stay in step with the screen, and otherwise replaces the address with one without ?view=.",
+      "docs": "https://docs.solidjs.com/solid-router/reference/primitives/use-navigate"
+    },
+    {
+      "choice": "The title is set with @solidjs/meta's <Title> in the router's root, where the docs put the MetaProvider; lang is on the document's <html>.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/head-and-metadata#add-the-provider"
+    },
+    {
+      "choice": "Scenario-forced: the shared stylesheet is a plain <link> in the document of entry-server.tsx rather than a CSS import, the docs' way to style components; no component imports CSS.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/css-and-styling#styling-components"
+    },
+    {
+      "choice": "Scenario-forced: product images are plain <img> elements with the reference's attributes, referred to by absolute path as the docs show for public assets.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/building-your-application/static-assets#public-directory"
+    },
+    {
+      "choice": "Workaround: SolidStart 2.0.5 imports its development toolbar into the error boundary it also renders in production. The toolbar is left out of production builds, as the docs say, but the stylesheets its modules import are side effects the bundler keeps, so every page would link a 17 kB stylesheet of toolbar styles (and load 1.9 kB of module-level script from the toolbar's UI library). A small plugin in vite.config.ts declares the toolbar module free of side effects in builds, so the bundler drops it with its stylesheets, as the one-stylesheet rule requires.",
+      "docs": "https://docs.solidjs.com/solid-start/v2/getting-started#development-toolbar"
+    }
+  ]
+}

@@ -39,6 +39,7 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `next--searchparams` | Variant: the list filtered in the browser, the URL kept with the History API |
 | `nuxt` | Nuxt: universal rendering, useFetch, Nitro server routes |
 | `qwik` | Qwik City: resumable components, route loaders and actions |
+| `solidstart` | SolidStart: queries and actions that run on the server, single-flight mutations |
 | `sveltekit` | SvelteKit: load functions, form actions, shallow routing |
 
 Next: Marko and SolidStart. Each stack lives in `apps/<id>/` with its own
