@@ -76,9 +76,11 @@ record the machine, the browser, the installed version of every stack and each r
 sample, so any summary can be recomputed.
 
 `npm test` runs the harness's own tests. `node scripts/report.js <results.json>` prints
-a run as Markdown tables. The Benchmark section of CycleWire's website is built from the
-newest run of each profile in `results/` by `scripts/build-site.js`; to see it with your
-own runs, start the repository's dev server with `node scripts/serve.js --local-results`.
+a run as Markdown tables, and `node scripts/resummarize.js <results.json>` computes a
+run's summaries again from its samples after the summaries change. The Benchmark
+section of CycleWire's website is built from the newest run of each profile in
+`results/` by `scripts/build-site.js`; to see it with your own runs, start the
+repository's dev server with `node scripts/serve.js --local-results`.
 
 ## Published results
 
