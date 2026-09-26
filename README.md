@@ -337,7 +337,7 @@ Minified, measured by `npm run size` and enforced in CI:
 
 One product page, built with each stack the way its documentation recommends and measured
 the same way in Chromium on GitHub's runners:
-[results](https://cyclechain.github.io/CycleWire/bench/) ·
+[charts and tables](https://cyclechain.github.io/CycleWire/#benchmark) ·
 [methodology](bench/METHODOLOGY.md) · [run it yourself](bench/README.md). The benchmark is
 maintained by the authors of CycleWire, which is one of the stacks measured, so every app,
 the runner and the raw data are in [`bench/`](bench/), and corrections from the other
@@ -345,8 +345,9 @@ projects are welcome. There is no overall score.
 
 <!-- bench:start -->
 Medians, lower is better. Time to effect runs from the input to the frame that shows the result;
-"Early tap" is a tap on "Add to cart" in the first frame after first paint. Confidence intervals,
-every other metric and each stack's choices are on the [results page](https://cyclechain.github.io/CycleWire/bench/).
+"Early tap" is a tap on "Add to cart" in the first frame after first paint. The
+[website](https://cyclechain.github.io/CycleWire/#benchmark) charts each metric with its 95% confidence
+interval, and lists more metrics and how each app is built.
 
 **Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-25, INTEL(R) XEON(R) PLATINUM 8573C (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
@@ -362,7 +363,7 @@ every other metric and each stack's choices are on the [results page](https://cy
 | Qwik City | 37.4 kB | 1,724 ms | 0 ms | 790 ms | 176 ms | 28 ms | 766 ms | 798 ms | in the page, 2,466 ms |
 | SvelteKit | 32.8 kB | 1,804 ms | 0 ms | 1,299 ms | 136 ms | 18 ms | 632 ms | 1,295 ms | by a page load, 946 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,200 ms, CycleWire 1,248 ms); Largest Contentful Paint (htmx 1,540 ms, CycleWire 1,612 ms); Requests (Alpine.js 24, CycleWire 26); Category filter (Astro + Preact 116 ms, CycleWire 606 ms); Live search (Astro + Preact 13 ms, CycleWire 32 ms); Quick view (SvelteKit 632 ms, CycleWire 1,189 ms); Event listeners (Qwik City 17, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,200 ms, CycleWire 1,248 ms); Largest Contentful Paint (htmx 1,540 ms, CycleWire 1,612 ms); Requests (Alpine.js 24, CycleWire 26); Category filter (Astro + Preact 116 ms, CycleWire 606 ms); Live search (Astro + Preact 13 ms, CycleWire 32 ms); Quick view (SvelteKit 632 ms, CycleWire 1,189 ms); Early tap (htmx 855 ms, CycleWire 1,835 ms); Event listeners (Qwik City 17, CycleWire 18).
 
 **Desktop**: fast connection, no CPU slowdown, mouse. 15 iterations on 2026-09-25, AMD EPYC 9V74 80-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
@@ -378,7 +379,7 @@ Where another stack beats CycleWire here (the 95% confidence intervals do not ov
 | Qwik City | 37.4 kB | 368 ms | 0 ms | 283 ms | 101 ms | 27 ms | 267 ms | 283 ms | in the page, 500 ms |
 | SvelteKit | 32.7 kB | 376 ms | 0 ms | 400 ms | 113 ms | 10 ms | 89 ms | 401 ms | in the page, 522 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 336 ms, CycleWire 364 ms); Requests (Alpine.js 40, CycleWire 42); Category filter (Astro + Preact 86 ms, CycleWire 116 ms); Live search (Astro + Preact 9 ms, CycleWire 29 ms); Quick view (SvelteKit 89 ms, CycleWire 266 ms); Event listeners (Qwik City 17, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 336 ms, CycleWire 364 ms); Requests (Alpine.js 40, CycleWire 42); Category filter (Astro + Preact 86 ms, CycleWire 116 ms); Live search (Astro + Preact 9 ms, CycleWire 29 ms); Quick view (SvelteKit 89 ms, CycleWire 266 ms); Early tap (htmx 284 ms, CycleWire 384 ms); Event listeners (Qwik City 17, CycleWire 18).
 
 <!-- bench:end -->
 

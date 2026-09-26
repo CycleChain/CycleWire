@@ -186,7 +186,12 @@ There is no composite score.
 The results list the metrics on which another stack beats CycleWire: a stack that is not
 a control has a lower median, the two 95% intervals do not overlap, and the difference is
 at least 3% of CycleWire's median. The last condition keeps out differences that are real
-but too small to matter, such as 1 ms in 250, which very stable metrics can produce.
+but too small to matter, such as 1 ms in 250, which very stable metrics can produce. On the
+early tap, only stacks that handled every tap (in the page or by a page load) are compared.
+
+The tables mark in bold, for each metric, every stack that no other stack beats by the same
+rule, controls aside. A stack with a noisy metric can be bold next to one with a lower but
+steadier median, because the data cannot tell them apart.
 
 ## 10. Limitations
 

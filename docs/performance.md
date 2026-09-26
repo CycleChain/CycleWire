@@ -59,7 +59,7 @@ connection. An explicit `preload()` call is not.
 The [benchmark](../bench/README.md) builds one product page with CycleWire and with other
 stacks, and measures loads, the time from an input to its result, a tap in the first frame
 after first paint, and a repeat visit, on a throttled phone and on a desktop
-([results](https://cyclechain.github.io/CycleWire/bench/)). What it shows about CycleWire,
+([results](https://cyclechain.github.io/CycleWire/#benchmark)). What it shows about CycleWire,
 and what to do about it:
 
 - **Loading costs about what plain HTML costs.** The core is the only script on load and

@@ -6,9 +6,10 @@ name: Benchmark
 # measure: by hand or weekly, the full run for each profile, kept as artifacts.
 # publish: when every profile was measured and the repository variable
 #          BENCH_PUBLISH is 'true', a pull request from github-actions[bot]
-#          replaces bench/results/ with the new runs; merging it redeploys the
-#          results page. It needs "Allow GitHub Actions to create and approve
-#          pull requests" in the repository settings. See bench/README.md.
+#          replaces bench/results/ with the new runs and updates the README's
+#          tables; merging it redeploys the website's Benchmark section. It
+#          needs "Allow GitHub Actions to create and approve pull requests" in
+#          the repository settings. See bench/README.md.
 
 on:
   pull_request:
@@ -125,6 +126,9 @@ jobs:
         working-directory: .
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
       - uses: actions/download-artifact@v7
         with:
           pattern: bench-*
@@ -139,7 +143,8 @@ jobs:
           git switch -c "$branch"
           find bench/results -name '*.json' -delete
           cp new-results/*.json bench/results/
-          git add -A bench/results
+          node bench/scripts/readme.js --write
+          git add -A bench/results README.md
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
             commit -m "chore(bench): results from run $GITHUB_RUN_ID"
           git push origin "$branch"
@@ -147,4 +152,4 @@ jobs:
           if gh label list --search bench --json name --jq '.[].name' | grep -qx bench; then label="--label bench"; fi
           gh pr create --base main --head "$branch" $label \
             --title "Benchmark results, $(date -u +%Y-%m-%d)" \
-            --body "Results of $RUN_URL. Merging this redeploys the results page. Check the conformance section and the failed visits in each file before merging."
+            --body "Results of $RUN_URL. Merging this redeploys the website's Benchmark section. Check the conformance section and the failed visits in each file before merging."

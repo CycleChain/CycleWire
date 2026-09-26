@@ -4,7 +4,7 @@ Corrections from the people who know a stack best are the most useful contributi
 this benchmark can get. If an app here is not built the way its documentation recommends,
 open a pull request that changes it, or an issue that explains how. Maintainers of a stack
 can also add a short response to its `bench.json` (`"response": { "text", "by", "url" }`);
-the results page shows it next to the numbers.
+the website shows it with the stack, under "How each app is built".
 
 ## What a stack must build
 

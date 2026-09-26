@@ -5,8 +5,11 @@
  *   /            → site/          (the landing page, so its "./dist/…" links resolve as on GitHub Pages)
  *   /dist/       → dist/
  *   /examples/   → examples/dist/ (built with `npm run examples`, laid out as on GitHub Pages)
- *   /bench/      → the benchmark's results page, built at start from bench/results/, local runs included
+ *   /bench/      → the raw benchmark results, as on GitHub Pages
  *   /fixtures/   → test/fixtures/
+ *
+ * The landing page gets the version stamp and the Benchmark section, built at
+ * start from bench/results/ (--local-results includes your own *.local.json runs).
  *
  * Test helpers:
  *   ?delay=ms                       hold the response
@@ -19,7 +22,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildSite } from '../bench/scripts/build-site.js';
-import { stamp, version } from './site.js';
+import { insertBenchmark, stamp, version } from './site.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const option = (name, fallback) => {
@@ -30,7 +33,8 @@ const port = Number(option('--port', process.env.PORT || 4173));
 const host = option('--host', '127.0.0.1');
 
 const benchPage = join(root, 'bench', '.cache', 'site');
-await buildSite({ out: benchPage, local: true });
+const bench = await buildSite({ out: benchPage, local: process.argv.includes('--local-results') });
+const landing = join(root, 'site', 'index.html');
 
 const mounts = [
     ['/dist/', join(root, 'dist')],
@@ -103,8 +107,12 @@ createServer(async (req, res) => {
     try {
         if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
         let body = await readFile(file);
-        // The same version stamp as the deployed site (scripts/site.js).
-        if (extname(file) === '.html') body = Buffer.from(stamp(body.toString('utf8'), await version()).html);
+        // The same version stamp and benchmark section as the deployed site (scripts/site.js).
+        if (extname(file) === '.html') {
+            let html = stamp(body.toString('utf8'), await version()).html;
+            if (file === landing) html = insertBenchmark(html, bench.html);
+            body = Buffer.from(html);
+        }
         send(res, 200, body, types[extname(file)] || 'application/octet-stream');
     } catch {
         send(res, 404, 'Not found');

@@ -70,8 +70,9 @@ export async function section({ local = false } = {}) {
     if (!parts.length) return null;
     return [
         'Medians, lower is better. Time to effect runs from the input to the frame that shows the result;',
-        '"Early tap" is a tap on "Add to cart" in the first frame after first paint. Confidence intervals,',
-        'every other metric and each stack\'s choices are on the [results page](https://cyclechain.github.io/CycleWire/bench/).',
+        '"Early tap" is a tap on "Add to cart" in the first frame after first paint. The',
+        '[website](https://cyclechain.github.io/CycleWire/#benchmark) charts each metric with its 95% confidence',
+        'interval, and lists more metrics and how each app is built.',
         '',
         ...parts,
     ].join('\n');

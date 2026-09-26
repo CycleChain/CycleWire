@@ -5,11 +5,13 @@
  *   /               site/ (the landing page)
  *   /dist/          dist/*.min.js, their source maps and sizes.json
  *   /examples/      examples/dist/, the live examples, when built
- *   /bench/         the benchmark's results page, from bench/results/
+ *   /bench/         the raw benchmark results, and a redirect from the old results page
  *
  * The package version is stamped into every element marked `data-version`,
- * so the page never shows a stale one; the build fails if it finds none.
- * `scripts/serve.js` applies the same stamp, so local previews match.
+ * so the page never shows a stale one; the build fails if it finds none. The
+ * landing page's Benchmark section is built from the newest published run of
+ * each profile in bench/results/. `scripts/serve.js` does the same, so local
+ * previews match.
  *
  *   npm run build && npm run size && npm run examples -- --production
  *   node scripts/site.js
@@ -40,6 +42,19 @@ export function stamp(html, version) {
     return { html: out, count };
 }
 
+const BENCHMARK = /(<!-- bench:start -->)[\s\S]*?(<!-- bench:end -->)/;
+
+/**
+ * Puts the benchmark's section between the landing page's
+ * <!-- bench:start --> and <!-- bench:end --> marks.
+ * @param {string} html
+ * @param {string} section
+ */
+export function insertBenchmark(html, section) {
+    if (!BENCHMARK.test(html)) throw new Error('site/index.html has no <!-- bench:start --> … <!-- bench:end --> block.');
+    return html.replace(BENCHMARK, (match, start, end) => `${start}\n${section}\n${end}`);
+}
+
 const exists = (path) => stat(path).then(() => true, () => false);
 
 /** @param {string} out */
@@ -58,13 +73,13 @@ export async function assemble(out) {
     if (await exists(examples)) await cp(examples, join(out, 'examples'), { recursive: true });
     else console.warn('examples/dist is missing, so the site has no live examples: run `npm run examples -- --production`.');
 
-    const profiles = await buildSite({ out: join(out, 'bench') });
-    if (!profiles.length) console.warn('bench/results has no published results, so /bench/ says so.');
+    const bench = await buildSite({ out: join(out, 'bench') });
+    if (!bench.profiles.length) console.warn('bench/results has no published results, so the Benchmark section says so.');
 
     const page = join(out, 'index.html');
     const { html, count } = stamp(await readFile(page, 'utf8'), current);
     if (!count) throw new Error('site/index.html has no element marked data-version.');
-    await writeFile(page, html);
+    await writeFile(page, insertBenchmark(html, bench.html));
     await writeFile(join(out, '.nojekyll'), '');
     console.log(`Assembled the site for v${current} in ${out} (${count} version marks).`);
 }
