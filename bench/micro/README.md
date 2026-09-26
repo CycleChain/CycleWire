@@ -46,9 +46,12 @@ Results validate against [`../schema/micro.v1.json`](../schema/micro.v1.json). T
 hold the machine (as the harness records it, plus a CPU speed index taken in Node),
 every browser's version and timer resolution, the version of every library, every raw
 sample and every summary. Summaries are the harness's own (`../runner/stats.js`): the
-median with a bootstrap 95% confidence interval. The Benchmark workflow runs both
-suites weekly and by hand (the `micro` job), writes the report into the job's summary
-and keeps the JSON as an artifact.
+median with a bootstrap 95% confidence interval. Under each table, the report lists
+where another library is faster than CycleWire by the harness's rule (a lower median,
+95% intervals that do not overlap, and a difference of at least 3%; see
+[METHODOLOGY.md](../METHODOLOGY.md), section 9) and where CycleWire failed. The
+Benchmark workflow runs both suites weekly and by hand (the `micro` job), writes the
+report into the job's summary and keeps the JSON as an artifact.
 
 ## Signals
 
@@ -135,7 +138,8 @@ text merged.
 | A custom element keeps its identity | The same element, with its state and shadow root, seeing its new attribute | Replacing it resets its state |
 | `<template>` content is updated | The template's content matches the new markup | A stale template stamps out old markup |
 
-Two cases are where the libraries **differ by design**, and the report marks them:
+Two cases are where the libraries **differ by design**, and the report shows them as
+"no, by design" rather than as mistakes:
 morphdom and idiomorph make an input's value match the markup (an input without a value
 attribute is emptied, so a server can clear a form by sending it again), while CycleWire
 copies the value only when the server changed the attribute; and opening a `<details>`

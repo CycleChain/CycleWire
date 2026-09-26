@@ -52,8 +52,22 @@ function sample() {
             correctness: [
                 { browser: 'chromium', library: 'cyclewire', case: 'markup', pass: true, problems: [] },
                 { browser: 'chromium', library: 'morphdom', case: 'template', pass: false, problems: ['the markup differs'] },
+                { browser: 'chromium', library: 'idiomorph', case: 'typed-value', pass: false, problems: ['the field holds ""'] },
             ],
             speed: [
+                {
+                    browser: 'chromium',
+                    library: 'cyclewire',
+                    operation: 'reverse',
+                    status: 'ok',
+                    samples: [10, 11, 12],
+                    withLayout: [10, 11, 12],
+                    summary: summarize([10, 11, 12]),
+                    summaryWithLayout: summarize([10, 11, 12]),
+                    mutations: { records: 40, childList: 40, attributes: 0, characterData: 0, added: 20, removed: 20 },
+                    kept: 1000,
+                    expectedKept: 1000,
+                },
                 {
                     browser: 'chromium',
                     library: 'idiomorph',
@@ -107,6 +121,12 @@ test('report.js prints every section as Markdown tables', () => {
         assert.match(output, /### Morph: speed in Chromium 153\.0\.0\.0/);
         assert.match(output, /10, 1,000\/1,000 kept/);
         assert.match(output, /could not launch webkit/);
+        // Where CycleWire is slower or failed, the report says so in words.
+        assert.match(output, /Where CycleWire is slower at morphing in Chromium[^\n]*\n\n- Reverse the rows \(CycleWire 11\.0 ms\): idiomorph 3\.20 ms/);
+        assert.match(output, /Where CycleWire is slower with its signals[^\n]*nowhere\./);
+        // A difference by design is not shown as a mistake.
+        assert.match(output, /\| An input's typed value survives when the new markup does not set a value ¹ \| – \| – \| no, by design \|/);
+        assert.match(output, /\| &lt;template> content is updated \| – \| \*\*no\*\* \| – \|/);
     } finally {
         rmSync(dir, { recursive: true, force: true });
     }

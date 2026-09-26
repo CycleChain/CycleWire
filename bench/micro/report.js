@@ -32,6 +32,33 @@ function table(header, rows, align = []) {
     console.log();
 }
 
+/**
+ * Whether `a` beats `b` by the harness's rule (METHODOLOGY.md, section 9): a
+ * lower median, 95% intervals that do not overlap, and a difference of at
+ * least 3% of b's median.
+ * @param {any} a @param {any} b
+ */
+const beats = (a, b) => Boolean(a?.n && b?.n && a.median < b.median && a.ci95[1] < b.ci95[0] && b.median - a.median >= 0.03 * b.median);
+
+/**
+ * Lists, for each row, the libraries that beat CycleWire, and the rows it failed.
+ * @param {string} what @param {Array<{ title: string, own: any, others: Array<{ name: string, row: any }> }>} rows
+ */
+function slower(what, rows) {
+    const lines = [];
+    for (const { title, own, others } of rows) {
+        if (!own) continue;
+        if (own.status === 'failed') {
+            lines.push(`- ${escape(title)}: CycleWire **failed**`);
+            continue;
+        }
+        const winners = others.filter(({ row }) => row?.status === 'ok' && beats(row.summary, own.summary));
+        if (winners.length) lines.push(`- ${escape(title)} (CycleWire ${ms(own.summary.median)} ms): ${winners.map(({ name, row }) => `${name} ${ms(row.summary.median)} ms`).join(', ')}`);
+    }
+    console.log(`Where CycleWire is slower ${what} (another library has a lower median, the two 95% intervals do not overlap, and the difference is at least 3% of CycleWire's median, the harness's rule), or failed:${lines.length ? '\n' : ' nowhere.\n'}`);
+    if (lines.length) console.log(`${lines.join('\n')}\n`);
+}
+
 console.log('## Micro benchmarks\n');
 const commit = environment.commit ? environment.commit.slice(0, 7) : 'unknown';
 console.log(`${config.samples} samples per measurement after ${config.warmup} warm-up, on ${environment.cpu} (${environment.cores} cores, ${environment.runner}, ${environment.os}), Node ${environment.node}, commit ${commit}. Load average ${environment.loadAverage.join(' / ')} at the start${environment.loadAverageEnd ? `, ${environment.loadAverageEnd.join(' / ')} at the end` : ''}.\n`);
@@ -54,6 +81,14 @@ if (signals) {
             }),
         ]),
         ['---', ...libraries.map(() => '--:')],
+    );
+    slower(
+        'with its signals',
+        signals.scenarios.map((/** @type {any} */ scenario) => ({
+            title: scenario.title,
+            own: result('cyclewire', scenario.id),
+            others: libraries.filter((/** @type {any} */ library) => library.id !== 'cyclewire').map((/** @type {any} */ library) => ({ name: library.name, row: result(library.id, scenario.id) })),
+        })),
     );
     const counted = signals.scenarios.filter((/** @type {any} */ scenario) => signals.results.some((/** @type {any} */ row) => row.scenario === scenario.id && row.counts?.evaluations !== undefined));
     if (counted.length) {
@@ -86,10 +121,12 @@ if (morph) {
             escape(entry.title) + (entry.design ? ' ¹' : ''),
             ...libraries.map((/** @type {any} */ library) => {
                 const found = rows(library.id, entry.id);
+                // Where the libraries differ by design, "no" is a choice, not a mistake.
+                const no = entry.design ? 'no, by design' : '**no**';
                 if (!found.length) return '–';
                 if (found.every((/** @type {any} */ row) => row.pass)) return 'yes';
-                if (found.every((/** @type {any} */ row) => !row.pass)) return '**no**';
-                return found.map((/** @type {any} */ row) => `${browserName(row.browser)} ${row.pass ? 'yes' : '**no**'}`).join(', ');
+                if (found.every((/** @type {any} */ row) => !row.pass)) return no;
+                return found.map((/** @type {any} */ row) => `${browserName(row.browser)} ${row.pass ? 'yes' : no}`).join(', ');
             }),
         ]),
     );
@@ -130,6 +167,14 @@ if (morph) {
                 return !row ? '–' : row.status === 'ok' ? cell(row.summary) : '**failed**';
             })]),
             align,
+        );
+        slower(
+            `at morphing in ${browserName(browser.name)}`,
+            morph.operations.map((/** @type {any} */ operation) => ({
+                title: operation.title,
+                own: find('cyclewire', operation.id),
+                others: libraries.filter((/** @type {any} */ library) => library.id !== 'cyclewire').map((/** @type {any} */ library) => ({ name: library.name, row: find(library.id, operation.id) })),
+            })),
         );
         console.log('The morph call and the style and layout it forces:\n');
         table(
