@@ -32,12 +32,25 @@ All notable changes to CycleWire are documented here. The format follows
 
 ### Fixed
 
+- **A computed no longer runs again when nothing it read has changed.** A write
+  upstream marked every computed below it stale, and each ran again even when the
+  computed between them came out the same; now a stale computed first checks the
+  versions of what it read, as the documentation always said it did.
+- A computed whose function threw runs again the next time it is read, instead of
+  returning its last value; an effect disposed during its own run stays unsubscribed.
 - The production modules of `cyclewire/prefetch` and `cyclewire/stream` no longer
   import `util.js` for nothing: a page that loads them without a bundler makes one
   request fewer, and esbuild stops warning about the import.
 
 ### Performance
 
+- **`cyclewire/signals` is two to five times faster.** A computed or an effect that
+  runs again walks the list of what its last run read and changes no subscription
+  while it reads the same sources in the same order; a source it reads twice is
+  listed once; and a source with one subscriber keeps it without a set. On the
+  benchmark's micro suite it moved from last in every scenario to first on dynamic
+  graphs, ahead of Vue on most, and close to Preact and alien-signals on the rest.
+  `signals.min.js` grows to 3417 B brotli (budget 3520 B).
 - The pointer-over handler skips elements without attributes, the look-ahead decides
   once per scanned subtree instead of once per element, and plugins' `preload` hooks run
   once per module instead of on every hover.

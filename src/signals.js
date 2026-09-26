@@ -44,36 +44,84 @@ const UNSAFE_URL = /^(?:javascript|vbscript):/i;
 function create() {
     // ---------------------------------------------------------------- core
 
-    /** @typedef {Source & { deps: Set<Source>, stale(): void }} Computation */
+    /**
+     * A computed or an effect: the sources its last run read, in order, with
+     * the version of each it saw. A run walks that list with `cursor` while
+     * it reads the same sources in the same order, and only makes lists of
+     * its own (`next`, `seen`) from the first read that differs.
+     * A run stamps what it reads with its own number (`stamp`), so a source
+     * it reads again is not listed twice.
+     * @typedef {{ deps: Source[], vers: number[], cursor: number, next: Source[] | null, seen: number[], stamp: number, off?: boolean, stale(): void }} Computation
+     */
 
     /** @type {Computation | null} */
     let observer = null;
     let depth = 0;
     let flushing = false;
+    /** What a computation that never ran has read: shared, never written to. */
+    const NONE = /** @type {any[]} */ ([]);
+    /** Numbers runs, and each comparison of a run's reads with the last run's. */
+    let epoch = 0;
+
+    /**
+     * A source's subscribers: none, one, or a set of them. Most sources have
+     * one, and a set for each would cost more than the source itself.
+     * @param {Source} source @param {Computation} sub
+     */
+    const subscribe = (source, sub) => {
+        const subs = source.subs;
+        if (!subs) source.subs = sub;
+        else if (subs instanceof Set) subs.add(sub);
+        else if (subs !== sub) source.subs = new Set([subs, sub]);
+    };
+    /** @param {Source} source @param {Computation} sub */
+    const release = (source, sub) => {
+        const subs = source.subs;
+        if (subs === sub) source.subs = null;
+        else if (subs instanceof Set) subs.delete(sub);
+    };
+    /** Marks every subscriber stale; that only marks and queues, so the set does not change while it is walked. @param {Source} source */
+    const stale = ({ subs }) => {
+        if (subs instanceof Set) for (const sub of subs) sub.stale();
+        else subs?.stale();
+    };
     /** @type {Set<Effect>} */
     const queue = new Set();
 
     class Source {
         constructor() {
-            /** @type {Set<Computation | Effect>} */
-            this.subs = new Set();
+            /** @type {Computation | Set<Computation> | null} */
+            this.subs = null;
             this.version = 0;
+            this.mark = 0;
         }
 
         track() {
-            if (!observer) return;
-            this.subs.add(observer);
-            observer.deps.add(this);
-            // Effects remember the version they actually read, so a write
-            // during their own run still counts as a change.
-            const seen = /** @type {any} */ (observer).seen;
-            if (seen && !seen.has(this)) seen.set(this, this.version);
+            const o = observer;
+            // Read already in this run: nothing to add.
+            if (!o || this.mark === o.stamp) return;
+            this.mark = o.stamp;
+            // The version read: a later write, even one made by the reader itself, is a change.
+            if (!o.next) {
+                const i = o.cursor;
+                // What the last run read here: subscribed already.
+                if (o.deps[i] === this) {
+                    o.vers[i] = this.version;
+                    o.cursor++;
+                    return;
+                }
+                o.next = i ? o.deps.slice(0, i) : [];
+                o.seen = i ? o.vers.slice(0, i) : [];
+            }
+            o.next.push(this);
+            o.seen.push(this.version);
+            subscribe(this, o);
         }
 
         notify() {
             depth++;
             try {
-                for (const sub of [...this.subs]) sub.stale();
+                stale(this);
             } finally {
                 if (!--depth) flush();
             }
@@ -118,8 +166,10 @@ function create() {
         constructor(fn) {
             super();
             this.fn = fn;
-            /** @type {Set<Source>} */
-            this.deps = new Set();
+            /** @type {Source[]} */
+            this.deps = this.vers = NONE;
+            this.cursor = this.stamp = 0;
+            this.next = this.seen = null;
             this.dirty = true;
             /** @type {T | undefined} */
             this.v = undefined;
@@ -128,17 +178,26 @@ function create() {
         stale() {
             if (this.dirty) return;
             this.dirty = true;
-            for (const sub of [...this.subs]) sub.stale();
+            stale(this);
         }
 
         refresh() {
             if (!this.dirty) return;
             this.dirty = false;
-            const next = execute(this, this.fn);
-            // Downstream work only reruns when the derived value really changed.
-            if (!this.version || !Object.is(next, this.v)) {
-                this.v = next;
-                this.version++;
+            try {
+                // A write upstream only marks this stale: it runs again only
+                // if something it read has really changed since.
+                if (this.version && !changed(/** @type {any} */ (this))) return;
+                const value = execute(/** @type {any} */ (this), this.fn);
+                // Downstream work only reruns when the derived value really changed.
+                if (!this.version || !Object.is(value, this.v)) {
+                    this.v = value;
+                    this.version++;
+                }
+            } catch (error) {
+                // Asked again, it tries again.
+                this.dirty = true;
+                throw error;
             }
         }
 
@@ -163,10 +222,10 @@ function create() {
         /** @param {() => unknown} fn */
         constructor(fn) {
             this.fn = fn;
-            /** @type {Set<Source>} */
-            this.deps = new Set();
-            /** @type {Map<Source, number>} */
-            this.seen = new Map();
+            /** @type {Source[]} */
+            this.deps = this.vers = NONE;
+            this.cursor = this.stamp = 0;
+            this.next = this.seen = null;
             /** @type {unknown} */
             this.cleanup = undefined;
             this.off = false;
@@ -177,20 +236,10 @@ function create() {
         }
 
         run() {
-            if (this.off) return;
-            if (this.seen.size) {
-                let changed = false;
-                for (const [dep, version] of this.seen) {
-                    dep.refresh();
-                    if (dep.version !== version) {
-                        changed = true;
-                        break;
-                    }
-                }
-                if (!changed) return;
-            }
+            // Only its first run finds it with nothing read: an effect that
+            // read nothing is never queued again.
+            if (this.off || (this.deps !== NONE && !changed(/** @type {any} */ (this)))) return;
             if (typeof this.cleanup === 'function') this.cleanup();
-            this.seen.clear();
             this.cleanup = execute(/** @type {any} */ (this), this.fn);
         }
 
@@ -202,27 +251,65 @@ function create() {
         }
     }
 
+    /**
+     * Whether a source the computation read has a new version since. Sources
+     * are refreshed in the order they were read, and the first change ends
+     * the check: what came after may not be read at all next time.
+     * @param {Computation} computation
+     */
+    function changed({ deps, vers }) {
+        for (let i = 0; i < deps.length; i++) {
+            deps[i].refresh();
+            if (deps[i].version !== vers[i]) return true;
+        }
+        return false;
+    }
+
     /** @param {Computation} computation */
     function unsubscribe(computation) {
-        for (const dep of computation.deps) dep.subs.delete(computation);
-        computation.deps.clear();
+        for (const dep of computation.deps) release(dep, computation);
+        computation.deps = computation.vers = NONE;
     }
 
     /**
-     * Runs fn with `computation` collecting the dependencies it reads.
+     * Runs fn with `computation` collecting the sources it reads. A run that
+     * reads what the last one read, in the same order, changes no
+     * subscription; otherwise the sources it no longer reads let it go.
      * @template T
      * @param {Computation} computation
      * @param {() => T} fn
      * @returns {T}
      */
     function execute(computation, fn) {
-        unsubscribe(computation);
         const previous = observer;
+        const old = computation.deps;
+        computation.cursor = 0;
+        computation.next = null;
+        computation.stamp = ++epoch;
         observer = computation;
         try {
             return fn();
         } finally {
             observer = previous;
+            // (The cast forgets the null assigned above: fn has changed it since.)
+            let { next, seen, cursor } = /** @type {Computation} */ (computation);
+            // It read the last run's first sources and stopped early.
+            if (!next && cursor < old.length) {
+                next = old.slice(0, cursor);
+                seen = computation.vers.slice(0, cursor);
+            }
+            if (next) {
+                if (old.length) {
+                    const mark = ++epoch;
+                    for (const dep of next) dep.mark = mark;
+                    for (const dep of old) if (dep.mark !== mark) release(dep, computation);
+                }
+                computation.deps = next;
+                computation.vers = seen;
+                computation.next = null;
+            }
+            // Disposed while it ran: what it read after that subscribed it again.
+            if (computation.off) unsubscribe(computation);
         }
     }
 
@@ -281,13 +368,16 @@ function create() {
      */
     function effect(fn) {
         const e = new Effect(fn);
+        // Writes made during the first run are flushed afterwards, not
+        // re-entrantly in the middle of it, as in a batch.
+        depth++;
         try {
-            // Writes made during the first run are flushed afterwards, not
-            // re-entrantly in the middle of it.
-            batch(() => e.run());
+            e.run();
         } catch (error) {
             e.dispose();
             throw error;
+        } finally {
+            if (!--depth) flush();
         }
         return () => e.dispose();
     }

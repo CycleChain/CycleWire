@@ -18,7 +18,11 @@ const budgets = {
     'css.min.js': { brotli: 768 },
     'dom.min.js': { brotli: 2304 },
     'morph.min.js': { brotli: 2048 },
-    'signals.min.js': { brotli: 3200 },
+    // 1.1's reactive core walks the last run's reads instead of rebuilding its
+    // subscriptions, checks versions before a computed runs again, and keeps a
+    // lone subscriber without a set: two to five times faster, measured at
+    // 3417 B brotli.
+    'signals.min.js': { brotli: 3520 },
     'stream.min.js': { brotli: 4096 },
     'prefetch.min.js': { brotli: 768 },
     'bootstrap.min.js': { brotli: 2304 },

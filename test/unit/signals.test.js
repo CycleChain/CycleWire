@@ -56,6 +56,94 @@ test('an unchanged derived value does not rerun downstream effects', () => {
     assert.equal(runs, 2);
 });
 
+test('a computed does not run again when nothing it read changed', () => {
+    const n = signal(0);
+    const zero = computed(() => (n.value, 0));
+    let runs = 0;
+    const next = computed(() => {
+        runs++;
+        return zero.value + 1;
+    });
+    const dispose = effect(() => next.value);
+    n.value = 1;
+    n.value = 2;
+    assert.equal(runs, 1);
+    dispose();
+});
+
+test('a run that reads other sources lets go of the old ones', () => {
+    const left = signal(true);
+    const a = signal(1);
+    const b = signal(2);
+    let runs = 0;
+    const dispose = effect(() => {
+        runs++;
+        return left.value ? a.value : b.value;
+    });
+    left.value = false;
+    a.value = 10; // no longer read
+    assert.equal(runs, 2);
+    b.value = 20;
+    assert.equal(runs, 3);
+    dispose();
+});
+
+test('a run that stops early lets go of what it did not reach', () => {
+    const done = signal(false);
+    const later = signal(1);
+    let runs = 0;
+    const dispose = effect(() => {
+        runs++;
+        if (!done.value) later.value;
+    });
+    done.value = true;
+    later.value = 2;
+    assert.equal(runs, 2);
+    dispose();
+});
+
+test('reading a source many times in a row subscribes once', () => {
+    const n = signal(1);
+    let sum = 0;
+    const dispose = effect(() => {
+        sum = 0;
+        for (let i = 0; i < 30; i++) sum += n.value;
+    });
+    n.value = 2;
+    assert.equal(sum, 60);
+    dispose();
+});
+
+test('a computed that threw runs again the next time it is read', () => {
+    const n = signal(0);
+    let runs = 0;
+    const inverse = computed(() => {
+        runs++;
+        if (n.value === 0) throw new Error('zero');
+        return 1 / n.value;
+    });
+    assert.throws(() => inverse.value, /zero/);
+    assert.throws(() => inverse.value, /zero/);
+    assert.equal(runs, 2);
+    n.value = 4;
+    assert.equal(inverse.value, 0.25);
+});
+
+test('an effect disposed during its own run does not run again', () => {
+    const stop = signal(0);
+    const other = signal(0);
+    let runs = 0;
+    const disposers = [];
+    disposers.push(effect(() => {
+        runs++;
+        if (stop.value) disposers[0]();
+        other.value;
+    }));
+    stop.value = 1;
+    other.value = 1;
+    assert.equal(runs, 2);
+});
+
 test('batch defers effects until the outermost batch ends', () => {
     const first = signal('Ada');
     const last = signal('Lovelace');
