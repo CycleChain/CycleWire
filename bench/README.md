@@ -42,7 +42,7 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `solidstart` | SolidStart: queries and actions that run on the server, single-flight mutations |
 | `sveltekit` | SvelteKit: load functions, form actions, shallow routing |
 
-Next: Marko and SolidStart. Each stack lives in `apps/<id>/` with its own
+Each stack lives in `apps/<id>/` with its own
 `package.json`, lockfile and [`bench.json`](schema/bench.v1.json) manifest, which lists
 every choice the app makes and the documentation behind it.
 [CONTRIBUTING.md](CONTRIBUTING.md) says what a stack must build, how to add one, and
