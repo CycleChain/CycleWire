@@ -22,7 +22,7 @@ Without a bundler, give its file instead:
 
 Being an action has three consequences:
 
-- **It costs nothing until it is used.** Its 3.6 kB (brotli) arrive when someone reaches
+- **It costs nothing until it is used.** Its 3.7 kB (brotli) arrive when someone reaches
   for an element that uses it, like any other action's code. They include
   [morph](morph.md) and what applies [`<cw-stream>` messages](stream.md), so the first
   answer that needs them does not wait for more code.
@@ -109,6 +109,10 @@ nothing: CycleWire takes their submit in any case.
 - **Anything else** changes nothing. The action fails with an error, reported by
   `cw:error` and `onError` like any action's.
 - **Redirects** are followed, as far as your own origin.
+- **The newest request for a target wins.** A request still on its way to a target stops
+  when another one sets out for it, from any element: a category tapped while a search is
+  loading shows the category's products, never the search's late answer. The request that
+  stopped ends quietly, without `cw:error`.
 - **`<cw-stream>` messages** at the top level of an answer are applied: each changes the
   element it names ([stream](stream.md)), and the rest of the answer goes to the target.
   One answer can update the cart badge, the flash message and the list at once.
@@ -194,5 +198,6 @@ When one URL answers both ways, say so to caches with `Vary: Sec-Fetch-Dest`.
 | `hx-trigger="keyup changed delay:150ms"` | `cw-on-input="request" cw-debounce="150"` |
 | `hx-trigger="revealed"`, `load` | `cw-trigger="visible"`, `load` |
 | `hx-swap-oob` | `<cw-stream>` messages in the answer |
+| `hx-sync` | Built in for one target: the newest request for it wins. Per element, `cw-concurrency` |
 | `hx-indicator` | `[cw-pending]` in CSS |
 | `hx-boost` | Not built in: request actions on the links and forms you choose |

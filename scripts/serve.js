@@ -130,7 +130,8 @@ async function echo(req, res) {
     send(res, Number(url.searchParams.get('status')) || 200, `<!doctype html><title>echo</title><h1 id="echo">${escape(req.method)} /echo</h1>${csrf}<ul>${rows}</ul>`, types['.html']);
 }
 
-createServer(async (req, res) => {
+/** @param {import('node:http').IncomingMessage} req @param {import('node:http').ServerResponse} res */
+async function handle(req, res) {
     const url = new URL(req.url, 'http://localhost');
     const delay = Math.min(Number(url.searchParams.get('delay')) || 0, 10_000);
     if (delay) await new Promise((done) => setTimeout(done, delay));
@@ -169,6 +170,9 @@ createServer(async (req, res) => {
     } catch {
         send(res, 404, 'Not found');
     }
-}).listen(port, host, () => {
+}
+
+// A request the page gave up on (an aborted fetch) ends here, not the server.
+createServer((req, res) => handle(req, res).catch(() => res.destroy())).listen(port, host, () => {
     console.log(`CycleWire dev server → http://${host}:${port}/`);
 });

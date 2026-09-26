@@ -23,6 +23,8 @@ import { apply } from './stream.js';
 
 /** The methods an attribute can name: `cw-get`, `cw-post`, … */
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
+/** The request on its way to each target. @type {WeakMap<Element, AbortController>} */
+const inflight = new WeakMap();
 
 /**
  * Throws unless a URL is on the page's own origin: markup never sends the
@@ -85,8 +87,14 @@ export async function run({ element, event, signal, action, fetch: get = fetch }
     const data = form ? new FormData(form, submitter) : new FormData();
     if (!form && el.name && el.value != null && (!/^(checkbox|radio)$/.test(el.type) || el.checked)) data.append(el.name, el.value);
 
+    // The newest request for a target wins: one still on its way there stops,
+    // whichever element sent it, so a late answer never covers a newer one.
+    inflight.get(target)?.abort();
+    const mine = new AbortController();
+    inflight.set(target, mine);
+    signal.addEventListener('abort', () => mine.abort(), { once: true });
     /** @type {RequestInit} */
-    const init = { signal };
+    const init = { signal: mine.signal };
     if (method === 'get') {
         for (const [name, value] of data) if (typeof value === 'string') url.searchParams.append(name, value);
     } else {
@@ -97,18 +105,26 @@ export async function run({ element, event, signal, action, fetch: get = fetch }
         if (token) init.headers = { 'X-CSRF-Token': token };
     }
     own(url.href);
-    // A plain GET goes through ctx.fetch, which takes a response cw-prefetch started.
-    const response = await get(url.href, init);
-    // A redirect may have led elsewhere.
-    own(response.url || url.href);
-    // 422 is a form sent back with its errors, to show like any answer.
-    if (!response.ok && response.status !== 422) throw new Error(`[CycleWire] request: ${init.method || 'GET'} ${url.href} answered ${response.status}`);
-    // No Content leaves the page as it is, but for a target to remove.
-    if (response.status === 204 && mode !== 'remove') return;
-
-    const content = fragment(new SafeHTML(await response.text()));
-    // A newer run took over while this one was reading its answer.
+    let text = '';
+    try {
+        // A plain GET goes through ctx.fetch, which takes a response cw-prefetch started.
+        const response = await get(url.href, init);
+        // A redirect may have led elsewhere.
+        own(response.url || url.href);
+        // 422 is a form sent back with its errors, to show like any answer.
+        if (!response.ok && response.status !== 422) throw new Error(`[CycleWire] request: ${init.method || 'GET'} ${url.href} answered ${response.status}`);
+        // No Content leaves the page as it is, but for a target to remove.
+        if (response.status === 204 && mode !== 'remove') return;
+        text = await response.text();
+    } catch (error) {
+        // A newer request for the same target took over: nothing to show, and nothing went wrong.
+        if (mine.signal.aborted && !signal.aborted) return;
+        throw error;
+    }
+    // A newer run of this element, or a newer request for the target, took over meanwhile.
     if (signal.aborted) throw signal.reason;
+    if (mine.signal.aborted) return;
+    const content = fragment(new SafeHTML(text));
     const messages = [...content.children].filter((child) => child.localName === 'cw-stream');
     for (const message of messages) message.remove();
     let chosen = content;

@@ -6,6 +6,12 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `cyclewire/request`: the newest request for a target wins. A request still on its way
+  to a target stops when another one sets out for it, from any element, and ends quietly,
+  so a late answer never covers a newer one.
+
 ## [1.2.0] - 2026-09-26
 
 ### Added

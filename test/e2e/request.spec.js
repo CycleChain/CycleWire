@@ -103,6 +103,20 @@ test.describe('cyclewire/request', () => {
         });
     }
 
+    test('the newest request for a target wins, whichever element sent it', async ({ page }) => {
+        await open(page);
+        const stopped = [];
+        page.on('requestfailed', (request) => stopped.push(new URL(request.url()).search));
+        await page.click('#slow');
+        await page.click('#fast');
+        await expect(page.locator('#latest [data-field="which"]')).toHaveText('which=fast');
+        // The slow answer would have landed by now; it was stopped instead.
+        await page.waitForTimeout(900);
+        await expect(page.locator('#latest [data-field="which"]')).toHaveText('which=fast');
+        expect(stopped).toEqual(['?delay=600&which=slow']);
+        expect(await errors(page)).toEqual([]);
+    });
+
     test('another origin is refused before anything is sent', async ({ page }) => {
         await open(page);
         const away = [];

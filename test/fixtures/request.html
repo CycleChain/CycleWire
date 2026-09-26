@@ -63,6 +63,10 @@
     <button id="quiet" type="button" cw-action="request" cw-post="/echo?status=204" cw-target="#cart">Quiet</button>
     <button id="nowhere" type="button" cw-action="request" cw-get="/echo?nowhere" cw-target="#missing">Nowhere</button>
 
+    <button id="slow" type="button" cw-action="request" cw-get="/echo?delay=600&amp;which=slow" cw-target="#latest">Slow</button>
+    <button id="fast" type="button" cw-action="request" cw-get="/echo?which=fast" cw-target="#latest">Fast</button>
+    <div id="latest"></div>
+
     <button id="away" type="button" cw-action="request" cw-get="https://example.com/away">Away</button>
     <button id="broken" type="button" cw-action="request" cw-get="/echo?status=500" cw-target="#results">Broken</button>
     <button id="script" type="button" cw-action="request" cw-get="/fixtures/partials/script.html" cw-target="#results">Script</button>
