@@ -4,7 +4,6 @@ apps/*/dist/
 apps/*/.next/
 apps/*/build/
 apps/*/.svelte-kit/
-apps/*/server/
 apps/*/.astro/
 results/*.local.json
 parts/

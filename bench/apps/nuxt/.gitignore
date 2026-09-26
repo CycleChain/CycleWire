@@ -22,7 +22,3 @@ logs
 .env
 .env.*
 !.env.example
-
-# bench/.gitignore leaves out apps/*/server/, a build output of another stack.
-# Here server/ is Nuxt's server directory, the app's own source.
-!/server/
