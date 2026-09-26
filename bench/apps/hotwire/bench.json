@@ -1,0 +1,100 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "hotwire",
+  "name": "Hotwire (Turbo + Stimulus)",
+  "kind": "library",
+  "summary": "The reference page from a plain Node server, with Turbo and Stimulus. Without JavaScript its links and forms load full pages; with Turbo, category links are Drive visits, the search results and the quick view load as Turbo Frames, add to cart and the newsletter answer with Turbo Streams, and two Stimulus controllers submit the search as you type and open the quick view dialog.",
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "@hotwired/turbo",
+    "@hotwired/stimulus"
+  ],
+  "idioms": [
+    {
+      "choice": "Turbo and Stimulus are installed from npm and bundled with the page's controllers by esbuild, the bundler Turbo's installation guide names, rather than loaded through an import map, the Stimulus handbook's route for Rails: the npm packages ship no minified build, and an import map would load Turbo, Stimulus and each controller as separate modules. Turbo is imported for its side effects only (import \"@hotwired/turbo\"), as the guide suggests when the code calls no Turbo function; importing it starts Turbo Drive, Frames and Streams.",
+      "docs": "https://turbo.hotwired.dev/handbook/installing#as-an-npm-package"
+    },
+    {
+      "choice": "Stimulus starts with Application.start() and the two controllers are registered by hand (window.Stimulus, Stimulus.register), as the Stimulus handbook shows for build systems other than Rails', which have no controller autoloading. Their files follow its [identifier]_controller.js naming.",
+      "docs": "https://stimulus.hotwired.dev/handbook/installing#using-other-build-systems"
+    },
+    {
+      "choice": "The bundle loads with a <script defer> in <head>, as Turbo's handbook shows for the application's bundle; anywhere else, Turbo Drive would load it again with every page change.",
+      "docs": "https://turbo.hotwired.dev/handbook/building#loading-your-application%E2%80%99s-javascript-bundle"
+    },
+    {
+      "choice": "The bundle's file name carries a hash of its content (esbuild's entryNames: '[name]-[hash]', recorded in a manifest the server reads) and its tag has data-turbo-track=\"reload\", so a new bundle makes Turbo Drive load the next page in full rather than merge it into the old one. The shared stylesheet has no version in its URL, so it is not tracked.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#reloading-when-assets-change"
+    },
+    {
+      "choice": "esbuild minifies the bundle, which its documentation says is usual in production. Everything else is its default for a browser bundle: an IIFE, which a classic script runs, the esnext target, and legal comments (Turbo's copyright notice) collected at the end.",
+      "docs": "https://esbuild.github.io/api/#minify"
+    },
+    {
+      "choice": "A plain node:http server, no web framework: Turbo is backend-agnostic, and the server follows the conventions of the Rails integration that the handbook offers as the reference: a stream or a redirect depending on the request's Accept header, a frame or the page depending on its Turbo-Frame header.",
+      "docs": "https://turbo.hotwired.dev/handbook/streams#integration-with-server-side-frameworks"
+    },
+    {
+      "choice": "The page is the app's own copy of the reference template (views.js): the reference render's hooks add attributes but cannot wrap part of the page, and a frame is a <turbo-frame> element wrapped around its content. The frames have no style of their own, and the page lays out exactly like the reference.",
+      "docs": "https://turbo.hotwired.dev/handbook/frames"
+    },
+    {
+      "choice": "Turbo Drive stays on, its default, for every link and form. A category link is an ordinary Drive visit: Turbo fetches the page the server renders for /?category=…, swaps the body and pushes the URL, so the search box is cleared and the chosen link marked by the same render that serves the page without JavaScript.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#application-visits"
+    },
+    {
+      "choice": "Search and category filters run on the server, as they do without JavaScript, rather than in a controller that hides cards in the browser: the Turbo handbook starts from the logic living on the server and the browser dealing only with the HTML it sends. That costs a request per search, after the scenario's 200 ms wait, where filtering in the browser would cost neither.",
+      "docs": "https://turbo.hotwired.dev/handbook/introduction"
+    },
+    {
+      "choice": "The result count and the cards are a <turbo-frame id=\"results\">, and the GET search form targets it with data-turbo-frame, which the Drive handbook suggests for GET forms: Turbo replaces only the frame, never the input being typed into, and the category goes along in the form's hidden field. There is no data-turbo-action, so typing neither changes the URL nor adds history entries.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#redirecting-after-a-form-submission"
+    },
+    {
+      "choice": "A Stimulus controller on the search form submits it 200 ms after the last input, the scenario's delay, with requestSubmit(), which the handbook names for submitting a form from code: unlike submit(), it fires the submit event that Turbo handles. Enter or the button submit at once and cancel the pending timer, and the controller clears it when it disconnects. A newer search cancels one still in flight, which Turbo's frames do on their own.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#form-submissions"
+    },
+    {
+      "choice": "Both frames have target=\"_top\", so the add-to-cart forms inside them submit for the page, like the page's other forms, rather than navigate their frame (which would mark the whole frame busy while the post is in flight). Only the search form and the Quick view links, which name a frame, navigate one.",
+      "docs": "https://turbo.hotwired.dev/handbook/frames#targeting-navigation-into-or-out-of-a-frame"
+    },
+    {
+      "choice": "A request with the Turbo-Frame header gets only the frame it names, which the Frames handbook allows (\"a full document, or just a fragment containing an updated version of the requested frame\"); every other request for the same URL gets the full page, so each URL still works without JavaScript.",
+      "docs": "https://turbo.hotwired.dev/handbook/frames"
+    },
+    {
+      "choice": "Answers that depend on the Turbo-Frame header carry Vary: Turbo-Frame, as the Rails integration gives frame requests their own ETag so that a cache never serves one for the other.",
+      "docs": "https://github.com/hotwired/turbo-rails/blob/main/app/controllers/turbo/frames/frame_request.rb"
+    },
+    {
+      "choice": "Each Quick view link targets a <turbo-frame> inside the <dialog> with data-turbo-frame, so Turbo loads the product into the dialog in place, from the URL that opens it without JavaScript (/?view=…), and the page's URL does not change.",
+      "docs": "https://turbo.hotwired.dev/handbook/frames#targeting-navigation-into-or-out-of-a-frame"
+    },
+    {
+      "choice": "A Stimulus controller on the <dialog> opens it as a modal with showModal() on turbo:frame-load: Turbo only puts HTML into the page, and the handbook leaves behaviour beyond that to Stimulus. The Close button stays a form with method=\"dialog\", which Turbo leaves to the browser.",
+      "docs": "https://turbo.hotwired.dev/handbook/building#attaching-behavior-with-stimulus"
+    },
+    {
+      "choice": "Add to cart and the newsletter answer Turbo's form submissions, whose Accept header lists text/vnd.turbo-stream.html, with Turbo Stream update actions for #cart-count and #cart-total, or for #newsletter-status, and answer other clients with the 303 redirect the plain forms use: the handbook's respond_to pattern. A redirect back to the page, which Turbo 8 can render as a morphing page refresh, would take a second request and a render of the whole page.",
+      "docs": "https://turbo.hotwired.dev/handbook/streams#streaming-from-http-responses"
+    },
+    {
+      "choice": "Everything works without JavaScript first, through the plain links and forms and the server's redirects; Drive, frames and streams are layered on top, as the Streams handbook advises.",
+      "docs": "https://turbo.hotwired.dev/handbook/streams#progressively-enhance-when-necessary"
+    },
+    {
+      "choice": "A newsletter address the server rejects is answered with 422 and a stream with its message, as Turbo expects of a form submission that fails validation. Chrome logs that 422 in the console; the benchmark's journey sends a valid address.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#redirecting-after-a-form-submission"
+    },
+    {
+      "choice": "#cart-count and #cart-total carry data-turbo-permanent, the handbook's own example of a cart counter: streams update them in place, and a page Turbo restores from its cache on Back keeps the current cart instead of the one cached with it.",
+      "docs": "https://turbo.hotwired.dev/handbook/building#persisting-elements-across-page-loads"
+    },
+    {
+      "choice": "Turbo's other defaults stay on: the page cache, the progress bar, whose default style Turbo inserts as a 251-byte <style> in <head> (within the scenario's 512 bytes), and prefetching a link 100 ms after the pointer comes to rest on it. On the desktop profile, where the pointer rests 100 ms before pressing, a category or quick view link therefore starts loading as the press begins, about 80 ms before the click, which then uses that request. A tap gives no hover before it, so on the mobile profile nothing is prefetched.",
+      "docs": "https://turbo.hotwired.dev/handbook/drive#prefetching-links-on-hover"
+    }
+  ]
+}
