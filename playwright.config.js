@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const port = 4173;
+// PW_PORT moves the test server, so two checkouts can run their suites at once.
+const port = Number(process.env.PW_PORT) || 4173;
 // PW_CHANNEL=chrome runs the Chromium project on your installed Chrome instead
 // of Playwright's download.
 const channel = process.env.PW_CHANNEL || undefined;
