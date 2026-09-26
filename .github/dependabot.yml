@@ -1,4 +1,4 @@
-# Weekly updates for the workflows' actions and the development dependencies.
+# Updates for the workflows' actions and every package.json in the repository.
 # CycleWire itself has no runtime dependencies.
 version: 2
 updates:
@@ -17,3 +17,42 @@ updates:
     groups:
       development:
         dependency-type: development
+  # The documentation site and the starter templates.
+  - package-ecosystem: npm
+    directories:
+      - /docs-site
+      - /packages/create-cyclewire
+      - /packages/create-cyclewire/templates/astro
+      - /packages/create-cyclewire/templates/vanilla
+      - /packages/create-cyclewire/templates/vite
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+    groups:
+      all:
+        patterns: ['*']
+  # The benchmark's runner, weekly: Playwright brings the browser it measures with.
+  - package-ecosystem: npm
+    directory: /bench
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build(bench)
+    groups:
+      runner:
+        patterns: ['*']
+  # The benchmark's apps, monthly, one pull request per app: a new release of a
+  # stack is measured once it has had time to settle, and the Benchmark
+  # workflow checks that the app still builds the same page.
+  - package-ecosystem: npm
+    directories:
+      - /bench/apps/*
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 4
+    commit-message:
+      prefix: build(bench)
+    groups:
+      app:
+        patterns: ['*']
