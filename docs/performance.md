@@ -77,9 +77,11 @@ and stylesheets.
 A touch screen gives no warning before a tap: the finger lands and the click follows
 about 100 ms later, too soon for a module to arrive over a slow connection. So where the
 primary input cannot hover, the default looks ahead: once the page is idle, the modules
-of the `cw-action` elements that near the viewport are fetched (downloaded and
-compiled, not run). Choose with `start({ preload })`: `'auto'` (the default), `'visible'`
-to look ahead on every screen, or `'intent'` to fetch nothing before intent.
+of the `cw-action` elements that near the viewport are fetched (a URL entry is
+downloaded and compiled without running; a loader function, such as Vite's, is
+imported, [as preloading always does](html-api.md#cw-preload)). Choose with
+`start({ preload })`: `'auto'` (the default), `'visible'` to look ahead on every screen,
+or `'intent'` to fetch nothing before intent.
 
 ## Fetch code and data together
 
