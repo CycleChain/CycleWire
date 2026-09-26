@@ -42,7 +42,8 @@ function table({ results }) {
         ...['cart', 'filter', 'search', 'quickview', 'newsletter'].map((id) => [metric(EFFECTS, `effect-${id}`).label, (s) => ms(median(s.journeys[id]?.effect))]),
         ['Early tap', (s) => early(s.early)],
     ];
-    const rows = stacks.map((stack) => `| ${stack.kind === 'control' ? `${stack.name} (control)` : stack.name} | ${columns.map(([, read]) => read(stack.summaries)).join(' | ')} |`);
+    const label = (stack) => (stack.kind === 'control' ? `${stack.name} (control)` : stack.variant ? `${stack.name} (variant)` : stack.name);
+    const rows = stacks.map((stack) => `| ${label(stack)} | ${columns.map(([, read]) => read(stack.summaries)).join(' | ')} |`);
     return [`| Stack | ${columns.map(([label]) => label).join(' | ')} |`, `| --- | ${columns.map(() => '---:').join(' | ')} |`, ...rows].join('\n');
 }
 
