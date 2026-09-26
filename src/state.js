@@ -12,6 +12,8 @@ export const opts = {
     idleTimeout: 2000,
     mutations: true,
     shadow: false,
+    /** @type {'auto' | 'intent' | 'visible'} */
+    preload: 'auto',
     /** @type {((error: unknown, info: import('./index.js').RunInfo) => void) | undefined} */
     onError: undefined,
 };

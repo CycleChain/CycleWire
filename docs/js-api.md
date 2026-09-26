@@ -22,6 +22,7 @@ Returns the API. Calling it again only registers the `actions` you pass.
 | `idleTimeout` | `2000` | `requestIdleCallback` timeout for `idle`, in ms |
 | `mutations` | `true` | Watch for added and removed content with a MutationObserver |
 | `shadow` | `false` | Observe the open shadow roots found while scanning (declarative shadow DOM) |
+| `preload` | `'auto'` | What else fetches the modules of elements without `data-cw-preload`. `'auto'`: on screens that cannot hover (`(hover: none)`), the element nearing the viewport once the page is idle; `'visible'`: the same on every screen; `'intent'`: nothing but intent |
 | `onError` | `console.error` | `(error, { action, element, event }) => void` for failed runs |
 | `plugins` | – | Plugins to install, e.g. `[signals()]` |
 

@@ -5,6 +5,8 @@
 - **One script.** The core is 4.7 kB brotli, or 4.8 kB for the classic-script build
   that also starts itself.
 - **No action code** until someone reaches for it, or a trigger or preload asks for it.
+  On screens that cannot hover, the modules of the actions in view are fetched once the
+  page is idle (see below).
 - **No work on load** beyond attaching listeners and one `querySelectorAll` for triggers
   and scheduled preloads. No component renders; state is not even parsed until it is
   used.
@@ -45,7 +47,7 @@ For the fastest possible activation, inline the 4.8 kB classic-script build in t
 
 | `data-cw-preload` | Use for |
 | --- | --- |
-| `intent` (default) | Almost everything |
+| `intent` (default) | Almost everything. On touch screens it also fetches what is in view once the page is idle |
 | `visible` | Below-the-fold features that are likely to be used |
 | `idle` | Features most visitors use, fetched once the page settles |
 | `load` | The one action that must be ready right away, or actions that call gesture-gated APIs |
@@ -53,6 +55,13 @@ For the fastest possible activation, inline the 4.8 kB classic-script build in t
 
 Speculative preloads are skipped when the user asked to save data or is on a 2G
 connection. An explicit `preload()` call is not.
+
+A touch screen gives no warning before a tap: the finger lands and the click follows
+about 100 ms later, too soon for a module to arrive over a slow connection. So where the
+primary input cannot hover, the default looks ahead: once the page is idle, the modules
+of the `data-cw-action` elements that near the viewport are fetched (downloaded and
+compiled, not run). Choose with `start({ preload })`: `'auto'` (the default), `'visible'`
+to look ahead on every screen, or `'intent'` to fetch nothing before intent.
 
 ## What the benchmark shows
 
@@ -67,8 +76,9 @@ and what to do about it:
   without JavaScript.
 - **An action's first use waits for its code.** On a slow network that is a round trip
   before the handler runs. On touch screens there is no hover, so intent preloading only
-  starts when the finger lands. Fetch the features most visitors use once the page is idle
-  (`idle`), and features that are likely to be used as they come into view (`visible`).
+  starts when the finger lands; the default now also fetches what is in view once the page
+  is idle. A tap that comes sooner than that still waits: preload the one action people
+  reach for first with `load`.
 - **Code, then data.** A handler that fetches data after its module arrives pays two round
   trips on its first use. Preload those modules earlier.
 - **Let the bundler preload an action's imports.** Vite fetches the chunks an action

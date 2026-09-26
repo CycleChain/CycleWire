@@ -97,4 +97,61 @@ test.describe('registry and preloading', () => {
         await page.locator('#b').scrollIntoViewIfNeeded();
         await expect(page.locator('link[rel="modulepreload"]')).toHaveCount(1);
     });
+
+    test('intent fetches a module whose scheduled preload has not happened yet', async ({ page }) => {
+        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated" data-cw-preload="idle">b</button>' });
+        // The browser never goes idle.
+        await page.evaluate(() => {
+            window.requestIdleCallback = () => 0;
+            window.CW.start({ actions: { evaluated: '/fixtures/actions/evaluated.js' } });
+        });
+        await page.waitForTimeout(100);
+        expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+        await page.hover('#b');
+        await expect(page.locator('link[rel="modulepreload"]')).toHaveCount(1);
+    });
+
+    // Screens that cannot hover get no warning before a tap.
+    const touchScreen = () => {
+        const native = window.matchMedia.bind(window);
+        window.matchMedia = (query) => (query === '(hover: none)' ? { ...native(query), matches: true } : native(query));
+    };
+
+    test('on screens that cannot hover, actions in view are fetched once the page is idle', async ({ page }) => {
+        await boot(page, {
+            start: false,
+            html: `<button id="near" data-cw-action="evaluated">near</button>
+                   <button id="own" data-cw-action="log" data-cw-preload="none">own choice</button>
+                   <div class="spacer"></div>
+                   <button id="far" data-cw-action="state">far</button>`,
+        });
+        await page.evaluate(touchScreen);
+        await page.evaluate(() => window.CW.start({ actions: { evaluated: '/fixtures/actions/evaluated.js', log: '/fixtures/actions/log.js', state: '/fixtures/actions/state.js' } }));
+        const hints = page.locator('link[rel="modulepreload"]');
+        await expect(hints).toHaveCount(1);
+        await expect(hints).toHaveAttribute('href', /\/evaluated\.js$/);
+        // Fetched, not run.
+        expect(await log(page)).toEqual([]);
+        await page.locator('#far').scrollIntoViewIfNeeded();
+        await expect(hints).toHaveCount(2);
+        await expect(hints.nth(1)).toHaveAttribute('href', /\/state\.js$/);
+    });
+
+    test('preload: "intent" keeps every fetch waiting for intent, and "visible" looks ahead on every screen', async ({ page }) => {
+        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await page.evaluate(touchScreen);
+        await page.evaluate(() => window.CW.start({ preload: 'intent', actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
+        await page.waitForTimeout(300);
+        expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+
+        // A screen that can hover.
+        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await page.evaluate(() => window.CW.start({ actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
+        await page.waitForTimeout(300);
+        expect(await page.locator('link[rel="modulepreload"]').count()).toBe(0);
+
+        await boot(page, { start: false, html: '<button id="b" data-cw-action="evaluated">b</button>' });
+        await page.evaluate(() => window.CW.start({ preload: 'visible', actions: { evaluated: '/fixtures/actions/evaluated.js' } }));
+        await expect(page.locator('link[rel="modulepreload"]')).toHaveCount(1);
+    });
 });

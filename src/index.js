@@ -67,6 +67,9 @@ import { warn } from './util.js';
  * @property {number} [idleTimeout]    requestIdleCallback timeout for `idle`, in ms. Default 2000
  * @property {boolean} [mutations]     watch for added and removed content. Default true
  * @property {boolean} [shadow]        observe the open shadow roots found while scanning (declarative shadow DOM)
+ * @property {'auto' | 'intent' | 'visible'} [preload]  what fetches the modules of elements without `data-cw-preload`
+ *     besides intent. "auto" (default): on screens that cannot hover, nearing the viewport once the page is idle;
+ *     "visible": the same on every screen; "intent": nothing else
  * @property {(error: unknown, info: RunInfo) => void} [onError]  replaces the default console.error
  * @property {Plugin[]} [plugins]
  */
@@ -95,7 +98,7 @@ export function start(options = {}) {
     }
     global[KEY] = api;
 
-    for (const key of /** @type {const} */ (['capture', 'rootMargin', 'idleTimeout', 'mutations', 'shadow', 'onError'])) {
+    for (const key of /** @type {const} */ (['capture', 'rootMargin', 'idleTimeout', 'mutations', 'shadow', 'preload', 'onError'])) {
         if (options[key] !== undefined) /** @type {any} */ (opts)[key] = options[key];
     }
     setPrefix(options.prefix ?? opts.prefix);

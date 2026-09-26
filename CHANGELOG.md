@@ -6,6 +6,26 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Touch screens look ahead.** Where the primary input cannot hover, intent arrives
+  with the tap, too late for a module to load over a slow connection. By default the
+  modules of `data-cw-action` elements without `data-cw-preload` are now also fetched
+  once the page is idle, as their elements near the viewport. `start({ preload })`
+  chooses: `'auto'` (the default), `'visible'` (on every screen) or `'intent'` (the 1.0
+  behaviour). The benchmark's mobile profile showed the first category filter and quick
+  view waiting for their code.
+- **Intent fetches modules whose scheduled preload has not happened yet.** Hovering,
+  focusing or touching an element with `data-cw-preload="idle"` or `"visible"` now
+  fetches its modules at once; only `none` opts out.
+
+### Performance
+
+- One `load` listener and one idle callback serve every `idle` trigger and preload,
+  instead of one per element.
+- Finding an element's actions no longer creates an `Attr` node for each of its
+  attributes, so hovering over the page leaves no nodes behind.
+
 ## [1.0.1] - 2026-09-25
 
 ### Security

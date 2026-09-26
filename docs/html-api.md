@@ -82,11 +82,16 @@ the page is prerendered by speculation rules.
 
 | Value | Fetches the element's action modules |
 | --- | --- |
-| `intent` (default) | On `pointerover`, `focusin` or `pointerdown` |
+| `intent` (default) | On `pointerover`, `focusin` or `pointerdown`. On screens that cannot hover, also once the page is idle and the element nears the viewport |
 | `visible` | When the element nears the viewport |
 | `idle` | When the browser is idle after load |
 | `load` | At start |
 | `none` | Never ahead of time |
+
+Intent also fetches the modules of an element whose `visible` or `idle` preload has not
+happened yet; only `none` turns it off. The look-ahead on screens that cannot hover
+applies to elements with `data-cw-action` and no `data-cw-preload`; `start({ preload })`
+changes it (see the [JavaScript API](js-api.md#startoptions)).
 
 URL entries are fetched with `<link rel="modulepreload">`, which downloads and compiles
 without running. Loader-function entries are imported, which runs the module's top level,

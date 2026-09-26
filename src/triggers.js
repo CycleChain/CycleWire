@@ -27,6 +27,8 @@ const observers = new Map();
 let waiting = [];
 /** Work held back while the page is prerendered. @type {(() => void)[]} */
 let held = [];
+/** Work waiting for the page to settle: one load listener and one idle callback serve all of it. @type {(() => void)[]} */
+let idling = [];
 
 /** Nothing speculative runs in a prerendered page nobody has looked at yet. */
 function gate(/** @type {() => void} */ fn) {
@@ -43,15 +45,29 @@ function gate(/** @type {() => void} */ fn) {
 
 /** @param {() => void} fn */
 function idle(fn) {
+    if (idling.push(fn) > 1) return;
+    const flush = () => {
+        const queue = idling;
+        idling = [];
+        queue.forEach((task) => task());
+    };
     const schedule = () => {
         const ric = /** @type {any} */ (globalThis).requestIdleCallback;
         // Safari has no requestIdleCallback.
-        if (ric) ric(fn, { timeout: opts.idleTimeout });
-        else setTimeout(fn, 200);
+        if (ric) ric(flush, { timeout: opts.idleTimeout });
+        else setTimeout(flush, 200);
     };
     if (document.readyState === 'complete') schedule();
     else addEventListener('load', schedule, { once: true });
 }
+
+/**
+ * Whether elements that do not choose a preload also fetch their modules
+ * before any intent: once the page is idle, as they near the viewport. With
+ * the default `auto`, on screens that cannot hover, where the first sign of
+ * intent is the tap itself.
+ */
+const ahead = () => opts.preload === 'visible' || (opts.preload === 'auto' && matchMedia('(hover: none)').matches);
 
 /** @param {Element} el @param {() => void} fn */
 function whenVisible(el, fn) {
@@ -81,6 +97,7 @@ function whenVisible(el, fn) {
 function schedule(el, when, fn) {
     if (when === 'load') return fn();
     if (when === 'idle') return idle(fn);
+    if (when === 'ahead') return idle(() => whenVisible(el, fn));
     if (when === 'visible') return whenVisible(el, fn);
     if (when.startsWith('media:')) {
         const query = matchMedia(when.slice(6).trim());
@@ -117,7 +134,8 @@ function setup(el) {
         if (action) gate(() => schedule(el, trigger.trim(), () => current === generation && fire(el, action)));
         else if (__DEV__) warn(`${attrs.trigger} needs a ${attrs.action} on the same element.`, el);
     }
-    const preload = el.getAttribute(attrs.preload)?.trim();
+    const own = el.getAttribute(attrs.preload);
+    const preload = own === null ? (el.hasAttribute(attrs.action) && ahead() ? 'ahead' : '') : own.trim();
     if (preload && preload !== 'intent' && preload !== 'none' && !preloaded.has(el)) {
         preloaded.add(el);
         gate(() => schedule(el, preload, () => {
@@ -133,7 +151,7 @@ function setup(el) {
  * @param {ParentNode} root
  */
 export function scan(root) {
-    const selector = `[${attrs.trigger}],[${attrs.preload}]`;
+    const selector = `[${attrs.trigger}],[${attrs.preload}]${ahead() ? `,[${attrs.action}]` : ''}`;
     if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) setup(/** @type {Element} */ (root));
     for (const el of root.querySelectorAll(selector)) setup(el);
     if (opts.shadow) {
@@ -199,6 +217,7 @@ export function stopTriggers() {
     visible.clear();
     waiting = [];
     held = [];
+    idling = [];
     activated = new WeakSet();
     preloaded = new WeakSet();
 }

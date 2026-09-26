@@ -120,7 +120,8 @@ function onIntent(/** @type {Event} */ event) {
             mode = el.getAttribute(attrs.preload);
         }
     }
-    if (names && (!mode || mode === 'intent') && !saveData()) {
+    // Intent fetches now what a scheduled preload would fetch later; only "none" opts out.
+    if (names && mode?.trim() !== 'none' && !saveData()) {
         for (const name of names) registry.preload(splitName(name)[0]);
     }
 }

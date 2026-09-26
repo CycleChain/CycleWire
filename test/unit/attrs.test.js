@@ -7,7 +7,8 @@ function el(localName, attributes = {}, type) {
     return {
         localName,
         type,
-        attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
+        getAttributeNames: () => Object.keys(attributes),
+        getAttribute: (name) => (name in attributes ? attributes[name] : null),
     };
 }
 
@@ -71,4 +72,6 @@ test('actionsOf collects every binding on an element', () => {
         class: 'btn',
     });
     assert.deepEqual(actionsOf(node, attrs), ['cart#add', 'cart#peek']);
+    // A binding left blank binds nothing.
+    assert.deepEqual(actionsOf(el('button', { 'data-cw-action': '  ', 'data-cw-on-click': '' }), attrs), []);
 });

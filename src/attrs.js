@@ -119,8 +119,10 @@ export function ignored(el, attrs) {
  */
 export function actionsOf(el, attrs) {
     const names = [];
-    for (const { name, value } of el.attributes) {
-        if (value && (name === attrs.action || name.startsWith(attrs.on))) names.push(value.trim());
+    // getAttributeNames() creates no Attr nodes, unlike reading el.attributes.
+    for (const name of el.getAttributeNames()) {
+        const value = (name === attrs.action || name.startsWith(attrs.on)) && el.getAttribute(name)?.trim();
+        if (value) names.push(value);
     }
     return names;
 }

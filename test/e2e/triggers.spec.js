@@ -12,6 +12,21 @@ test.describe('triggers', () => {
         await expect.poll(() => entries(page)).toEqual(['run:now', 'second:later']);
     });
 
+    test('one idle callback serves every idle trigger and preload', async ({ page }) => {
+        await boot(page, { start: false, html: [1, 2, 3].map((n) => `<div id="t${n}" data-cw-action="log" data-cw-trigger="idle"></div><button data-cw-action="evaluated" data-cw-preload="idle">p${n}</button>`).join('') });
+        await page.evaluate(() => {
+            window.__idle = 0;
+            window.requestIdleCallback = (callback) => {
+                window.__idle++;
+                return setTimeout(callback, 0);
+            };
+            window.CW.start({ actions: { log: '/fixtures/actions/log.js', evaluated: '/fixtures/actions/evaluated.js' } });
+        });
+        await expect.poll(() => entries(page)).toEqual(['run:t1', 'run:t2', 'run:t3']);
+        await expect(page.locator('link[rel="modulepreload"]')).toHaveCount(1);
+        expect(await page.evaluate(() => window.__idle)).toBe(1);
+    });
+
     test('visible runs when the element approaches the viewport, once', async ({ page }) => {
         await boot(page, { html: '<div class="spacer"></div><div id="v" data-cw-action="log" data-cw-trigger="visible">below</div>' });
         await page.waitForTimeout(200);

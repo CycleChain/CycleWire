@@ -95,7 +95,9 @@ analytics.
 ### Preloading
 
 `data-cw-preload` chooses when to fetch: `intent` (the default: pointer over, focus or
-touch start), `visible`, `idle`, `load` or `none`. Speculative fetches are skipped under
+touch start), `visible`, `idle`, `load` or `none`. Screens that cannot hover give no
+warning before a tap, so there the default also fetches an action's module once the page
+is idle and its element nears the viewport. Speculative fetches are skipped under
 Save-Data and on 2G connections.
 
 ## Compared with Qwik
