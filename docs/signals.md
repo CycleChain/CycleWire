@@ -1,7 +1,7 @@
 # cyclewire/signals
 
 Fine-grained reactivity that **resumes from state the server serialized into the
-page** instead of re-rendering it. 3.1 kB brotli.
+page** instead of re-rendering it. 3.4 kB brotli.
 
 ```js
 import { start } from 'cyclewire';

@@ -11,9 +11,9 @@ action runs.
 | `cyclewire` | Activation: everything in the next section | 4.9 kB |
 | `cyclewire/css` | Stylesheets that arrive with the actions that need them | 0.6 kB |
 | `cyclewire/dom` | Safe `html` templates, inert fragments, `swap`, `transition` | 2.2 kB |
-| `cyclewire/morph` | Morphing to new server HTML while keeping focus and input | 1.8 kB |
-| `cyclewire/signals` | Signals, reactive stores, `cw-bind` resumed from server JSON | 3.1 kB |
-| `cyclewire/stream` | Server-sent HTML messages that change the page, over Server-Sent Events or in responses | 3.3 kB |
+| `cyclewire/morph` | Morphing to new server HTML while keeping focus and input | 2.2 kB |
+| `cyclewire/signals` | Signals, reactive stores, `cw-bind` resumed from server JSON | 3.4 kB |
+| `cyclewire/stream` | Server-sent HTML messages that change the page, over Server-Sent Events or in responses | 3.7 kB |
 | `cyclewire/prefetch` | Data fetched on intent next to the action's code, taken by `ctx.fetch` | 0.5 kB |
 | `cyclewire/bootstrap` | Bootstrap 5's data API without its JavaScript | 2.1 kB |
 
@@ -210,7 +210,7 @@ you need two-way inputs.
 
 ### One script with everything
 
-For prototypes and small sites, `cyclewire.full.global.min.js` (14.0 kB) bundles every
+For prototypes and small sites, `cyclewire.full.global.min.js` (15.0 kB) bundles every
 module into one classic script:
 - It exposes `CycleWire.css`, `CycleWire.dom`, `CycleWire.morph`, `CycleWire.signals` and
   `CycleWire.bootstrap`.

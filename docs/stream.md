@@ -2,7 +2,7 @@
 
 The server changes the page with small HTML messages, sent over
 [Server-Sent Events](https://developer.mozilla.org/docs/Web/API/Server-sent_events) as
-things happen, or in the body of any response. 3.3 kB brotli, with `dom` and `morph`.
+things happen, or in the body of any response. 3.7 kB brotli, with `dom` and `morph`.
 
 ```html
 <cw-stream op="append" target="messages">

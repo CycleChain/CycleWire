@@ -100,7 +100,7 @@ start({
 <script src="https://cdn.jsdelivr.net/npm/cyclewire@1/dist/cyclewire.global.min.js" defer></script>
 ```
 
-That's it. Until someone reaches for the button, the page has downloaded a single 5.0 kB
+That's it. Until someone reaches for the button, the page has downloaded a single 5 kB
 script and no action code.
 
 ---
@@ -349,17 +349,17 @@ Minified, measured by `npm run size` and enforced in CI:
 <!-- size:start -->
 | File | brotli | gzip |
 | --- | --- | --- |
-| `cyclewire.min.js` (core) | 5.0 kB | 5.4 kB |
+| `cyclewire.min.js` (core) | 4.9 kB | 5.4 kB |
 | `css.min.js` | 0.6 kB | 0.7 kB |
-| `dom.min.js` | 2.2 kB | 2.5 kB |
-| `morph.min.js` (includes what it needs from dom) | 1.8 kB | 2.0 kB |
-| `signals.min.js` | 3.1 kB | 3.4 kB |
-| `stream.min.js` (includes dom and morph) | 3.3 kB | 3.6 kB |
+| `dom.min.js` | 2.2 kB | 2.4 kB |
+| `morph.min.js` (includes what it needs from dom) | 2.2 kB | 2.5 kB |
+| `signals.min.js` | 3.4 kB | 3.8 kB |
+| `stream.min.js` (includes dom and morph) | 3.7 kB | 4.1 kB |
 | `prefetch.min.js` (a plugin) | 0.5 kB | 0.6 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
-| `devtools.min.js` (development only) | 7.1 kB | 7.9 kB |
+| `devtools.min.js` (development only) | 7.0 kB | 7.9 kB |
 | `cyclewire.global.min.js` (core + auto start) | 5.1 kB | 5.6 kB |
-| `cyclewire.full.global.min.js` (everything) | 14.3 kB | 15.7 kB |
+| `cyclewire.full.global.min.js` (everything) | 15.0 kB | 16.5 kB |
 <!-- size:end -->
 
 ---

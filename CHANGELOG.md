@@ -6,66 +6,7 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
-### Added
-
-- **`cyclewire/prefetch`** (0.5 kB brotli): data fetched on intent, next to the
-  action's code. An element names a URL with `cw-prefetch`; when the pointer, focus or a
-  finger reaches it, the plugin starts a GET of that URL on the page's own origin, and
-  the handler's `ctx.fetch` takes the response that is already on its way. The code and
-  the data then arrive together instead of one after the other.
-- An `intent(element)` plugin hook, called whenever the user heads for an element that
-  binds actions.
-- The package exports its CDN builds as `cyclewire/dist/*.min.js`, so a server can
-  resolve the classic-script build to inline it in `<head>`.
-
-### Changed
-
-- **Quick handlers run at once.** A handler whose module is in memory no longer waits
-  for a paint unless its synchronous part held the main thread for more than 10 ms the
-  last time it ran, per action and per device. Its result then lands in the next frame
-  instead of the one after. Slow handlers still let the pressed state paint first.
-- **Speculative preloads step aside.** URL entries are preloaded at high priority on
-  intent and for `cw-preload="load"`, and at low priority for `visible`, `idle` and the
-  touch look-ahead, so they never hold up the page's own images.
-- Size budgets: `cyclewire.min.js` 5120 B brotli (measured 4952 B), the classic builds
-  5376 B and 14848 B, and `prefetch.min.js` 768 B.
-
-### Fixed
-
-- **A computed no longer runs again when nothing it read has changed.** A write
-  upstream marked every computed below it stale, and each ran again even when the
-  computed between them came out the same; now a stale computed first checks the
-  versions of what it read, as the documentation always said it did.
-- A computed whose function threw runs again the next time it is read, instead of
-  returning its last value; an effect disposed during its own run stays unsubscribed.
-- `morph()` puts an `xlink:href` it adds to SVG in the XLink namespace, so a `<use>` it
-  gives one points at its symbol.
-- The production modules of `cyclewire/prefetch` and `cyclewire/stream` no longer
-  import `util.js` for nothing: a page that loads them without a bundler makes one
-  request fewer, and esbuild stops warning about the import.
-
-### Performance
-
-- **`cyclewire/signals` is two to five times faster.** A computed or an effect that
-  runs again walks the list of what its last run read and changes no subscription
-  while it reads the same sources in the same order; a source it reads twice is
-  listed once; and a source with one subscriber keeps it without a set. On the
-  benchmark's micro suite it moved from last in every scenario to first on dynamic
-  graphs, ahead of Vue on most, and close to Preact and alien-signals on the rest.
-  `signals.min.js` grows to 3417 B brotli (budget 3520 B).
-- **`morph()` moves only what changed places, and skips what did not change.** It pairs
-  the new children with the old ones first, then leaves the longest run already in
-  order where it is: swapping two rows of a thousand moves two rows instead of every row
-  between them (8 DOM mutations instead of 3,990). A subtree equal to its new markup is
-  left alone after one native comparison. On 1,000 keyed rows it is now faster than
-  morphdom at every operation the micro suite measures, for example 6.4 ms against
-  10.7 ms to update every tenth row (15 ms before). `morph.min.js` grows to 2196 B
-  brotli (budget 2304 B); the full classic build's budget becomes 15488 B.
-- The pointer-over handler skips elements without attributes, the look-ahead decides
-  once per scanned subtree instead of once per element, and plugins' `preload` hooks run
-  once per module instead of on every hover.
-
-## [1.1.0-beta.1] - 2026-09-26
+## [1.1.0] - 2026-09-26
 
 ### Added
 
@@ -115,16 +56,24 @@ All notable changes to CycleWire are documented here. The format follows
 - **A documentation site** at [cyclechain.github.io/CycleWire/docs/](https://cyclechain.github.io/CycleWire/docs/),
   built from `docs/*.md` with search. The Markdown files stay the only source; the build
   checks every link and anchor.
+- **`cyclewire/prefetch`** (0.5 kB brotli): data fetched on intent, next to the
+  action's code. An element names a URL with `cw-prefetch`; when the pointer, focus or a
+  finger reaches it, the plugin starts a GET of that URL on the page's own origin, and
+  the handler's `ctx.fetch` takes the response that is already on its way. The code and
+  the data then arrive together instead of one after the other.
+- An `intent(element)` plugin hook, called whenever the user heads for an element that
+  binds actions.
+- The package exports its CDN builds as `cyclewire/dist/*.min.js`, so a server can
+  resolve the classic-script build to inline it in `<head>`.
 
 ### Changed
 
 - **Attributes are written `cw-action`, not `data-cw-action`.** Every name in the
   vocabulary drops `data-`: `cw-action`, `cw-on-click`, `cw-props`, `cw-trigger`,
   `cw-preload`, `cw-pending`, `cw-state`, `cw-bind`, `cw-store`, `cw-key`, and so on,
-  as short to write as htmx's `hx-*` or Alpine's `x-*`. The prefix now names the whole
-  start of the attribute: `start({ prefix: 'data-cw-' })` keeps the 1.0 names, which HTML
-  validators accept, `'x-'` gives `x-action`, and `''` still means `data-action`. The
-  helpers, `cyclewire check` and the Vite plugin follow the same prefix.
+  as short to write as htmx's `hx-*` or Alpine's `x-*`. The `prefix` option now names the
+  whole start of the attribute (`'x-'` gives `x-action`, and `''` still means
+  `data-action`); the helpers, `cyclewire check` and the Vite plugin follow it.
 - **Touch screens look ahead.** Where the primary input cannot hover, intent arrives
   with the tap, too late for a module to load over a slow connection. By default the
   modules of `cw-action` elements without `cw-preload` are now also fetched
@@ -132,11 +81,34 @@ All notable changes to CycleWire are documented here. The format follows
   chooses: `'auto'` (the default), `'visible'` (on every screen) or `'intent'` (the 1.0
   behaviour). The benchmark's mobile profile showed the first category filter and quick
   view waiting for their code.
-- Size budgets: `stream.min.js` 4096 B, and `cyclewire.full.global.min.js` 14336 B
-  (brotli), which now includes `cyclewire/stream`.
 - **Intent fetches modules whose scheduled preload has not happened yet.** Hovering,
   focusing or touching an element with `cw-preload="idle"` or `"visible"` now
   fetches its modules at once; only `none` opts out.
+- **Quick handlers run at once.** A handler whose module is in memory no longer waits
+  for a paint unless its synchronous part held the main thread for more than 10 ms the
+  last time it ran, per action and per device. Its result then lands in the next frame
+  instead of the one after. Slow handlers still let the pressed state paint first.
+- **Speculative preloads step aside.** URL entries are preloaded at high priority on
+  intent and for `cw-preload="load"`, and at low priority for `visible`, `idle` and the
+  touch look-ahead, so they never hold up the page's own images.
+- Size budgets, brotli: `cyclewire.min.js` 5120 B (measured 4952 B), `prefetch.min.js`
+  768 B, `stream.min.js` 4096 B, `signals.min.js` 3520 B, `morph.min.js` 2304 B, and the
+  classic builds 5376 B and 15488 B; the full one now includes `cyclewire/stream` and
+  `cyclewire/prefetch`.
+
+### Fixed
+
+- **A computed no longer runs again when nothing it read has changed.** A write
+  upstream marked every computed below it stale, and each ran again even when the
+  computed between them came out the same; now a stale computed first checks the
+  versions of what it read, as the documentation always said it did.
+- A computed whose function threw runs again the next time it is read, instead of
+  returning its last value; an effect disposed during its own run stays unsubscribed.
+- `morph()` puts an `xlink:href` it adds to SVG in the XLink namespace, so a `<use>` it
+  gives one points at its symbol.
+- The production modules of `cyclewire/prefetch` and `cyclewire/stream` no longer
+  import `util.js` for nothing: a page that loads them without a bundler makes one
+  request fewer, and esbuild stops warning about the import.
 
 ### Performance
 
@@ -144,6 +116,24 @@ All notable changes to CycleWire are documented here. The format follows
   instead of one per element.
 - Finding an element's actions no longer creates an `Attr` node for each of its
   attributes, so hovering over the page leaves no nodes behind.
+- **`cyclewire/signals` is two to five times faster.** A computed or an effect that
+  runs again walks the list of what its last run read and changes no subscription
+  while it reads the same sources in the same order; a source it reads twice is
+  listed once; and a source with one subscriber keeps it without a set. On the
+  benchmark's micro suite it moved from last in every scenario to first on dynamic
+  graphs, ahead of Vue on most, and close to Preact and alien-signals on the rest.
+  `signals.min.js` grows to 3417 B brotli (budget 3520 B).
+- **`morph()` moves only what changed places, and skips what did not change.** It pairs
+  the new children with the old ones first, then leaves the longest run already in
+  order where it is: swapping two rows of a thousand moves two rows instead of every row
+  between them (8 DOM mutations instead of 3,990). A subtree equal to its new markup is
+  left alone after one native comparison. On 1,000 keyed rows it is now faster than
+  morphdom at every operation the micro suite measures, for example 6.4 ms against
+  10.7 ms to update every tenth row (15 ms before). `morph.min.js` grows to 2196 B
+  brotli (budget 2304 B); the full classic build's budget becomes 15488 B.
+- The pointer-over handler skips elements without attributes, the look-ahead decides
+  once per scanned subtree instead of once per element, and plugins' `preload` hooks run
+  once per module instead of on every hover.
 
 ## [1.0.1] - 2026-09-25
 
@@ -207,7 +197,7 @@ interactive without hydration.
   SweetAlert2, DataTables and jQuery, tested in Chromium, Firefox and WebKit and live
   on GitHub Pages.
 
-[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.1.0-beta.1...HEAD
-[1.1.0-beta.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...v1.1.0-beta.1
+[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CycleChain/CycleWire/releases/tag/v1.0.0

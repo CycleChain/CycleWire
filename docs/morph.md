@@ -3,7 +3,7 @@
 Update part of the page to match new server-rendered HTML while keeping every element
 that stays. Focus, the caret, typed-in values, scroll positions, playing media and loaded
 iframes survive. This is the job a virtual DOM does, done DOM to DOM, with nothing
-re-rendered on the client. 1.8 kB brotli.
+re-rendered on the client. 2.2 kB brotli.
 
 ```js
 import { morph } from 'cyclewire/morph';
