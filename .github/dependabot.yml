@@ -1,5 +1,7 @@
 # Updates for the workflows' actions and every package.json in the repository.
-# CycleWire itself has no runtime dependencies.
+# CycleWire itself has no runtime dependencies. Major versions of the tools the
+# apps and templates are built with (TypeScript, Vite, a framework) change how
+# they build, so they are taken on purpose, not by a weekly pull request.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -17,6 +19,10 @@ updates:
     groups:
       development:
         dependency-type: development
+    ignore:
+      # The types follow the oldest Node the tooling supports (22), not the newest.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
   # The documentation site and the starter templates.
   - package-ecosystem: npm
     directories:
@@ -32,6 +38,9 @@ updates:
     groups:
       all:
         patterns: ['*']
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   # The benchmark's runner, weekly: Playwright brings the browser it measures with.
   - package-ecosystem: npm
     directory: /bench
@@ -56,3 +65,6 @@ updates:
     groups:
       app:
         patterns: ['*']
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
