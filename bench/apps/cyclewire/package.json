@@ -7,7 +7,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "cyclewire": "1.0.1"
+    "cyclewire": "file:../../.."
   },
   "devDependencies": {
     "vite": "8.3.1"

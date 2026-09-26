@@ -3,8 +3,8 @@
  * module installs and builds them, starts their servers on free ports, and
  * starts the proxy in front of them (proxy/main.js, in its own process).
  */
-import { spawn, fork } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { execFileSync, spawn, fork } from 'node:child_process';
+import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -73,7 +73,18 @@ export async function prepare(stack, { build = true, log = console.log } = {}) {
     }
     for (const name of stack.manifest.packages ?? []) {
         const file = join(stack.dir, 'node_modules', name, 'package.json');
-        stack.versions[name] = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')).version : null;
+        const version = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')).version : null;
+        // A package linked from this repository (file:) is its source at this commit, not a release.
+        stack.versions[name] = version && lstatSync(join(stack.dir, 'node_modules', name)).isSymbolicLink() ? `${version}+${commit()}` : version;
+    }
+}
+
+/** The short commit the checkout is at, for packages built from source. */
+function commit() {
+    try {
+        return execFileSync('git', ['rev-parse', '--short', process.env.GITHUB_SHA || 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } catch {
+        return 'source';
     }
 }
 

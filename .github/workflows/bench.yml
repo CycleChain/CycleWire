@@ -12,11 +12,13 @@ name: Benchmark
 #          the repository settings. See bench/README.md.
 
 on:
+  # The CycleWire app is built from this repository's source, so changes to
+  # the library are checked too.
   pull_request:
-    paths: ['bench/**', '.github/workflows/bench.yml']
+    paths: ['bench/**', 'src/**', 'package.json', 'scripts/build.js', '.github/workflows/bench.yml']
   push:
     branches: [main]
-    paths: ['bench/**', '.github/workflows/bench.yml']
+    paths: ['bench/**', 'src/**', 'package.json', 'scripts/build.js', '.github/workflows/bench.yml']
   workflow_dispatch:
     inputs:
       profile:
@@ -59,6 +61,9 @@ jobs:
           cache-dependency-path: |
             bench/package-lock.json
             bench/apps/*/package-lock.json
+      - name: Build CycleWire, which the CycleWire app links to
+        working-directory: .
+        run: npm ci && npm run build
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
@@ -91,6 +96,9 @@ jobs:
           cache-dependency-path: |
             bench/package-lock.json
             bench/apps/*/package-lock.json
+      - name: Build CycleWire, which the CycleWire app links to
+        working-directory: .
+        run: npm ci && npm run build
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Measure

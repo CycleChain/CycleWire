@@ -3,7 +3,7 @@
   "id": "cyclewire",
   "name": "CycleWire",
   "kind": "library",
-  "summary": "The reference page activated by CycleWire: the 4.7 kB core loads up front, and each interaction's code loads when someone reaches for it. Nothing hydrates.",
+  "summary": "The reference page activated by CycleWire, built from this repository's source, so every run measures the commit it runs on: the core loads up front, and each interaction's code loads when someone reaches for it. Nothing hydrates.",
   "build": "npm run build",
   "start": "node server.js",
   "search": "live",
@@ -24,12 +24,12 @@
       "docs": "https://vite.dev/guide/backend-integration"
     },
     {
-      "choice": "Add to cart is preloaded when the browser is idle (data-cw-preload=\"idle\"), since most visitors use it; everything else loads on intent, the default.",
+      "choice": "Add to cart is preloaded when the browser is idle (cw-preload=\"idle\"), since most visitors use it; everything else loads on intent, the default.",
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#choose-when-to-fetch"
     },
     {
-      "choice": "The cart header is bound to a store the server serializes (data-cw-store, data-cw-bind); cyclewire/signals arrives with the cart action.",
-      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#data-cw-store"
+      "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#cw-store"
     },
     {
       "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",

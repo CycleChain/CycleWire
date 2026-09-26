@@ -19,15 +19,15 @@ listen({
     js: fileURLToPath(new URL('dist/js/', import.meta.url)),
     hooks: (state) => ({
         head,
-        bodyEnd: `<script type="application/json" data-cw-store="cart">${json(summary(state.cart))}</script>`,
+        bodyEnd: `<script type="application/json" cw-store="cart">${json(summary(state.cart))}</script>`,
         attrs: {
-            cartCount: () => ' data-cw-bind="text: $cart.count"',
-            cartTotal: () => ' data-cw-bind="text: $cart.totalText"',
-            searchForm: () => ' data-cw-action="catalog#search" data-cw-on-input="catalog#search"',
-            categoryLink: () => ' data-cw-action="catalog#category" data-cw-prevent="click"',
-            addToCart: () => ' data-cw-action="cart#add" data-cw-preload="idle"',
-            quickView: () => ' data-cw-action="quickview" data-cw-prevent="click"',
-            newsletter: () => ' data-cw-action="newsletter"',
+            cartCount: () => ' cw-bind="text: $cart.count"',
+            cartTotal: () => ' cw-bind="text: $cart.totalText"',
+            searchForm: () => ' cw-action="catalog#search" cw-on-input="catalog#search"',
+            categoryLink: () => ' cw-action="catalog#category" cw-prevent="click"',
+            addToCart: () => ' cw-action="cart#add" cw-preload="idle"',
+            quickView: () => ' cw-action="quickview" cw-prevent="click"',
+            newsletter: () => ' cw-action="newsletter"',
         },
     }),
 });

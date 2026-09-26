@@ -214,4 +214,8 @@ npx playwright install chromium
 node run.js --profile=mobile --iterations=15
 ```
 
-Results name the commit, the browser and the installed version of every stack.
+Results name the commit, the browser and the installed version of every stack. Every
+stack runs a published release, except CycleWire's own app, which is built from this
+repository's source so that each run measures the library at the commit it runs on; its
+version is recorded with that commit, as in `1.1.0-beta.1+6ef70dd`. Build the library
+first (`npm ci && npm run build` in the repository root) when you run it yourself.
