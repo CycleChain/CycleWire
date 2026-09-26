@@ -8,7 +8,9 @@
  *   /bench/         the raw benchmark results, and a redirect from the old results page
  *
  * The package version is stamped into every element marked `data-version`,
- * so the page never shows a stale one; the build fails if it finds none. The
+ * and each bundle's brotli size from dist/sizes.json into every element
+ * marked `data-size="<file>"`, so the page never shows a stale one; the build
+ * fails if it finds no version mark or a size it cannot fill. The
  * landing page's Benchmark section is built from the newest published run of
  * each profile in bench/results/. `scripts/serve.js` does the same, so local
  * previews match.
@@ -38,6 +40,24 @@ export function stamp(html, version) {
     const out = html.replace(/(<([a-z][\w-]*)\b[^>]*?\sdata-version(?=[\s=>/])[^>]*>)[^<]*(<\/\2>)/gi, (match, open, tag, close) => {
         count++;
         return `${open}v${version}${close}`;
+    });
+    return { html: out, count };
+}
+
+/**
+ * Writes each bundle's size into every element marked `data-size="<file>"`,
+ * from dist/sizes.json's `files[file].label`.
+ * @param {string} html
+ * @param {{ files: Record<string, { label: string }> }} sizes
+ * @returns {{ html: string, count: number }}
+ */
+export function stampSizes(html, sizes) {
+    let count = 0;
+    const out = html.replace(/(<([a-z][\w-]*)\b[^>]*?\sdata-size="([^"]+)"[^>]*>)[^<]*(<\/\2>)/gi, (match, open, tag, file, close) => {
+        const found = sizes.files[file];
+        if (!found) throw new Error(`dist/sizes.json has no size for ${file}.`);
+        count++;
+        return `${open}${found.label}${close}`;
     });
     return { html: out, count };
 }
@@ -79,9 +99,10 @@ export async function assemble(out) {
     const page = join(out, 'index.html');
     const { html, count } = stamp(await readFile(page, 'utf8'), current);
     if (!count) throw new Error('site/index.html has no element marked data-version.');
-    await writeFile(page, insertBenchmark(html, bench.html));
+    const sized = stampSizes(html, JSON.parse(await readFile(join(root, 'dist', 'sizes.json'), 'utf8')));
+    await writeFile(page, insertBenchmark(sized.html, bench.html));
     await writeFile(join(out, '.nojekyll'), '');
-    console.log(`Assembled the site for v${current} in ${out} (${count} version marks).`);
+    console.log(`Assembled the site for v${current} in ${out} (${count} version marks, ${sized.count} sizes).`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

@@ -22,7 +22,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildSite } from '../bench/scripts/build-site.js';
-import { insertBenchmark, stamp, version } from './site.js';
+import { insertBenchmark, stamp, stampSizes, version } from './site.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const option = (name, fallback) => {
@@ -110,7 +110,12 @@ createServer(async (req, res) => {
         // The same version stamp and benchmark section as the deployed site (scripts/site.js).
         if (extname(file) === '.html') {
             let html = stamp(body.toString('utf8'), await version()).html;
-            if (file === landing) html = insertBenchmark(html, bench.html);
+            if (file === landing) {
+                html = insertBenchmark(html, bench.html);
+                // Sizes appear once `npm run size` has written them.
+                const sizes = await readFile(join(root, 'dist', 'sizes.json'), 'utf8').catch(() => null);
+                if (sizes) html = stampSizes(html, JSON.parse(sizes)).html;
+            }
             body = Buffer.from(html);
         }
         send(res, 200, body, types[extname(file)] || 'application/octet-stream');
