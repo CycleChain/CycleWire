@@ -1,8 +1,8 @@
 name: Benchmark
 
 # check:   on changes to bench/, the harness's tests, the conformance check for
-#          every stack, and a short run (one journey and two early taps) to
-#          prove the pipeline works.
+#          every stack a change can affect (scripts/changed.js), and a short
+#          run (one journey and two early taps) to prove the pipeline works.
 # measure: by hand or weekly, the full run for each profile, in two parts on
 #          two runners, every stack in each: the journeys (with the loads they
 #          start with), and the early taps with the repeat visits. A part keeps
@@ -62,7 +62,10 @@ jobs:
     name: Conformance and a short run
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -78,9 +81,29 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
-      - run: node run.js --check
+      # A pull request that changes only some apps checks those apps and their
+      # variants; anything else (the runner, the scenario, the library, a push
+      # to main) checks every stack.
+      - name: Which stacks to check
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          stacks=""
+          if [ -n "$PR" ]; then stacks=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate --jq '.[].filename' | node scripts/changed.js); fi
+          echo "stacks=$stacks" >> "$GITHUB_OUTPUT"
+          echo "Stacks to check: ${stacks:-all}"
+      - name: Conformance
+        if: steps.scope.outputs.stacks != 'none'
+        env:
+          STACKS: ${{ steps.scope.outputs.stacks }}
+        run: node run.js --check ${STACKS:+--stacks="$STACKS"}
       - name: A short run
-        run: node run.js --iterations=1 --kinds=journeys,early --journeys=cart --offsets=0,1000 --skip-build --out=results/check.json
+        if: steps.scope.outputs.stacks != 'none'
+        env:
+          STACKS: ${{ steps.scope.outputs.stacks }}
+        run: node run.js --iterations=1 --kinds=journeys,early --journeys=cart --offsets=0,1000 --skip-build ${STACKS:+--stacks="$STACKS"} --out=results/check.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:

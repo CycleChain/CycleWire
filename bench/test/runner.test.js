@@ -114,3 +114,15 @@ test('Spearman\'s rho is 1 for the same order, -1 for the reverse, and handles t
     assert.ok(Math.abs(spearman([1, 2, 2, 3], [1, 2, 3, 4]) - 0.9486832980505138) < 1e-9);
     assert.equal(spearman([1, 2], [2, 1]), null);
 });
+
+test('a change to some apps checks those apps and their variants; anything else checks every stack', async () => {
+    const { changedStacks } = await import('../scripts/changed.js');
+    const variants = { cyclewire: null, 'cyclewire--inline': { of: 'cyclewire' }, next: null, 'next--searchparams': { of: 'next' }, htmx: null };
+    assert.deepEqual(changedStacks(['bench/apps/htmx/server.js'], variants), ['htmx']);
+    assert.deepEqual(changedStacks(['bench/apps/cyclewire/src/actions/cart.js', 'bench/README.md'], variants), ['cyclewire', 'cyclewire--inline']);
+    // A variant's own change leaves the stack it builds on alone.
+    assert.deepEqual(changedStacks(['bench/apps/next--searchparams/app/page.js'], variants), ['next--searchparams']);
+    assert.equal(changedStacks(['bench/runner/measure.js'], variants), null);
+    assert.equal(changedStacks(['src/delegate.js', 'bench/apps/htmx/server.js'], variants), null);
+    assert.deepEqual(changedStacks(['bench/METHODOLOGY.md', 'docs/performance.md'], variants), []);
+});
