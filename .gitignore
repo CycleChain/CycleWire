@@ -1,6 +1,6 @@
 node_modules/
 dist/
-types/
+/types/
 test-results/
 playwright-report/
 blob-report/
@@ -8,3 +8,7 @@ _site/
 *.tgz
 *.log
 .DS_Store
+docs-site/node_modules/
+docs-site/dist/
+docs-site/.astro/
+docs-site/src/content/docs/
