@@ -172,11 +172,12 @@ afterwards. CycleWire never sets `disabled`, because that would throw focus to `
 ```
 
 Read by `cyclewire/auto` and the classic-script builds. Place it before the CycleWire
-script. The full build also accepts `"signals": false` and `"bootstrap": true` (or
-`{ "global": true }`).
+script. The full build also accepts `"signals": false`, `"bootstrap": true` (or
+`{ "global": true }`) and `"streams": { "channels": { … } }`.
 
 ## Module attributes
 
 These belong to the optional modules and are documented with them:
 - [signals](signals.md): `data-cw-state`, `data-cw-store`, `data-cw-bind`.
 - [morph](morph.md): `data-cw-key`, `data-cw-preserve`.
+- [stream](stream.md): `data-cw-stream`, and the `data-cw-stream-state` it sets.

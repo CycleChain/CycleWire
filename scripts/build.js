@@ -6,7 +6,7 @@
  *   dist/esm-dev/*.js    same, with development warnings ("development" export condition)
  *   dist/<name>.min.js   bundled + minified ES modules for CDNs and <script type="module">
  *   dist/cyclewire.global.min.js        classic script: core, auto-starts, sets window.CycleWire
- *   dist/cyclewire.full.global.min.js   classic script: core + css + dom + morph + signals + bootstrap
+ *   dist/cyclewire.full.global.min.js   classic script: core + css + dom + morph + signals + stream + bootstrap
  *
  * Type declarations are emitted separately by `tsc` (see the "build" npm script).
  */
@@ -45,6 +45,7 @@ const bundles = {
     'dom.min.js': 'src/dom.js',
     'morph.min.js': 'src/morph.js',
     'signals.min.js': 'src/signals.js',
+    'stream.min.js': 'src/stream.js',
     'bootstrap.min.js': 'src/bootstrap.js',
 };
 

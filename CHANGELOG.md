@@ -28,6 +28,16 @@ All notable changes to CycleWire are documented here. The format follows
   page; the declarations stay up to date; `index.html` is checked; and the build writes a
   manifest `cyclewire check` can read. `vite` is an optional peer dependency.
 
+- **`cyclewire/stream`** (3.3 kB brotli with `dom` and `morph`): the server changes the
+  page with `<cw-stream op="append|prepend|before|after|inner|outer|morph|remove">`
+  messages, over Server-Sent Events (`connect()`) or in any response (`apply()`).
+  Connections are shared per URL, reconnect with the last event id and a growing delay,
+  close when their element leaves the page, and step aside for the back/forward cache and
+  prerendering. The `streams({ channels })` plugin subscribes `data-cw-stream` elements
+  to the channels you list, on your own origin only. `<cw-stream>` is not a custom
+  element, so markup that reaches the page any other way does nothing. The full
+  classic-script build includes it.
+
 ### Changed
 
 - **Touch screens look ahead.** Where the primary input cannot hover, intent arrives
@@ -37,6 +47,8 @@ All notable changes to CycleWire are documented here. The format follows
   chooses: `'auto'` (the default), `'visible'` (on every screen) or `'intent'` (the 1.0
   behaviour). The benchmark's mobile profile showed the first category filter and quick
   view waiting for their code.
+- Size budgets: `stream.min.js` 4096 B, and `cyclewire.full.global.min.js` 14336 B
+  (brotli), which now includes `cyclewire/stream`.
 - **Intent fetches modules whose scheduled preload has not happened yet.** Hovering,
   focusing or touching an element with `data-cw-preload="idle"` or `"visible"` now
   fetches its modules at once; only `none` opts out.

@@ -9,7 +9,8 @@
             "actions": {
                 "widget": { "module": "/fixtures/actions/styled.js", "css": "/fixtures/styles/widget.css" },
                 "state": "/fixtures/actions/state.js"
-            }
+            },
+            "streams": { "channels": { "feed": "/sse/listen?channel=full-fixture" } }
         }
     </script>
     <script src="/dist/cyclewire.full.global.min.js"></script>
@@ -20,5 +21,6 @@
         <output id="count" data-cw-bind="text: count">2</output>
         <button id="inc" data-cw-action="state#inc">+1</button>
     </section>
+    <ul id="feed" data-cw-stream="feed"></ul>
 </body>
 </html>

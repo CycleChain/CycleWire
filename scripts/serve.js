@@ -16,6 +16,11 @@
  *   /fail-once/<token>/<path>       answer 500 the first time a token is seen, then serve <path>
  *   /echo                           echo a (form) request back as HTML
  *   /health                         readiness probe
+ *   /sse/listen?channel=            a Server-Sent Events stream (retry: 200 ms)
+ *   /sse/fail?channel=&times=       answers 500 that many times for the channel, then streams
+ *   POST /sse/send?channel=         writes the request body, raw SSE, to the channel's listeners
+ *   POST /sse/drop?channel=         ends the channel's streams, as a dropped connection would
+ *   /sse/stats?channel=             { open, connects, lastEventId } for the channel
  */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -59,6 +64,43 @@ const types = {
 
 const failedTokens = new Set();
 
+/** Server-Sent Events channels for the stream tests. @type {Map<string, { open: Set<import('node:http').ServerResponse>, connects: number, failures: number, lastEventId: string | null }>} */
+const channels = new Map();
+const channel = (/** @type {string} */ name) => {
+    if (!channels.has(name)) channels.set(name, { open: new Set(), connects: 0, failures: 0, lastEventId: null });
+    return /** @type {NonNullable<ReturnType<typeof channels.get>>} */ (channels.get(name));
+};
+
+/** @param {import('node:http').IncomingMessage} req @param {import('node:http').ServerResponse} res @param {URL} url */
+async function sse(req, res, url) {
+    const name = url.searchParams.get('channel') || 'default';
+    const state = channel(name);
+    const action = url.pathname.slice('/sse/'.length);
+    if (action === 'stats') return send(res, 200, JSON.stringify({ open: state.open.size, connects: state.connects, lastEventId: state.lastEventId }), types['.json']);
+    if (req.method === 'POST' && action === 'send') {
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        for (const listener of state.open) listener.write(body);
+        return send(res, 200, JSON.stringify({ listeners: state.open.size }), types['.json']);
+    }
+    if (req.method === 'POST' && action === 'drop') {
+        for (const listener of state.open) listener.end();
+        state.open.clear();
+        return send(res, 200, '{}', types['.json']);
+    }
+    if (action === 'fail' && state.failures < (Number(url.searchParams.get('times')) || 1)) {
+        state.failures++;
+        return send(res, 500, 'failing on purpose');
+    }
+    if (action !== 'listen' && action !== 'fail') return send(res, 404, 'Not found');
+    state.connects++;
+    state.lastEventId = /** @type {string | undefined} */ (req.headers['last-event-id']) ?? url.searchParams.get('last-event-id');
+    res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-store', Connection: 'keep-alive' });
+    res.write('retry: 200\n\n');
+    state.open.add(res);
+    req.on('close', () => state.open.delete(res));
+}
+
 const escape = (value) => String(value).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function send(res, status, body, type = 'text/plain; charset=utf-8') {
@@ -91,6 +133,7 @@ createServer(async (req, res) => {
 
     if (url.pathname === '/health') return send(res, 200, 'ok');
     if (url.pathname === '/echo') return echo(req, res);
+    if (url.pathname.startsWith('/sse/')) return sse(req, res, url);
 
     let pathname = decodeURIComponent(url.pathname);
     const failOnce = /^\/fail-once\/([\w-]+)(\/.*)$/.exec(pathname);

@@ -10,8 +10,11 @@ after the first release.
 2. Update `version` in `package.json` (`npm version <patch|minor|major> --no-git-tag-version`).
 3. Move the "Unreleased" notes in `CHANGELOG.md` under the new version and date, and
    update the compare links at the bottom.
-4. Commit: `git commit -am "chore(release): X.Y.Z"`.
-5. Tag and push:
+4. Refresh the README's size table with `npm run build && npm run size -- --readme`, and
+   check the sizes written in the prose (README, `docs/performance.md`, `docs/modules.md`,
+   `docs/concepts.md`); the landing page takes its sizes from `dist/sizes.json` by itself.
+5. Commit: `git commit -am "chore(release): X.Y.Z"`.
+6. Tag and push:
 
    ```bash
    git tag -a vX.Y.Z -m "CycleWire vX.Y.Z"

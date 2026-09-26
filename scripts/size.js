@@ -2,6 +2,9 @@
 /**
  * Measures every shipped bundle (raw, gzip -9, brotli -q 11), enforces the size
  * budgets and writes dist/sizes.json for the README and the landing page.
+ *
+ *   node scripts/size.js            measure and check
+ *   node scripts/size.js --readme   also rewrite the README's size table (before a release)
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
@@ -14,9 +17,19 @@ const budgets = {
     'dom.min.js': { brotli: 2304 },
     'morph.min.js': { brotli: 2048 },
     'signals.min.js': { brotli: 3200 },
+    'stream.min.js': { brotli: 4096 },
     'bootstrap.min.js': { brotli: 2304 },
     'cyclewire.global.min.js': { brotli: 5120 },
-    'cyclewire.full.global.min.js': { brotli: 12800 },
+    'cyclewire.full.global.min.js': { brotli: 14336 },
+};
+
+/** How the README names each bundle. */
+const notes = {
+    'cyclewire.min.js': 'core',
+    'cyclewire.global.min.js': 'core + auto start',
+    'morph.min.js': 'includes what it needs from dom',
+    'stream.min.js': 'includes dom and morph',
+    'cyclewire.full.global.min.js': 'everything',
 };
 
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
@@ -53,6 +66,20 @@ for (const [file, budget] of Object.entries(budgets)) {
 
 console.table(rows);
 await writeFile('dist/sizes.json', JSON.stringify(report, null, 2) + '\n');
+
+if (process.argv.includes('--readme')) {
+    const kB = (bytes) => `${(bytes / 1000).toFixed(1)} kB`;
+    const table = [
+        '| File | brotli | gzip |',
+        '| --- | --- | --- |',
+        ...Object.entries(report.files).map(([file, size]) => `| \`${file}\`${notes[file] ? ` (${notes[file]})` : ''} | ${kB(size.brotli)} | ${kB(size.gzip)} |`),
+    ].join('\n');
+    const readme = await readFile('README.md', 'utf8');
+    const marks = /(<!-- size:start -->)[\s\S]*?(<!-- size:end -->)/;
+    if (!marks.test(readme)) throw new Error('README.md has no <!-- size:start --> … <!-- size:end --> block.');
+    await writeFile('README.md', readme.replace(marks, (match, start, end) => `${start}\n${table}\n${end}`));
+    console.log('Updated the size table in README.md');
+}
 
 if (failed) {
     console.error('Size budget exceeded.');

@@ -70,6 +70,11 @@
       "development": "./dist/esm-dev/signals.js",
       "default": "./dist/esm/signals.js"
     },
+    "./stream": {
+      "types": "./types/stream.d.ts",
+      "development": "./dist/esm-dev/stream.js",
+      "default": "./dist/esm/stream.js"
+    },
     "./bootstrap": {
       "types": "./types/bootstrap.d.ts",
       "development": "./dist/esm-dev/bootstrap.js",

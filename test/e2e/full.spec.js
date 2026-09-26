@@ -11,10 +11,14 @@ test.describe('full classic-script build', () => {
 
     test('exposes every module on window.CycleWire', async ({ page }) => {
         const shape = await page.evaluate(() => {
-            const { css, dom, morph, signals, bootstrap } = window.CycleWire;
-            return [typeof css, typeof dom.html, typeof morph, typeof signals.signal, typeof bootstrap.bootstrap];
+            const { css, dom, morph, signals, stream, bootstrap } = window.CycleWire;
+            return [typeof css, typeof dom.html, typeof morph, typeof signals.signal, typeof stream.connect, typeof bootstrap.bootstrap];
         });
-        expect(shape).toEqual(['function', 'function', 'function', 'function', 'function']);
+        expect(shape).toEqual(['function', 'function', 'function', 'function', 'function', 'function']);
+    });
+
+    test('opens the stream channels the JSON config lists', async ({ page }) => {
+        await expect(page.locator('#feed')).toHaveAttribute('data-cw-stream-state', 'open');
     });
 
     test('applies an action\'s stylesheet from the JSON config before its handler', async ({ page }) => {

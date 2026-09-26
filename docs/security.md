@@ -92,10 +92,19 @@ and can restyle a page to mislead. That is why stylesheet URLs follow the same r
 modules: `cyclewire/css` takes them from `{ module, css }` entries or from `css()` calls in
 your code, and never from markup.
 
+## Streams open only the channels you list
+
+`data-cw-stream` names a channel, never a URL: the `streams()` plugin of
+[`cyclewire/stream`](stream.md) maps channel names to same-origin URLs, so injected markup
+can only subscribe to streams you chose. Stream messages are HTML your server wrote,
+applied like `html.raw()`: `<script>` elements in them never run, and `<cw-stream>` is not
+a custom element, so a message that reaches the page any other way does nothing.
+
 ## Trusted Types
 
-When the page enforces `require-trusted-types-for 'script'`, `cyclewire/dom` and
-`cyclewire/morph` parse markup through a Trusted Types policy named `cyclewire`. Allow it:
+When the page enforces `require-trusted-types-for 'script'`, `cyclewire/dom`,
+`cyclewire/morph` and `cyclewire/stream` parse markup through a Trusted Types policy named
+`cyclewire`. Allow it:
 
 ```http
 Content-Security-Policy: require-trusted-types-for 'script'; trusted-types cyclewire
