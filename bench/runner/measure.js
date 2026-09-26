@@ -144,6 +144,16 @@ async function interactionDelay(page, inputAt) {
     }, inputAt).catch(() => null);
 }
 
+/** A cold load and nothing else, to compare with another tool's (crosscheck/). */
+export async function coldVisit({ browser, profile, url }) {
+    const session = await open({ browser, profile });
+    try {
+        return await load(session, url);
+    } finally {
+        await session.close();
+    }
+}
+
 /**
  * A cold load, then one journey.
  * @param {{ browser: import('playwright').Browser, profile: object, url: string, journey: string, searchMode: 'live' | 'submit' }} options

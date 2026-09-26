@@ -202,7 +202,17 @@ The tables mark in bold, for each metric, every stack that no other stack beats 
 rule, controls aside. A stack with a noisy metric can be bold next to one with a lower but
 steadier median, because the data cannot tell them apart.
 
-## 10. Limitations
+## 10. Cross-check with Lighthouse
+
+Every measured run also has a cross-check on its own runner (`crosscheck/run.js`): for
+each stack, five cold loads by the harness and five Lighthouse navigations, in turn, on
+one machine, with the same DevTools throttling (the profile's numbers are Lighthouse's
+own), the same screen and user agent, and an empty cache. The job's summary is a table of
+the two medians of FCP, LCP, TBT and CLS for every stack. Lighthouse measures TBT from FCP
+to Time to Interactive and the harness from FCP until the page settles, so TBT can differ
+where long tasks run late; FCP, LCP and CLS should agree within the noise.
+
+## 11. Limitations
 
 - Chromium only: the measurements rely on the Chrome DevTools Protocol.
 - Throttling is per request in the browser, not at the packet level. Packet-level
@@ -214,7 +224,7 @@ steadier median, because the data cannot tell them apart.
 - One page is not every application. The page is small and server-rendered by design:
   it is the kind of page this benchmark wants to ask about.
 
-## 11. Reproducing
+## 12. Reproducing
 
 ```bash
 cd bench

@@ -1,0 +1,13 @@
+{
+  "name": "cyclewire-bench-crosscheck",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Lighthouse, run next to the harness on the same machine, to check the harness's load metrics.",
+  "type": "module",
+  "scripts": {
+    "crosscheck": "node run.js"
+  },
+  "dependencies": {
+    "lighthouse": "13.5.0"
+  }
+}

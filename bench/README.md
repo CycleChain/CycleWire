@@ -85,7 +85,9 @@ stopped keeps what it measured). Each profile is measured in two parts on two ru
 every stack in each: the journeys with the loads they start with, and the early taps with
 the repeat visits. Every metric then comes from one machine, and neither part comes near
 the six-hour job limit. `node scripts/merge.js` joins the parts into one results file,
-which records both machines. With the repository variable `BENCH_PUBLISH` set to
+which records both machines. Next to them, a Lighthouse cross-check
+(`crosscheck/`, its own `package.json`) compares the harness's load metrics with
+Lighthouse's on one runner and writes the table into the job's summary. With the repository variable `BENCH_PUBLISH` set to
 `true`, it also opens a pull request from `github-actions[bot]` that replaces the files in
 `results/`. Merging new results redeploys the website, whose
 [Benchmark section](https://cyclechain.github.io/CycleWire/#benchmark) shows the newest run

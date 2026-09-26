@@ -10,6 +10,9 @@ name: Benchmark
 #          time limit.
 # merge:   joins each profile's parts into one results file (scripts/merge.js),
 #          kept as an artifact.
+# crosscheck: next to measure, Lighthouse and the harness's cold load in turn on
+#          one runner, to check the harness's load metrics (crosscheck/run.js);
+#          the table is in the job's summary.
 # publish: when every profile was measured and the repository variable
 #          BENCH_PUBLISH is 'true', a pull request from github-actions[bot]
 #          replaces bench/results/ with the new runs and updates the README's
@@ -159,6 +162,46 @@ jobs:
         with:
           name: bench-results-${{ matrix.profile }}
           path: bench/merged/*.json
+          retention-days: 90
+
+  crosscheck:
+    name: Lighthouse cross-check (${{ matrix.profile }})
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ${{ vars.BENCH_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: ${{ fromJSON((inputs.profile == 'mobile' && '["mobile"]') || (inputs.profile == 'desktop' && '["desktop"]') || '["mobile","desktop"]') }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            bench/package-lock.json
+            bench/crosscheck/package-lock.json
+            bench/apps/*/package-lock.json
+      - name: Build CycleWire, which the CycleWire app links to
+        working-directory: .
+        run: npm ci && npm run build
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm ci
+        working-directory: bench/crosscheck
+      - name: Cross-check
+        working-directory: bench/crosscheck
+        env:
+          PROFILE: ${{ matrix.profile }}
+          STACKS: ${{ inputs.stacks }}
+        run: node run.js --profile="$PROFILE" --runs=5 ${STACKS:+--stacks="$STACKS"} --out="out/$PROFILE.json"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench-crosscheck-${{ matrix.profile }}
+          path: bench/crosscheck/out/*.json
+          if-no-files-found: ignore
           retention-days: 90
 
   publish:

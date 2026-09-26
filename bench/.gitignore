@@ -9,3 +9,4 @@ apps/*/.astro/
 results/*.local.json
 parts/
 merged/
+crosscheck/out/
