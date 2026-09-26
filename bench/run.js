@@ -11,6 +11,7 @@
  *   node run.js --serve                   start everything and print the URLs
  *
  * Options: --kinds=journeys,early,repeat  --journeys=cart,filter,search,quickview,newsletter
+ *          --offsets=0,1000,2000 (ms after first paint that the early taps wait)
  *          --seed=1  --out=<file>  --channel=chrome  --headed  --skip-build  --skip-conformance
  */
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
@@ -33,6 +34,12 @@ import { prng, shuffle } from './scenario/random.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const KINDS = ['journeys', 'early', 'repeat'];
+/**
+ * When the early taps land, in ms after "Add to cart" is first painted: at
+ * once, then one and two seconds later, which shows how long after it
+ * appears each page takes a tap in the page itself.
+ */
+const OFFSETS = [0, 1000, 2000];
 
 const { values: args } = parseArgs({
     options: {
@@ -41,6 +48,7 @@ const { values: args } = parseArgs({
         iterations: { type: 'string', default: '15' },
         kinds: { type: 'string', default: KINDS.join(',') },
         journeys: { type: 'string', default: JOURNEYS.join(',') },
+        offsets: { type: 'string', default: OFFSETS.join(',') },
         seed: { type: 'string', default: '1' },
         out: { type: 'string' },
         channel: { type: 'string' },
@@ -68,6 +76,8 @@ const profile = PROFILES[args.profile] ?? fail(`Unknown profile "${args.profile}
 const stacks = list(args.stacks ?? available().join(','), available(), 'stacks').map(load);
 const kinds = list(args.kinds, KINDS, 'kinds');
 const journeys = list(args.journeys, JOURNEYS, 'journeys');
+const offsets = [...new Set(args.offsets.split(',').map((item) => Number(item.trim())))].sort((a, b) => a - b);
+if (!offsets.length || offsets.some((offset) => !Number.isInteger(offset) || offset < 0 || offset > 10_000)) fail('--offsets must be whole milliseconds from 0 to 10000, comma-separated');
 const iterations = Number(args.iterations);
 const seed = Number(args.seed);
 if (!Number.isInteger(iterations) || iterations < 1) fail('--iterations must be a positive integer');
@@ -115,11 +125,11 @@ try {
         const failures = [];
         const tasks = measured.flatMap((stack) => [
             ...(kinds.includes('journeys') ? journeys.map((journey) => ({ stack, kind: 'journey', journey })) : []),
-            ...(kinds.includes('early') ? [{ stack, kind: 'early' }] : []),
+            ...(kinds.includes('early') ? offsets.map((offset) => ({ stack, kind: 'early', offset })) : []),
             ...(kinds.includes('repeat') ? [{ stack, kind: 'repeat' }] : []),
         ]);
 
-        const runTask = async ({ stack, kind, journey }, iteration) => {
+        const runTask = async ({ stack, kind, journey, offset }, iteration) => {
             const base = { browser, profile, url: stack.url };
             const into = samples.get(stack.id);
             if (kind === 'journey') {
@@ -129,7 +139,7 @@ try {
                     into.journeys[journey].push({ iteration, ...result });
                 }
             } else if (kind === 'early') {
-                const result = await earlyVisit(base);
+                const result = await earlyVisit({ ...base, offset });
                 if (iteration >= 0) into.early.push({ iteration, ...result });
             } else {
                 const result = await repeatVisit(base);
@@ -139,7 +149,8 @@ try {
 
         // One unrecorded pass, so servers and the proxy's compression cache are warm.
         log(`Warming up ${measured.length} stack(s)`);
-        for (const task of tasks) await runTask(task, -1).catch((error) => log(`${task.stack.id}: warm-up ${task.kind} failed: ${error.message}`));
+        // The warm-up needs one early tap per stack, not one per offset.
+        for (const task of tasks.filter((item) => !item.offset)) await runTask(task, -1).catch((error) => log(`${task.stack.id}: warm-up ${task.kind} failed: ${error.message}`));
 
         const out = args.out ?? `${ROOT}/results/${startedAt.toISOString().slice(0, 10)}-${profile.id}.local.json`;
         await mkdir(dirname(out), { recursive: true });
@@ -152,12 +163,13 @@ try {
             finishedAt: new Date().toISOString(),
             profile: describe(profile),
             environment: environmentInfo,
-            config: { iterations: completed, planned: iterations, seed, kinds, journeys, quietMs: QUIET_MS, delivery: POLICY },
+            config: { iterations: completed, planned: iterations, seed, kinds, journeys, offsets, quietMs: QUIET_MS, delivery: POLICY },
             stacks: stacks.map((stack) => ({
                 id: stack.id,
                 name: stack.manifest.name,
                 kind: stack.manifest.kind,
                 summary: stack.manifest.summary,
+                variant: stack.manifest.variant ?? null,
                 versions: stack.versions,
                 search: stack.manifest.search,
                 idioms: stack.manifest.idioms,
@@ -183,8 +195,8 @@ try {
                 try {
                     await runTask(task, iteration);
                 } catch (error) {
-                    failures.push({ stack: task.stack.id, kind: task.kind, journey: task.journey ?? null, iteration, message: String(error.message).slice(0, 500) });
-                    log(`${task.stack.id}: ${task.kind}${task.journey ? ` ${task.journey}` : ''} failed: ${error.message.split('\n')[0]}`);
+                    failures.push({ stack: task.stack.id, kind: task.kind, journey: task.journey ?? null, ...(task.offset === undefined ? {} : { offset: task.offset }), iteration, message: String(error.message).slice(0, 500) });
+                    log(`${task.stack.id}: ${task.kind}${task.journey ? ` ${task.journey}` : ''}${task.offset ? ` +${task.offset} ms` : ''} failed: ${error.message.split('\n')[0]}`);
                 }
             }
             // Saved after every iteration, so a run that is stopped keeps what it measured.

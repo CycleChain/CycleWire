@@ -1,0 +1,48 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "cyclewire--inline",
+  "name": "CycleWire, inline",
+  "kind": "library",
+  "summary": "The CycleWire app with the core inlined in the page: CycleWire starts while the page is still parsing, and each action's code loads as one module when someone reaches for it.",
+  "variant": {
+    "of": "cyclewire",
+    "differs": "The core is the classic-script build inlined in <head>, which starts from a JSON block that maps actions to URLs, instead of a module loaded with the page; the actions are one module each (esbuild) instead of Vite chunks. It tests the performance guide's advice to inline the core for the fastest activation."
+  },
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "cyclewire",
+    "esbuild"
+  ],
+  "idioms": [
+    {
+      "choice": "The core is the classic-script build, inlined in <head> after a <script type=\"application/json\" data-cyclewire> block that maps each action to its module's URL, as the performance guide suggests for the fastest activation: it starts while the page is still parsing, with no request of its own.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#load-cyclewire-early"
+    },
+    {
+      "choice": "Actions are registered by URL from the JSON block, the way a page without a bundler registers them.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
+    },
+    {
+      "choice": "esbuild builds each action into one module with what it imports bundled in, so loading an action is one request. Modules that two actions include, such as cyclewire/signals, keep one state per page.",
+      "docs": "https://esbuild.github.io/api/#bundle"
+    },
+    {
+      "choice": "Add to cart, the action most visitors use first, is preloaded with the page: the server writes <link rel=\"modulepreload\"> for its chunk and the chunks it imports, from Vite's manifest, so a tap on it right after the page appears waits only for the server. Everything else loads on intent, the default, and on touch screens also once the page is idle.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#preload-the-action-people-reach-for-first"
+    },
+    {
+      "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#cw-store"
+    },
+    {
+      "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#import-it-from-the-action-that-needs-it"
+    },
+    {
+      "choice": "The prefetch plugin is a module that registers with the running CycleWire through CycleWire.use(): the quick view link names its data with cw-prefetch, fetched on intent next to the action's code, and ctx.fetch() takes the response. A quick view before that module runs asks the server itself.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/prefetch.md"
+    }
+  ]
+}

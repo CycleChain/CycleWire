@@ -133,6 +133,42 @@
         }
       }
     },
+    "parts": {
+      "description": "Set when the run was measured in parts, each on its own machine and each with every stack: the kinds of visits each part made, when, and where. `environment` is the first part's.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kinds",
+          "startedAt",
+          "finishedAt",
+          "environment"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kinds": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "journeys",
+                "early",
+                "repeat"
+              ]
+            }
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string"
+          },
+          "environment": {
+            "$ref": "#/properties/environment"
+          }
+        }
+      }
+    },
     "config": {
       "type": "object",
       "required": [
@@ -174,6 +210,14 @@
             "type": "string"
           }
         },
+        "offsets": {
+          "description": "When the early taps landed, in ms after first paint.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
         "quietMs": {
           "type": "number"
         },
@@ -212,6 +256,10 @@
               "string",
               "null"
             ]
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
           },
           "iteration": {
             "type": "integer"
@@ -572,6 +620,11 @@
           "items": {
             "type": "string"
           }
+        },
+        "offset": {
+          "description": "How long after first paint the tap waited, in ms. Absent in runs that only tapped at once.",
+          "type": "integer",
+          "minimum": 0
         }
       }
     },
@@ -603,6 +656,25 @@
         },
         "summary": {
           "type": "string"
+        },
+        "variant": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "of",
+            "differs"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "of": {
+              "type": "string"
+            },
+            "differs": {
+              "type": "string"
+            }
+          }
         },
         "versions": {
           "type": "object",
@@ -751,23 +823,17 @@
                   }
                 },
                 "early": {
+                  "description": "The taps in the first frame after first paint.",
+                  "$ref": "#/$defs/taps"
+                },
+                "later": {
+                  "description": "The taps that waited, keyed by how many ms after first paint.",
                   "type": "object",
-                  "required": [
-                    "outcomes",
-                    "effect",
-                    "sinceFcp"
-                  ],
-                  "additionalProperties": false,
-                  "properties": {
-                    "outcomes": {
-                      "$ref": "#/$defs/counts"
-                    },
-                    "effect": {
-                      "$ref": "#/$defs/summary"
-                    },
-                    "sinceFcp": {
-                      "$ref": "#/$defs/summary"
-                    }
+                  "propertyNames": {
+                    "pattern": "^[1-9][0-9]*$"
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/$defs/taps"
                   }
                 }
               }
@@ -779,6 +845,26 @@
             "object",
             "null"
           ]
+        }
+      }
+    },
+    "taps": {
+      "type": "object",
+      "required": [
+        "outcomes",
+        "effect",
+        "sinceFcp"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "outcomes": {
+          "$ref": "#/$defs/counts"
+        },
+        "effect": {
+          "$ref": "#/$defs/summary"
+        },
+        "sinceFcp": {
+          "$ref": "#/$defs/summary"
         }
       }
     }

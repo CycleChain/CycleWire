@@ -1,0 +1,51 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "cyclewire--no-preload",
+  "name": "CycleWire, intent only",
+  "kind": "library",
+  "summary": "The CycleWire app with nothing fetched ahead of intent: the core loads up front, and every action's code when someone reaches for it, Add to cart included, on touch screens too.",
+  "variant": {
+    "of": "cyclewire",
+    "differs": "No <link rel=\"modulepreload\"> for Add to cart, and start({ preload: 'intent' }), which turns off the look-ahead that fetches the code of the actions in view on touch screens. It shows what the two save an interaction, and what they cost a load."
+  },
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "cyclewire"
+  ],
+  "idioms": [
+    {
+      "choice": "The core loads as a module in <head>, with a modulepreload link, as the performance guide recommends.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#load-cyclewire-early"
+    },
+    {
+      "choice": "Vite bundles the page's script, and fromGlob(import.meta.glob('./actions/*.js')) registers every action as its own chunk. Vite preloads a chunk's dependencies when it is imported.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
+    },
+    {
+      "choice": "The server writes the entry's <script> and <link rel=\"modulepreload\"> tags from Vite's manifest, and the modulepreload polyfill is turned off rather than imported, as the backend integration guide allows. Preloading an action's imports stays on.",
+      "docs": "https://vite.dev/guide/backend-integration"
+    },
+    {
+      "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#cw-store"
+    },
+    {
+      "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#import-it-from-the-action-that-needs-it"
+    },
+    {
+      "choice": "The quick view link names its data with cw-prefetch, and the prefetch plugin fetches it on intent, next to the action's code; the action's ctx.fetch() takes that response.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#fetch-code-and-data-together"
+    },
+    {
+      "choice": "start({ preload: 'intent' }) fetches an action's code only on intent, on every screen: the look-ahead that the default ('auto') runs on touch screens, fetching the code of the actions in view once the page is idle, is off. The server writes <link rel=\"modulepreload\"> for the entry and its imports only.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#choose-when-to-fetch"
+    },
+    {
+      "choice": "The build and the actions are the CycleWire app's: this folder has its own entry, which imports ../cyclewire/src/actions/*.js, and resolve.dedupe keeps one copy of cyclewire.",
+      "docs": "https://vite.dev/config/shared-options#resolve-dedupe"
+    }
+  ]
+}

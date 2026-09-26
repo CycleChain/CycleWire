@@ -97,14 +97,18 @@ Every visit uses a fresh browser context: an empty cache, no cookies, a new conn
 | Visit | |
 | --- | --- |
 | Journey | Load the page, wait until it settles, then perform one interaction and wait for its result |
-| Early tap | Load the page and tap "Add to cart" in the first frame after first paint in which the button is on screen |
+| Early tap | Load the page and tap "Add to cart" in the first frame after first paint in which the button is on screen, or one or two seconds after that frame |
 | Repeat | Load the page and let it settle, then load it again in the same context |
 
-One iteration makes each visit once for every stack (five journeys, one early tap, one
+One iteration makes each visit once for every stack (five journeys, three early taps, one
 repeat), in an order shuffled with a seeded generator, so a slow minute on the machine
 does not land on one stack. The first pass over every visit is a warm-up and is not
 recorded. Every journey visit also records its load, so load metrics have five samples
 per iteration.
+
+The published runs make these visits in two parts, on two machines, with every stack in
+each: the journeys, and the early taps with the repeat visits. Stacks are only ever
+compared on a metric measured on one machine, and the results record both machines.
 
 **Settled** means: the `load` event has fired, no request has been in flight for one
 second, and no long task has run for one second.
@@ -119,7 +123,7 @@ second, and no long task has run for one second.
 | CLS | The largest session window of layout shifts without recent input, as web-vitals computes it |
 | TBT | Total Blocking Time between FCP and settling: the part of every long task beyond 50 ms, with tasks clipped to that window as Lighthouse does |
 | Settled | The later of the end of the `load` event, the end of the last resource and the end of the last long task |
-| Main thread | Task and script time from the DevTools Protocol's `Performance.getMetrics`, over the visit |
+| Main thread | How long the main thread was busy while the page loaded (`TaskDuration` from the DevTools Protocol's `Performance.getMetrics`, from navigation to settling), and the parts of it spent running script (`ScriptDuration`), recalculating style (`RecalcStyleDuration`) and laying out (`LayoutDuration`). The rest is parsing, painting and the like |
 | Bytes | From the DevTools Protocol: `encodedDataLength` (on the wire, headers included) and decoded body size, grouped by resource type |
 | Heap, nodes, listeners | `JSHeapUsedSize`, `Nodes` and `JSEventListeners` from `Performance.getMetrics`, read in the repeat visit after the first load has settled and garbage has been collected (Chrome keeps counting removed listeners until they are collected) |
 
@@ -166,7 +170,11 @@ during the interaction, as a secondary metric.
 
 People tap as soon as they see a button. The early-tap visit taps "Add to cart" in the
 first frame after first paint where the button is on screen, then waits for the page to
-settle and classifies the outcome:
+settle and classifies the outcome. Two more early-tap visits wait one and two seconds
+after that frame before tapping (`--offsets=0,1000,2000`), which shows how long after it
+appears each page handles a tap in the page itself rather than by a page load. The wait
+runs in the runner, not in the page, so a tap lands on time even while the page's main
+thread is busy, at the place the button was painted, as a person's would.
 
 | Outcome | |
 | --- | --- |
@@ -187,7 +195,8 @@ The results list the metrics on which another stack beats CycleWire: a stack tha
 a control has a lower median, the two 95% intervals do not overlap, and the difference is
 at least 3% of CycleWire's median. The last condition keeps out differences that are real
 but too small to matter, such as 1 ms in 250, which very stable metrics can produce. On the
-early tap, only stacks that handled every tap (in the page or by a page load) are compared.
+early taps, only stacks that handled every tap at that offset (in the page or by a page
+load) are compared.
 
 The tables mark in bold, for each metric, every stack that no other stack beats by the same
 rule, controls aside. A stack with a noisy metric can be bold next to one with a lower but

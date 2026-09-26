@@ -53,9 +53,12 @@ const kilobytes = (value) => (value === null || value === undefined ? '–' : `$
 const plain = (value) => (value === null || value === undefined ? '–' : Math.round(value).toLocaleString('en-US'));
 const score = (value) => (value === null || value === undefined ? '–' : value.toFixed(3));
 
-/** Whether a stack handled every early tap, in the page or by a page load. */
-const handledEvery = (stack) => {
-    const { lost = 0, duplicate = 0, error = 0 } = stack.summaries.early?.outcomes ?? {};
+/** The early taps that waited `offset` ms after first paint; 0 is the tap at once. */
+const tapsAt = (summaries, offset) => (offset ? summaries.later?.[offset] : summaries.early);
+
+/** Whether a stack handled every early tap at `offset`, in the page or by a page load. */
+const handledEvery = (offset) => (stack) => {
+    const { lost = 0, duplicate = 0, error = 0 } = tapsAt(stack.summaries, offset)?.outcomes ?? {};
     return lost + duplicate + error === 0;
 };
 
@@ -75,6 +78,10 @@ export const LOAD = [
     { id: 'total', label: 'All bytes', read: (s) => s.cold['bytes.total.transfer'], format: kilobytes, note: 'on the wire' },
     { id: 'html', label: 'HTML', read: (s) => s.cold['bytes.document.transfer'], format: kilobytes, note: 'on the wire' },
     { id: 'requests', label: 'Requests', read: (s) => s.cold.requests, format: plain },
+    { id: 'main', label: 'Main thread', read: (s) => s.cold['mainThread.task'], format: time, note: 'busy while loading' },
+    { id: 'script', label: 'Script', read: (s) => s.cold['mainThread.script'], format: time, note: 'on the main thread while loading' },
+    { id: 'style', label: 'Style', read: (s) => s.cold['mainThread.style'], format: time, note: 'recalculation while loading' },
+    { id: 'layout', label: 'Layout', read: (s) => s.cold['mainThread.layout'], format: time, note: 'while loading' },
 ];
 /** @type {Metric[]} */
 export const REPEAT = [
@@ -86,7 +93,29 @@ export const REPEAT = [
 /** @type {Metric[]} */
 export const EFFECTS = Object.entries(JOURNEYS).map(([id, label]) => ({ id: `effect-${id}`, label, read: (s) => s.journeys[id]?.effect, format: time }));
 /** A tap in the first frame after first paint: a stack that lost or doubled a tap is not compared. @type {Metric} */
-export const EARLY = { id: 'early', label: 'Early tap', read: (s) => s.early?.effect, format: time, eligible: handledEvery };
+export const EARLY = { id: 'early', label: 'Early tap', read: (s) => s.early?.effect, format: time, eligible: handledEvery(0) };
+
+/** "1 s", "1.5 s", "250 ms". */
+const after = (ms) => (ms % 1000 ? (ms > 1000 ? `${ms / 1000} s` : `${ms} ms`) : `${ms / 1000} s`);
+
+/**
+ * The early taps of a run: at once, then one metric per later offset, each
+ * compared among the stacks that handled every tap at that offset.
+ * @returns {Metric[]}
+ */
+export function taps(results) {
+    const offsets = new Set(results.config?.offsets ?? []);
+    for (const stack of results.stacks) for (const offset of Object.keys(stack.summaries?.later ?? {})) offsets.add(Number(offset));
+    const later = [...offsets].filter(Boolean).sort((a, b) => a - b).map((offset) => ({
+        id: `early-${offset}`,
+        label: `Early tap, ${after(offset)} later`,
+        read: (s) => tapsAt(s, offset)?.effect,
+        format: time,
+        eligible: handledEvery(offset),
+        offset,
+    }));
+    return [{ ...EARLY, offset: 0 }, ...later];
+}
 
 const byId = (metrics, id) => metrics.find((metric) => metric.id === id);
 const has = (summary) => Boolean(summary?.n) && summary.median !== null && summary.median !== undefined;
@@ -111,22 +140,25 @@ export function beats(a, b) {
 /** The stacks a metric compares: not the controls, which are baselines rather than choices. */
 const rivalsOf = (stacks, metric) => stacks.filter((stack) => stack.kind !== 'control' && (!metric.eligible || metric.eligible(stack)));
 
+/** CycleWire, or another way to build the page with it. */
+const isOurs = (stack) => stack.id === 'cyclewire' || stack.variant?.of === 'cyclewire';
+
 /**
  * Where CycleWire is not the best: metrics on which another stack that is
  * not a control beats it (see `beats`). For each, the stack with the lowest
- * median among those that do.
+ * median among those that do. CycleWire's own variants are not another stack.
  */
 export function notBest(results) {
     const stacks = results.stacks.filter((stack) => stack.measured);
     const cyclewire = stacks.find((stack) => stack.id === 'cyclewire');
     if (!cyclewire) return [];
     const findings = [];
-    for (const metric of [...LOAD, ...EFFECTS, EARLY, ...REPEAT]) {
+    for (const metric of [...LOAD, ...EFFECTS, ...taps(results), ...REPEAT]) {
         const ours = metric.read(cyclewire.summaries);
         if (!has(ours)) continue;
         let best = null;
         for (const stack of rivalsOf(stacks, metric)) {
-            if (stack.id === 'cyclewire') continue;
+            if (isOurs(stack)) continue;
             const theirs = metric.read(stack.summaries);
             if (beats(theirs, ours) && (!best || theirs.median < best.summary.median)) best = { stack, summary: theirs };
         }
@@ -141,12 +173,12 @@ export function leaders(stacks, metric) {
     return new Set(rivals.filter((stack) => !rivals.some((other) => beats(metric.read(other.summaries), metric.read(stack.summaries)))).map((stack) => stack.id));
 }
 
-/** How the early taps were handled, the most common outcome first: "in the page", "page load 2/15", … */
-function outcomeNote(stack) {
-    const outcomes = stack.summaries.early?.outcomes ?? {};
+/** How the early taps at `offset` were handled, the most common outcome first: "in the page", "page load 2/15", … */
+const outcomeNote = (offset) => (stack) => {
+    const outcomes = tapsAt(stack.summaries, offset)?.outcomes ?? {};
     const total = Object.values(outcomes).reduce((sum, count) => sum + count, 0);
     return Object.entries(outcomes).filter(([, count]) => count).sort((a, b) => b[1] - a[1]).map(([outcome, count]) => (count === total ? OUTCOME_NOTES[outcome] : `${OUTCOME_NOTES[outcome]} ${count}/${total}`)).join(', ');
-}
+};
 
 /** Column headings, where the label is too long for one. */
 const SHORT = {
@@ -161,13 +193,23 @@ const KEY = [
     { ...short(byId(LOAD, 'lcp')), title: 'Largest Contentful Paint', group: 'Loading' },
     { ...short(byId(LOAD, 'tbt')), title: 'Total Blocking Time', group: 'Loading' },
     ...EFFECTS.map((metric) => ({ ...short(metric), title: `Time to effect: ${metric.label.toLowerCase()}`, group: 'Time to effect' })),
-    { ...short(EARLY), title: 'Early tap: time to effect', note: outcomeNote },
+    { ...short(EARLY), title: 'Early tap: time to effect', note: outcomeNote(0) },
 ];
 /** Everything else, in a second table. */
 const MORE = [
     ...['fcp', 'cls', 'settled', 'total', 'html', 'requests'].map((id) => ({ ...short(byId(LOAD, id)), group: 'Cold load' })),
+    ...['main', 'script', 'style', 'layout'].map((id) => ({ ...short(byId(LOAD, id)), group: 'Main thread while loading' })),
     ...REPEAT.map((metric) => ({ ...short(metric), group: 'Repeat visit' })),
 ];
+
+/** The early taps' columns: at once, then each later offset. */
+const tapColumns = (results) => taps(results).map((metric) => ({
+    ...metric,
+    short: metric.offset ? `${after(metric.offset)} later` : 'At once',
+    title: metric.offset ? `Tapped ${after(metric.offset)} after first paint` : 'Tapped in the first frame after first paint',
+    note: outcomeNote(metric.offset),
+    group: 'Tapped after first paint',
+}));
 
 /**
  * The column groups and the header: a first row that names the groups, and a
@@ -201,9 +243,12 @@ function cell(stack, metric, lead, { ci = false } = {}) {
     return `<td data-value="${summary.median}"${ci ? ` data-low="${low}" data-high="${high}"` : ''}${lead.has(stack.id) ? ' class="is-lead"' : ''}>${esc(metric.format(summary.median))}${note ? ` <small>${esc(note)}</small>` : ''}</td>`;
 }
 
+/** "control" or "variant", after a stack's name. */
+const tags = (stack) => (stack.kind === 'control' ? ' <span class="tag">control</span>' : stack.variant ? ' <span class="tag">variant</span>' : '');
+
 function table({ id, caption, metrics, stacks, ci }) {
     const leads = metrics.map((metric) => leaders(stacks, metric));
-    const rows = stacks.map((stack) => `<tr data-stack="${esc(stack.id)}"${stack.id === 'cyclewire' ? ' class="is-ours"' : ''}><th scope="row">${esc(stack.name)}${stack.kind === 'control' ? ' <span class="tag">control</span>' : ''}</th>${metrics.map((metric, i) => cell(stack, metric, leads[i], { ci })).join('')}</tr>`).join('\n');
+    const rows = stacks.map((stack) => `<tr data-stack="${esc(stack.id)}"${stack.id === 'cyclewire' ? ' class="is-ours"' : ''}><th scope="row">${esc(stack.name)}${tags(stack)}</th>${metrics.map((metric, i) => cell(stack, metric, leads[i], { ci })).join('')}</tr>`).join('\n');
     // The description sits outside the scrolling region, so a narrow screen shows all of it.
     return `<p class="bench__note" id="${id}">${esc(caption)}</p>
 <div class="table-wrap bench__table" role="region" aria-labelledby="${id}" tabindex="0"><table aria-labelledby="${id}">
@@ -226,7 +271,7 @@ function chart({ stacks, metric }) {
     const max = Math.max(0, ...data.map(({ summary }) => (has(summary) ? (summary.ci95?.[1] ?? summary.median) : 0)));
     const percent = (number) => `${max ? ((number / max) * 100).toFixed(2) : 0}%`;
     const bars = data.map(({ stack, summary }) => {
-        const kind = stack.id === 'cyclewire' ? 'ours' : stack.kind === 'control' ? 'control' : 'other';
+        const kind = stack.id === 'cyclewire' ? 'ours' : isOurs(stack) ? 'variant' : stack.kind === 'control' ? 'control' : 'other';
         const median = has(summary) ? summary.median : 0;
         const [low, high] = has(summary) ? (summary.ci95 ?? [median, median]) : [0, 0];
         const note = typeof metric.note === 'function' && has(summary) ? metric.note(stack) : '';
@@ -245,7 +290,7 @@ ${bars}
 
 function findings(results) {
     const list = notBest(results);
-    const hasRivals = results.stacks.some((stack) => stack.measured && stack.id !== 'cyclewire' && stack.kind !== 'control');
+    const hasRivals = results.stacks.some((stack) => stack.measured && !isOurs(stack) && stack.kind !== 'control');
     const body = !hasRivals
         ? '<p>This run measured CycleWire only against the controls, so there is nothing to compare it with yet.</p>'
         : !list.length
@@ -253,9 +298,23 @@ function findings(results) {
             : `<ul>${list.map(({ metric, ours, best }) => `<li><b>${esc(metric.label)}</b>: ${esc(best.stack.name)} ${esc(metric.format(best.summary.median))}, CycleWire ${esc(metric.format(ours.median))}</li>`).join('')}</ul>`;
     return `<div class="bench__findings">
 <h3>Where another stack beats CycleWire</h3>
-<p class="muted">Every metric on which a stack that is not a control has a median at least 3% lower, with 95% confidence intervals that do not overlap. For each, the stack with the lowest median.</p>
+<p class="muted">Every metric on which a stack that is not a control has a median at least 3% lower, with 95% confidence intervals that do not overlap. For each, the stack with the lowest median.${results.stacks.some((stack) => stack.measured && stack.variant?.of === 'cyclewire') ? ' Variants of the CycleWire app are CycleWire, so they are not listed.' : ''}</p>
 ${body}
 </div>`;
+}
+
+/**
+ * "Add to cart" tapped when it first appears and again later: the offsets
+ * show how long each page takes to handle a tap in the page itself.
+ */
+function later(id, results, stacks) {
+    const columns = tapColumns(results);
+    if (columns.length < 2) return '';
+    const times = columns.slice(1).map((metric) => after(metric.offset)).join(' and ');
+    return `<details class="bench__more">
+<summary>Early taps: when "Add to cart" first appears, and ${esc(times)} later</summary>
+${table({ id: `bench-${id}-taps-caption`, caption: `${PROFILES[id]}: time from the tap to its effect, median, and how the taps were handled. A tap handled by a page load is the form working without JavaScript. Bold marks the stacks no other stack clearly beats among those that handled every tap, controls aside.`, metrics: columns, stacks, ci: true })}
+</details>`;
 }
 
 function panel(id, entry) {
@@ -275,9 +334,10 @@ ${skipped.length ? `<p class="bench__warning">Not measured, because they failed 
 ${chart({ stacks, metric: KEY[0] })}
 ${table({ id: `bench-${id}-caption`, caption: `${PROFILES[id]}: medians of ${loads} loads and ${config.iterations} of each interaction per stack. Lower is better; bold marks the stacks no other stack clearly beats, controls aside.`, metrics: KEY, stacks, ci: true })}
 ${findings(results)}
+${later(id, results, stacks)}
 <details class="bench__more">
-<summary>More metrics: first paint, layout shift, bytes, requests, repeat visits and memory</summary>
-${table({ id: `bench-${id}-more-caption`, caption: `${PROFILES[id]}: medians, lower is better. Memory is read after garbage collection on the repeat visit.`, metrics: MORE, stacks })}
+<summary>More metrics: first paint, layout shift, bytes, requests, the main thread, repeat visits and memory</summary>
+${table({ id: `bench-${id}-more-caption`, caption: `${PROFILES[id]}: medians, lower is better. The main thread's time is split by what it spent it on while the page loaded; the rest is parsing, painting and the like. Memory is read after garbage collection on the repeat visit.`, metrics: MORE, stacks })}
 </details>
 </div>`;
 }
@@ -291,7 +351,9 @@ function stackList(stacks) {
         const checks = failed.length ? `failed ${failed.map((check) => `<code>${esc(check.id)}</code>`).join(', ')}` : `${stack.conformance.checks.length} of ${stack.conformance.checks.length} checks passed`;
         const choices = stack.idioms?.length ? ` · <a href="${blob}/${esc(stack.id)}/bench.json">${stack.idioms.length} documented ${stack.idioms.length === 1 ? 'choice' : 'choices'}</a>` : '';
         const response = stack.response ? `<blockquote class="bench__response"><p>${esc(stack.response.text)}</p><footer>${stack.response.url ? `<a href="${esc(stack.response.url)}">${esc(stack.response.by)}</a>` : esc(stack.response.by)}</footer></blockquote>` : '';
-        return `<li><b>${esc(stack.name)}</b>${stack.kind === 'control' ? ' <span class="tag">control</span>' : ''} ${versions}<p>${esc(stack.summary)}</p><p class="bench__links"><a href="${tree}/${esc(stack.id)}">Source</a>${choices} · ${checks}</p>${response}</li>`;
+        const base = stack.variant ? stacks.find((other) => other.id === stack.variant.of) : null;
+        const variant = stack.variant ? `<p>A variant of ${esc(base?.name ?? stack.variant.of)}: ${esc(stack.variant.differs)}</p>` : '';
+        return `<li><b>${esc(stack.name)}</b>${tags(stack)} ${versions}<p>${esc(stack.summary)}</p>${variant}<p class="bench__links"><a href="${tree}/${esc(stack.id)}">Source</a>${choices} · ${checks}</p>${response}</li>`;
     }).join('\n');
     return `<details class="bench__more">
 <summary>How each app is built</summary>

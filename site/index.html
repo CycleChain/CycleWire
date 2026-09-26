@@ -385,6 +385,7 @@
         .bench__track { position: relative; height: 16px; border-radius: 5px; background: var(--surface-2); }
         .bench__fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 5px; background: var(--faint); }
         .bench__bar--ours .bench__fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+        .bench__bar--variant .bench__fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: .45; }
         .bench__bar--control .bench__fill { background: repeating-linear-gradient(135deg, var(--border-strong) 0 4px, transparent 4px 8px); box-shadow: inset 0 0 0 1px var(--border-strong); }
         /* The whisker: the 95% confidence interval of the median. */
         .bench__ci { position: absolute; top: 3px; bottom: 3px; border-inline: 1.5px solid var(--text); opacity: .7; }

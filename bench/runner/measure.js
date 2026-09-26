@@ -4,7 +4,8 @@
  * page and records what happened.
  *
  * - journey:  a cold load, then one interaction once the page has settled.
- * - early:    a cold load, with "Add to cart" tapped as soon as it is painted.
+ * - early:    a cold load, with "Add to cart" tapped as soon as it is painted,
+ *             or a set time after that.
  * - repeat:   a cold load, then a second load of the same page with a warm cache.
  */
 import { EARLY, perform } from './journeys.js';
@@ -178,8 +179,14 @@ export async function journeyVisit({ browser, profile, url, journey, searchMode 
     }
 }
 
-/** A cold load with "Add to cart" tapped the moment it is painted. */
-export async function earlyVisit({ browser, profile, url }) {
+/**
+ * A cold load with "Add to cart" tapped the moment it is painted, or `offset`
+ * ms after that. The wait runs outside the page, as a person's does: a tap
+ * lands on time even while the page's main thread is busy, where the button
+ * was painted.
+ * @param {{ browser: import('playwright').Browser, profile: object, url: string, offset?: number }} options
+ */
+export async function earlyVisit({ browser, profile, url, offset = 0 }) {
     const session = await open({ browser, profile });
     try {
         const { page, cdp } = session;
@@ -196,7 +203,7 @@ export async function earlyVisit({ browser, profile, url }) {
                     const rect = button.getBoundingClientRect();
                     if (rect.bottom > 0 && rect.top < innerHeight) {
                         bench.arm(condition[0], condition[1]);
-                        resolve({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, fcp: bench.fcp, origin: performance.timeOrigin });
+                        resolve({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, fcp: bench.fcp, origin: performance.timeOrigin, at: performance.timeOrigin + performance.now() });
                         return;
                     }
                 }
@@ -205,7 +212,10 @@ export async function earlyVisit({ browser, profile, url }) {
             };
             tick();
         }), EARLY);
-        if (!found) return { outcome: 'error', error: 'The button never appeared', tapAt: null, sinceFcp: null, effect: null };
+        if (!found) return { outcome: 'error', offset, error: 'The button never appeared', tapAt: null, sinceFcp: null, effect: null };
+        // Both clocks are the machine's wall clock.
+        const wait = found.at + offset - Date.now();
+        if (wait > 0) await sleep(wait);
         await press(page, cdp, profile.input, found);
         const effect = await waitForEffect(page);
         await settle(session);
@@ -219,6 +229,7 @@ export async function earlyVisit({ browser, profile, url }) {
         else outcome = count === '0' ? 'lost' : 'error';
         return {
             outcome,
+            offset,
             fcp: round(found.fcp),
             tapAt,
             sinceFcp: tapAt === null ? null : round(tapAt - found.fcp),

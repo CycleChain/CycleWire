@@ -46,6 +46,8 @@ table('Load (cold)', [
     ['Settled', (s) => s.cold.settled],
     ['Main thread (task)', (s) => s.cold['mainThread.task']],
     ['Script time', (s) => s.cold['mainThread.script']],
+    ['Style time', (s) => s.cold['mainThread.style']],
+    ['Layout time', (s) => s.cold['mainThread.layout']],
     ['JavaScript (transfer)', (s) => s.cold['bytes.script.transfer'], kb],
     ['Document (transfer)', (s) => s.cold['bytes.document.transfer'], kb],
     ['Total (transfer)', (s) => s.cold['bytes.total.transfer'], kb],
@@ -63,11 +65,13 @@ table('Repeat visit', [
 ]);
 
 console.log('\n### Early tap\n');
-console.log('| Stack | Outcomes | Time to effect | Tap after FCP |');
-console.log('| --- | --- | --- | --- |');
+console.log('| Stack | Waited | Outcomes | Time to effect | Tap after FCP |');
+console.log('| --- | --- | --- | --- | --- |');
 for (const stack of stacks) {
-    const { outcomes, effect, sinceFcp } = stack.summaries.early;
-    console.log(`| ${stack.name} | ${Object.entries(outcomes).map(([outcome, count]) => `${outcome} ${count}`).join(', ') || '–'} | ${cell(effect)} | ${cell(sinceFcp)} |`);
+    const taps = [['0 ms', stack.summaries.early], ...Object.entries(stack.summaries.later ?? {}).map(([offset, summary]) => [`${offset} ms`, summary])];
+    for (const [waited, { outcomes, effect, sinceFcp }] of taps) {
+        console.log(`| ${stack.name} | ${waited} | ${Object.entries(outcomes).map(([outcome, count]) => `${outcome} ${count}`).join(', ') || '–'} | ${cell(effect)} | ${cell(sinceFcp)} |`);
+    }
 }
 if (results.failures.length) {
     console.log(`\n${results.failures.length} visits failed:`);

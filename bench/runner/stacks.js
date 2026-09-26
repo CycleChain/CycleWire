@@ -40,6 +40,7 @@ export function load(id) {
     const problems = validateManifest(manifest);
     if (problems.length) throw new Error(`apps/${id}/bench.json does not match schema/bench.v1.json:\n${problems.join('\n')}`);
     if (manifest.id !== id) throw new Error(`apps/${id}/bench.json says its id is "${manifest.id}"`);
+    if (manifest.variant && !existsSync(join(APPS, manifest.variant.of, 'bench.json'))) throw new Error(`apps/${id}/bench.json is a variant of "${manifest.variant.of}", which has no folder in apps/`);
     return { id, dir, manifest, versions: {} };
 }
 

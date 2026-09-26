@@ -4,8 +4,10 @@ import { html, swap } from 'cyclewire/dom';
 import { categoryName, formatPrice } from '../../../../scenario/markup.js';
 
 // ctx.fetch takes the response the prefetch plugin fetched when the pointer or
-// finger reached the link.
-export async function run({ element, fetch, signal }) {
+// finger reached the link. Before that plugin is registered (the inline
+// variant, apps/cyclewire--inline, registers it after the page is parsed), a
+// quick view asks the server itself.
+export async function run({ element, fetch = globalThis.fetch, signal }) {
     const response = await fetch(element.getAttribute('cw-prefetch'), { signal });
     if (!response.ok) throw new Error(`The product answered ${response.status}`);
     const product = await response.json();

@@ -1,9 +1,15 @@
 name: Benchmark
 
 # check:   on changes to bench/, the harness's tests, the conformance check for
-#          every stack, and a short run (one journey and the early tap) to prove
-#          the pipeline works.
-# measure: by hand or weekly, the full run for each profile, kept as artifacts.
+#          every stack, and a short run (one journey and two early taps) to
+#          prove the pipeline works.
+# measure: by hand or weekly, the full run for each profile, in two parts on
+#          two runners, every stack in each: the journeys (with the loads they
+#          start with), and the early taps with the repeat visits. A part keeps
+#          one machine behind each metric, and neither comes near the job
+#          time limit.
+# merge:   joins each profile's parts into one results file (scripts/merge.js),
+#          kept as an artifact.
 # publish: when every profile was measured and the repository variable
 #          BENCH_PUBLISH is 'true', a pull request from github-actions[bot]
 #          replaces bench/results/ with the new runs and updates the README's
@@ -69,7 +75,7 @@ jobs:
       - run: npm test
       - run: node run.js --check
       - name: A short run
-        run: node run.js --iterations=1 --kinds=journeys,early --journeys=cart --skip-build --out=results/check.json
+        run: node run.js --iterations=1 --kinds=journeys,early --journeys=cart --offsets=0,1000 --skip-build --out=results/check.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -79,7 +85,7 @@ jobs:
           retention-days: 14
 
   measure:
-    name: Measure (${{ matrix.profile }})
+    name: Measure (${{ matrix.profile }}, ${{ matrix.part }})
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ${{ vars.BENCH_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 350
@@ -87,6 +93,7 @@ jobs:
       fail-fast: false
       matrix:
         profile: ${{ fromJSON((inputs.profile == 'mobile' && '["mobile"]') || (inputs.profile == 'desktop' && '["desktop"]') || '["mobile","desktop"]') }}
+        part: [journeys, taps]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -107,22 +114,56 @@ jobs:
         timeout-minutes: 320
         env:
           PROFILE: ${{ matrix.profile }}
+          PART: ${{ matrix.part }}
           ITERATIONS: ${{ inputs.iterations || '15' }}
           STACKS: ${{ inputs.stacks }}
         run: |
-          out="results/$(date -u +%Y-%m-%d)-$PROFILE.json"
-          node run.js --profile="$PROFILE" --iterations="$ITERATIONS" ${STACKS:+--stacks="$STACKS"} --out="$out"
+          kinds=$([ "$PART" = journeys ] && echo journeys || echo early,repeat)
+          node run.js --profile="$PROFILE" --kinds="$kinds" --iterations="$ITERATIONS" ${STACKS:+--stacks="$STACKS"} --out="parts/$PROFILE-$PART.json"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: bench-${{ matrix.profile }}
-          path: bench/results/*.json
+          name: bench-part-${{ matrix.profile }}-${{ matrix.part }}
+          path: bench/parts/*.json
           if-no-files-found: ignore
+          retention-days: 30
+
+  merge:
+    name: Merge (${{ matrix.profile }})
+    needs: measure
+    if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: ${{ fromJSON((inputs.profile == 'mobile' && '["mobile"]') || (inputs.profile == 'desktop' && '["desktop"]') || '["mobile","desktop"]') }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: bench/package-lock.json
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: bench-part-${{ matrix.profile }}-*
+          path: bench/parts
+          merge-multiple: true
+      - name: Merge the parts
+        run: |
+          mkdir -p merged
+          node scripts/merge.js --out-dir=merged parts/${{ matrix.profile }}-*.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bench-results-${{ matrix.profile }}
+          path: bench/merged/*.json
           retention-days: 90
 
   publish:
     name: Propose the results
-    needs: measure
+    needs: merge
     if: vars.BENCH_PUBLISH == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -139,7 +180,7 @@ jobs:
           node-version: 24
       - uses: actions/download-artifact@v7
         with:
-          pattern: bench-*
+          pattern: bench-results-*
           path: new-results
           merge-multiple: true
       - name: Open a pull request

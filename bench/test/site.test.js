@@ -14,6 +14,7 @@ const summaries = (overrides = {}) => {
         repeat: { fcp: summary(650), 'bytes.total.transfer': summary(2500, 0), 'memory.heap': summary(1e6, 0), 'memory.listeners': summary(18, 0) },
         journeys: { ...journeys, ...overrides.journeys },
         early: { outcomes: { effect: 10 }, effect: summary(1800), sinceFcp: summary(30), ...overrides.early },
+        ...(overrides.later ? { later: overrides.later } : {}),
     };
 };
 const stack = (id, kind, overrides) => ({
@@ -57,6 +58,46 @@ test('the early tap counts only for stacks that handled every tap', () => {
         stack('lossy', 'framework', { early: { outcomes: { effect: 7, lost: 3 }, effect: summary(500) } }),
     ]);
     assert.deepEqual(notBest(run).map(({ metric, best }) => [metric.id, best.stack.id]), [['early', 'reload']]);
+});
+
+test('a later tap is compared among the stacks that handled every tap at that offset', () => {
+    const taps = (outcomes, median) => ({ outcomes, effect: summary(median), sinceFcp: summary(1030) });
+    const run = results([
+        stack('cyclewire', 'library', { later: { 1000: taps({ effect: 10 }, 700) } }),
+        // Every tap at once was a page load, but a second later it is quicker in the page.
+        stack('hydrated', 'framework', { early: { outcomes: { navigation: 10 }, effect: summary(2500) }, later: { 1000: taps({ effect: 10 }, 400) } }),
+        stack('lossy', 'framework', { later: { 1000: taps({ effect: 8, lost: 2 }, 100) } }),
+    ]);
+    run.config.offsets = [0, 1000];
+    assert.deepEqual(notBest(run).map(({ metric, best }) => [metric.id, best.stack.id]), [['early-1000', 'hydrated']]);
+    const html = section({ mobile: { file: 'x.json', results: run } });
+    assert.match(html, /<summary>Early taps: when "Add to cart" first appears, and 1 s later<\/summary>/);
+    const taps1000 = html.slice(html.indexOf('bench-mobile-taps-caption'));
+    assert.match(taps1000, /<th scope="colgroup" colspan="2">Tapped after first paint<\/th>/);
+    assert.match(taps1000, /data-metric="early-1000" data-column="2"[^>]*><button type="button" cw-action="sort">1 s later<\/button>/);
+    assert.match(taps1000, /<td data-value="2500"[^>]*>2,500 ms <small>page load<\/small><\/td>/);
+});
+
+test('a variant of CycleWire is CycleWire; a variant of another stack is another stack', () => {
+    const variant = (id, of, overrides) => ({ ...stack(id, 'framework', overrides), variant: { of, differs: 'Something else.' } });
+    const run = results([
+        stack('cyclewire', 'library'),
+        variant('cyclewire--inline', 'cyclewire', { cold: { lcp: summary(600) } }),
+        stack('next', 'meta-framework'),
+        variant('next--client', 'next', { journeys: { filter: { effect: summary(100) } } }),
+    ]);
+    assert.deepEqual(notBest(run).map(({ metric, best }) => [metric.id, best.stack.id]), [['effect-filter', 'next--client']]);
+    const html = section({ mobile: { file: 'x.json', results: run } });
+    assert.match(html, /<th scope="row">&lt;cyclewire--inline&gt; <span class="tag">variant<\/span><\/th>/);
+    assert.match(html, /<li class="bench__bar bench__bar--variant" data-stack="cyclewire--inline">/);
+    assert.match(html, /<li class="bench__bar bench__bar--other" data-stack="next--client">/);
+    assert.match(html, /<p>A variant of &lt;next&gt;: Something else\.<\/p>/);
+    assert.match(html, /Variants of the CycleWire app are CycleWire, so they are not listed\./);
+});
+
+test('a run without later taps has no table for them', () => {
+    const html = section({ mobile: { file: 'x.json', results: results([stack('cyclewire', 'library')]) } });
+    assert.ok(!html.includes('taps-caption'));
 });
 
 test('bold marks every stack that no other non-control stack beats', () => {

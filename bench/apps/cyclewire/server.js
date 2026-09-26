@@ -2,38 +2,19 @@
 // recommends: the core as a module in <head>, actions in their own chunks,
 // the action most visitors use first (add to cart) preloaded with the page,
 // the quick view's data prefetched on intent, and the cart header bound to a
-// store the server serializes.
-import { readFileSync } from 'node:fs';
+// store the server serializes (page.js).
 import { fileURLToPath } from 'node:url';
-import { summary } from '../../scenario/catalog.js';
-import { listen } from '../../scenario/server.js';
+import { manifestOf, serve } from './page.js';
 
-const manifest = JSON.parse(readFileSync(new URL('dist/js/.vite/manifest.json', import.meta.url), 'utf8'));
-const entry = manifest['src/main.js'];
-/** A chunk and the chunks it imports, from Vite's manifest. @param {string} key @returns {string[]} */
-const chunks = (key) => [manifest[key].file, ...(manifest[key].imports ?? []).flatMap(chunks)];
+const { manifest, chunks } = manifestOf(new URL('dist/js/.vite/manifest.json', import.meta.url));
 // The entry, and the add-to-cart action with its imports: a tap on it right after the page
 // appears then waits only for the server, not for its code.
 const preloads = [...new Set([...chunks('src/main.js'), ...chunks('src/actions/cart.js')])];
-const head = [
-    ...preloads.map((file) => `<link rel="modulepreload" href="/js/${file}">`),
-    `<script type="module" src="/js/${entry.file}"></script>`,
-].join('\n');
-const json = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
-listen({
+serve({
     js: fileURLToPath(new URL('dist/js/', import.meta.url)),
-    hooks: (state) => ({
-        head,
-        bodyEnd: `<script type="application/json" cw-store="cart">${json(summary(state.cart))}</script>`,
-        attrs: {
-            cartCount: () => ' cw-bind="text: $cart.count"',
-            cartTotal: () => ' cw-bind="text: $cart.totalText"',
-            searchForm: () => ' cw-action="catalog#search" cw-on-input="catalog#search"',
-            categoryLink: () => ' cw-action="catalog#category" cw-prevent="click"',
-            addToCart: () => ' cw-action="cart#add"',
-            quickView: (product) => ` cw-action="quickview" cw-prevent="click" cw-prefetch="/api/products/${product.id}"`,
-            newsletter: () => ' cw-action="newsletter"',
-        },
-    }),
+    head: [
+        ...preloads.map((file) => `<link rel="modulepreload" href="/js/${file}">`),
+        `<script type="module" src="/js/${manifest['src/main.js'].file}"></script>`,
+    ].join('\n'),
 });

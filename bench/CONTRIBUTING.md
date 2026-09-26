@@ -93,6 +93,18 @@ a metric, special-casing the runner, or loading less than a real app of this kin
    `node run.js --stacks=static,<id> --iterations=3` to see numbers.
 4. Open a pull request. CI runs the harness's tests, the conformance check and one short run.
 
+## Variants
+
+When a stack's documentation recommends more than one way to build a page like this, a
+second way can join as a variant: `apps/<stack>--<name>/`, a stack of its own with
+`"variant": { "of": "<stack>", "differs": "…" }` in its `bench.json`, where `differs`
+says in a sentence or two what it does differently and what that shows. A variant may
+import the files of the stack it varies (the CycleWire variants take their actions from
+`apps/cyclewire/src/actions/`), and it lists its own `idioms` in full.
+
+Results tag variants. A variant of CycleWire is CycleWire, so it is never among the
+stacks that beat CycleWire; a variant of any other stack is compared like any stack.
+
 ## Changing the scenario
 
 The scenario is shared by every stack, so changes to it are rare and deliberate. After

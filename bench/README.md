@@ -11,9 +11,9 @@ recommends, served through the same proxy and measured the same way in Chromium.
 
 | | |
 | --- | --- |
-| **Load** | TTFB, First Contentful Paint, Largest Contentful Paint, Cumulative Layout Shift, Total Blocking Time, time until the page settles, main-thread time, JavaScript and total bytes, requests, heap, event listeners |
+| **Load** | TTFB, First Contentful Paint, Largest Contentful Paint, Cumulative Layout Shift, Total Blocking Time, time until the page settles, main-thread time (and its script, style and layout parts), JavaScript and total bytes, requests, heap, event listeners |
 | **Time to effect** | For five interactions (add to cart, category filter, live search, quick view, newsletter sign-up): from the input to the frame that shows its result |
-| **Early tap** | "Add to cart" tapped the moment it is painted: handled in the page, handled by a full page load, lost, or handled twice? |
+| **Early tap** | "Add to cart" tapped the moment it is painted, and one and two seconds later: handled in the page, handled by a full page load, lost, or handled twice? |
 | **Repeat visit** | The same page loaded again with the cache the first visit left |
 
 Every number is a median over many runs with a 95% confidence interval. There is no
@@ -27,6 +27,8 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `static` | Control: the page with no JavaScript. Forms post and links navigate |
 | `vanilla` | Control: one small hand-written module, no library |
 | `cyclewire` | CycleWire: the core up front, each interaction's code on intent |
+| `cyclewire--inline` | Variant: the core inlined in `<head>`, actions registered by URL |
+| `cyclewire--no-preload` | Variant: nothing fetched ahead of intent, not even Add to cart |
 | `htmx` | htmx: server-rendered fragments swapped into the page |
 | `alpine` | Alpine.js: directives in the server's markup, stores for shared state |
 | `astro` | Astro with Preact islands, nanostores and Astro Actions |
@@ -34,10 +36,11 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `qwik` | Qwik City: resumable components, route loaders and actions |
 | `sveltekit` | SvelteKit: load functions, form actions, shallow routing |
 
-Next: Nuxt, Angular and Stimulus. Each stack lives in `apps/<id>/` with its own
+Next: Nuxt, Angular and Hotwire. Each stack lives in `apps/<id>/` with its own
 `package.json`, lockfile and [`bench.json`](schema/bench.v1.json) manifest, which lists
 every choice the app makes and the documentation behind it.
-[CONTRIBUTING.md](CONTRIBUTING.md) says what a stack must build and how to add one.
+[CONTRIBUTING.md](CONTRIBUTING.md) says what a stack must build, how to add one, and
+how a variant (another documented way to build the page with a stack) joins.
 
 ## Run it
 
@@ -58,6 +61,7 @@ node run.js                  # measure: mobile profile, 15 iterations
 | `--iterations=15` | Runs per stack and measurement |
 | `--kinds=journeys,early,repeat` | Which visits to make |
 | `--journeys=cart,filter,search,quickview,newsletter` | Which interactions |
+| `--offsets=0,1000,2000` | When the early taps land, in ms after the button is first painted |
 | `--seed=1` | Seeds the shuffled run order |
 | `--out=<file>` | Where to write results (default: `results/<date>-<profile>.local.json`) |
 | `--channel=chrome` | Use an installed Chrome instead of Playwright's Chromium |
@@ -77,7 +81,11 @@ own runs, start the repository's dev server with `node scripts/serve.js --local-
 
 The Benchmark workflow measures both profiles by hand or weekly on GitHub's runners, and
 keeps each run as an artifact (results are saved after every iteration, so a run that is
-stopped keeps what it measured). With the repository variable `BENCH_PUBLISH` set to
+stopped keeps what it measured). Each profile is measured in two parts on two runners,
+every stack in each: the journeys with the loads they start with, and the early taps with
+the repeat visits. Every metric then comes from one machine, and neither part comes near
+the six-hour job limit. `node scripts/merge.js` joins the parts into one results file,
+which records both machines. With the repository variable `BENCH_PUBLISH` set to
 `true`, it also opens a pull request from `github-actions[bot]` that replaces the files in
 `results/`. Merging new results redeploys the website, whose
 [Benchmark section](https://cyclechain.github.io/CycleWire/#benchmark) shows the newest run
@@ -93,8 +101,7 @@ repository's README.
 | `runner/` | The in-page probe, journeys, visits, conformance checks and statistics |
 | `apps/` | One folder per stack |
 | `schema/` | JSON Schemas for manifests and results |
-| `scripts/` | Generators for the catalog, the golden text, the report and the results page |
-| `site/` | The results page's one script: sorting tables with CycleWire |
+| `scripts/` | Generators for the catalog, the golden text, the report and the website's Benchmark section, and the merge of a run's parts |
 | `results/` | Published results |
 
 ## Limitations

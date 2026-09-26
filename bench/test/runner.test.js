@@ -73,6 +73,20 @@ test('sample summaries cover every metric and count outcomes', () => {
     assert.equal(summary.journeys.cart.failed, 1);
     assert.deepEqual(summary.journeys.cart.navigated, { false: 1, null: 1 });
     assert.deepEqual(summary.early.outcomes, { effect: 1, lost: 1 });
+    assert.deepEqual(summary.later, {});
+});
+
+test('early taps are summarized by how long after first paint they waited', () => {
+    const tap = (offset, outcome, effect) => ({ offset, outcome, effect, sinceFcp: offset + 30 });
+    const summary = summarizeSamples({
+        cold: [], repeat: [], journeys: {},
+        early: [tap(0, 'navigation', 900), tap(0, 'navigation', 950), tap(1000, 'effect', 300), tap(2000, 'effect', 250), tap(1000, 'navigation', 800)],
+    });
+    assert.deepEqual(summary.early.outcomes, { navigation: 2 });
+    assert.deepEqual(Object.keys(summary.later), ['1000', '2000']);
+    assert.deepEqual(summary.later[1000].outcomes, { effect: 1, navigation: 1 });
+    assert.equal(summary.later[2000].effect.median, 250);
+    assert.equal(summary.later[2000].sinceFcp.median, 2030);
 });
 
 test('a navigation cancels what the page being left was still loading', async () => {

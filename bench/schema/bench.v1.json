@@ -42,6 +42,25 @@
       "type": "string",
       "minLength": 1
     },
+    "variant": {
+      "description": "Set when the app is another way to build the page with a stack the benchmark already has: the folder of that stack, and what this one does differently.",
+      "type": "object",
+      "required": [
+        "of",
+        "differs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "of": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "differs": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "build": {
       "description": "Shell command that builds the app for production, run in its folder.",
       "type": "string"
