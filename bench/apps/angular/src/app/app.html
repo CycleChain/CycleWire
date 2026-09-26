@@ -1,0 +1,8 @@
+<header class="top">
+  <a class="brand" routerLink="/">Wirestore</a>
+  <p class="cart">
+    Cart <span id="cart-count">{{ cart.count() }}</span> · <span id="cart-total">{{ formatPrice(cart.total()) }}</span>
+  </p>
+</header>
+<router-outlet />
+<footer class="bottom"><p>Wirestore is a benchmark scenario. Nothing here is for sale.</p></footer>

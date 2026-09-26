@@ -1,0 +1,112 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "angular",
+  "name": "Angular",
+  "kind": "framework",
+  "summary": "The page rendered per request by @angular/ssr's Express server and hydrated with Angular 22's defaults: incremental hydration, with the newsletter below the fold hydrating when it scrolls into view, and event replay. httpResource reads the shared JSON API, whose answers on the server reach the browser in the transfer cache; search and category are query parameters filtered in the browser, and the forms post to Express without JavaScript and to the API once hydrated.",
+  "build": "npm run build",
+  "start": "npm run serve:ssr:wirestore",
+  "search": "live",
+  "packages": [
+    "@angular/core",
+    "@angular/ssr"
+  ],
+  "idioms": [
+    {
+      "choice": "The project is laid out the way `ng new --ssr` writes it with Angular CLI 22.2: standalone components with the 2025 file names, the application builder, zoneless change detection and OnPush components (both defaults in 22), src/server.ts and the app's server config. The template's placeholder page, favicon, global styles.css and test setup are left out.",
+      "docs": "https://angular.dev/guide/ssr#setting-up-hybrid-rendering"
+    },
+    {
+      "choice": "`ng build` (outputMode server) builds the browser bundles and the Node server, and `npm run serve:ssr:wirestore`, the script `ng new --ssr` adds, runs node dist/wirestore/server/server.mjs: the template's Express server with AngularNodeAppEngine, which reads $PORT. It also takes $HOST (127.0.0.1), where the template listens on every interface.",
+      "docs": "https://angular.dev/guide/ssr#nodejs"
+    },
+    {
+      "choice": "One server route, `**` with RenderMode.Server, so every request is rendered on the server: the header shows the visitor's cart, from a cookie. The template's default is RenderMode.Prerender; nothing is prerendered.",
+      "docs": "https://angular.dev/guide/ssr#configuring-server-routes"
+    },
+    {
+      "choice": "Hydration is provideClientHydration() with its defaults, as the template writes it. In Angular 22 they include incremental hydration and, with it, event replay: withIncrementalHydration() is deprecated because it is now the default, so it is not added.",
+      "docs": "https://angular.dev/api/platform-browser/withIncrementalHydration"
+    },
+    {
+      "choice": "The newsletter, below the 50 cards, is a @defer block with `hydrate on viewport`: the server renders it, and its component's code, a separate chunk, loads and hydrates when it scrolls into view. Until then its form posts without JavaScript. `on viewport` and a @placeholder cover client-side rendering, which this page never does, as the guide asks.",
+      "docs": "https://angular.dev/guide/incremental-hydration#hydrate-on-viewport"
+    },
+    {
+      "choice": "The rest of the page hydrates at once: the header, the search, the categories and the cards respond as soon as the filters or the cart change, and a card left dehydrated until interaction would have its first \"Add to cart\" posted by the browser, since event replay queues a submit without preventing its default action.",
+      "docs": "https://angular.dev/guide/incremental-hydration#how-does-incremental-hydration-work"
+    },
+    {
+      "choice": "Listeners on forms and links return early when the browser has already acted. Event replay calls, after hydration, the listeners of events from before it, marked `event.eventPhase === EventPhase.REPLAY` (the check Angular's replay error points to, since preventDefault() then throws), and incremental hydration calls those of a @defer block once it has hydrated. Such a form was posted by the browser, so sending it again would add to the cart twice.",
+      "docs": "https://github.com/angular/angular/blob/v22.2.0/packages/core/primitives/event-dispatch/src/event_dispatcher.ts#L29-L37"
+    },
+    {
+      "choice": "Add to cart and the newsletter are plain forms (method=post, action /cart and /newsletter) with a (submit) listener, in an attribute directive for add to cart. Angular's form directives are not used, since they would handle a form the browser has already sent: Signal Forms' FormRoot calls preventDefault() on every submit, which throws during event replay, and adds novalidate.",
+      "docs": "https://angular.dev/guide/forms/signals/form-submission#setting-up-form-submission-with-formroot"
+    },
+    {
+      "choice": "Without JavaScript the forms reach two Express routes in src/server.ts, before the Angular handler, where the template puts API endpoints: they update the cart cookie with the scenario's cart.js, or check the address, and redirect (303) as the scenario's reference server does.",
+      "docs": "https://angular.dev/guide/ssr#nodejs"
+    },
+    {
+      "choice": "Data comes from the shared JSON API through httpResource: the listing (every product without its description), the cart and the quick view's product. HttpClient's transfer cache, on by default, writes the server's answers into the page, and httpResource starts from them while the page hydrates, so hydrating asks for nothing.",
+      "docs": "https://angular.dev/guide/ssr#caching-data-when-using-httpclient"
+    },
+    {
+      "choice": "On the server the shared API sits behind the proxy, at no address the server can reach, so app.config.server.ts provides a server implementation of HttpBackend that answers the same GET requests in-process with the scenario's catalog.js and cart.js, reading the cart cookie from the REQUEST token. The browser uses the default fetch backend.",
+      "docs": "https://angular.dev/guide/ssr#providing-platform-specific-implementations"
+    },
+    {
+      "choice": "HttpClient is injected without provideHttpClient(): since Angular 21 it is available by default, with the fetch backend.",
+      "docs": "https://angular.dev/guide/http/setup"
+    },
+    {
+      "choice": "The cart is a root service declared with @Service(), Angular 22's shorthand for @Injectable({ providedIn: 'root' }), shared by the header and the add-to-cart directive. It keeps the cart as an httpResource and sets it to the API's answer after each addition.",
+      "docs": "https://angular.dev/guide/di/creating-and-using-services"
+    },
+    {
+      "choice": "The URL's query parameters are the page's state, as on the server: withComponentInputBinding() binds ?q=, ?category=, ?view=, ?subscribed= and ?newsletter= to the page component's inputs, with an input transform for parameters that are absent.",
+      "docs": "https://angular.dev/api/router/withComponentInputBinding"
+    },
+    {
+      "choice": "Categories are RouterLinks with [queryParams]: their href loads the category's page without JavaScript, and with it the router navigates in the page. The links have no ?q=, so choosing a category clears the search.",
+      "docs": "https://angular.dev/guide/routing/navigate-to-routes#how-to-use-routerlink"
+    },
+    {
+      "choice": "Live search in the browser: each input navigates with router.navigate (queryParamsHandling 'merge', replaceUrl), so ?q= follows the box without a history entry per key, and the list is a computed signal over the listing, with no request and no debounce. The search form stays a GET form for the page without JavaScript.",
+      "docs": "https://angular.dev/guide/routing/navigate-to-routes#routernavigate"
+    },
+    {
+      "choice": "Quick view keeps its /?view=<id> link, which the server renders with the <dialog> open in the page. Once hydrated, a click loads the product with httpResource and afterRenderEffect calls showModal() once its content has rendered; the URL does not change.",
+      "docs": "https://angular.dev/guide/signals/effect#side-effects-on-dom-elements"
+    },
+    {
+      "choice": "The newsletter's message is a linkedSignal: it starts from ?subscribed= or ?newsletter=invalid, where the server's redirect puts it, and is set to the API's answer (200, or 422 with the reason).",
+      "docs": "https://angular.dev/guide/signals/linked-signal"
+    },
+    {
+      "choice": "security.allowedHosts in angular.json lists localhost, the host the browser uses through the proxy, so Angular's check of the Host and X-Forwarded-Host headers stays on.",
+      "docs": "https://angular.dev/best-practices/security#configuring-allowed-hosts"
+    },
+    {
+      "choice": "AngularNodeAppEngine trusts the X-Forwarded-For, -Host and -Proto headers the proxy sends. Without it Angular drops them, with a warning on every request.",
+      "docs": "https://angular.dev/best-practices/security#configuring-trusted-proxy-headers"
+    },
+    {
+      "choice": "Scenario rule: /assets/app.css is a plain <link> in src/index.html, and the build has no global stylesheet (styles: []) or component styles, so Angular adds no <style>. Critical CSS inlining, on by default, is turned off with optimization.styles.inlineCritical: it inlines the critical rules of a page's stylesheets and loads the stylesheets themselves asynchronously, and the scenario's stylesheet must stay one plain <link>. Here it found no stylesheet in the build to work on and only warned that it could not read /assets/app.css.",
+      "docs": "https://angular.dev/reference/configs/workspace-config#styles-optimization-options"
+    },
+    {
+      "choice": "Scenario rule: product images are plain <img> elements with the reference's src, width, height, loading and decoding, rather than NgOptimizedImage.",
+      "docs": "https://angular.dev/guide/image-optimization"
+    },
+    {
+      "choice": "The shared modules are imported from ../../scenario with allowJs, so TypeScript reads their JSDoc types. The browser code imports only markup.js; catalog.js and cart.js, which carry the product data, reach the server bundle only.",
+      "docs": "https://www.typescriptlang.org/tsconfig/#allowJs"
+    },
+    {
+      "choice": "The CLI's usage analytics are off for the project (cli.analytics: false in angular.json), so builds never ask or report.",
+      "docs": "https://angular.dev/reference/configs/workspace-config#angular-cli-configuration-options"
+    }
+  ]
+}

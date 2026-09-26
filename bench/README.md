@@ -32,13 +32,14 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `htmx` | htmx: server-rendered fragments swapped into the page |
 | `alpine` | Alpine.js: directives in the server's markup, stores for shared state |
 | `hotwire` | Hotwire: Turbo Drive, Frames and Streams from the server, Stimulus for the rest |
+| `angular` | Angular with @angular/ssr: incremental hydration, httpResource, query parameters as state |
 | `astro` | Astro with Preact islands, nanostores and Astro Actions |
 | `next` | Next.js App Router: Server Components, Server Actions, an intercepted modal |
 | `nuxt` | Nuxt: universal rendering, useFetch, Nitro server routes |
 | `qwik` | Qwik City: resumable components, route loaders and actions |
 | `sveltekit` | SvelteKit: load functions, form actions, shallow routing |
 
-Next: Angular. Each stack lives in `apps/<id>/` with its own
+Next: Marko and SolidStart. Each stack lives in `apps/<id>/` with its own
 `package.json`, lockfile and [`bench.json`](schema/bench.v1.json) manifest, which lists
 every choice the app makes and the documentation behind it.
 [CONTRIBUTING.md](CONTRIBUTING.md) says what a stack must build, how to add one, and

@@ -1,0 +1,80 @@
+<main>
+  <section class="intro">
+    <h1>Everyday objects, made well</h1>
+    <p>Lamps, chairs, pans and pens from small workshops. Free returns for 60 days.</p>
+  </section>
+  <!-- A GET form: without JavaScript it loads the filtered page. -->
+  <form class="search" role="search" action="/" method="get" (submit)="searched($event)">
+    <label for="q">Search products</label>
+    <div class="search__row">
+      <input #query id="q" name="q" type="search" [value]="q()" autocomplete="off" (input)="search(query.value)" />
+      @if (category()) {
+        <input type="hidden" name="category" [value]="category()" />
+      }
+      <button>Search</button>
+    </div>
+  </form>
+  <!-- Links to the category's page. Choosing one leaves out ?q=, which clears the search. -->
+  <nav class="categories" id="categories" aria-label="Categories">
+    @for (filter of filters; track filter.id) {
+      <a
+        routerLink="/"
+        [queryParams]="{ category: filter.id || null }"
+        [attr.aria-current]="filter.id === category() ? 'page' : null"
+        >{{ filter.name }}</a
+      >
+    }
+  </nav>
+  <p class="count" id="result-count" role="status">{{ resultText(visible().length) }}</p>
+  <ul class="grid" id="products">
+    @for (product of visible(); track product.id; let index = $index) {
+      <li class="card" [attr.data-product]="product.id" [attr.data-category]="product.category">
+        <img
+          src="/images/{{ product.id }}.webp"
+          alt=""
+          width="480"
+          height="360"
+          [attr.loading]="index < eagerImages ? 'eager' : 'lazy'"
+          decoding="async"
+        />
+        <h3>{{ product.name }}</h3>
+        <p class="meta">
+          <span>{{ categoryName(product.category) }}</span>&ngsp;<span class="price">{{ formatPrice(product.price) }}</span>
+        </p>
+        <div class="actions">
+          <form method="post" action="/cart" [appAddToCart]="product.id">
+            <input type="hidden" name="id" [value]="product.id" /><button>Add to cart</button>
+          </form>
+          <a class="quick" href="/?view={{ product.id }}" (click)="openQuickView($event, product.id)">Quick view</a>
+        </div>
+      </li>
+    }
+  </ul>
+  <!-- Below the 50 cards: rendered on the server, hydrated when it scrolls into view. -->
+  @defer (on viewport; hydrate on viewport) {
+    <app-newsletter [subscribed]="subscribed()" [invalid]="newsletter() === 'invalid'" />
+  } @placeholder {
+    <section class="newsletter"></section>
+  }
+</main>
+<dialog #dialog id="quick-view" aria-labelledby="quick-view-title" [attr.open]="openInPage()" (close)="inPage.set(false)">
+  @if (quickView.hasValue()) {
+    @let item = quickView.value();
+    <div class="quick-view">
+      <img src="/images/{{ item.id }}.webp" alt="" width="480" height="360" />
+      <div class="quick-view__body">
+        <h2 id="quick-view-title">{{ item.name }}</h2>
+        <p class="meta">
+          <span>{{ categoryName(item.category) }}</span>&ngsp;<span class="price">{{ formatPrice(item.price) }}</span>
+        </p>
+        <p>{{ item.description }}</p>
+        <div class="actions">
+          <form method="post" action="/cart" [appAddToCart]="item.id">
+            <input type="hidden" name="id" [value]="item.id" /><button>Add to cart</button>
+          </form>
+          <form method="dialog"><button>Close</button></form>
+        </div>
+      </div>
+    </div>
+  }
+</dialog>
