@@ -35,6 +35,7 @@ first needed.
 | `actions` | The first of `src/actions`, `resources/js/actions`, …, `actions` that exists | The actions directory, relative to Vite's root |
 | `types` | `cyclewire-actions.d.ts` next to the actions directory | The declaration file to keep up to date, or `false` |
 | `devtools` | `false` | Open [`cyclewire/devtools`](devtools.md) during development |
+| `early` | `false` | Put [`cyclewire/early`](early.md) first in `index.html`'s `<head>`, after `<meta charset>`, so taps before CycleWire starts are kept |
 | `check` | `true` | Warn about unknown actions and invalid values in `index.html` |
 | `prefix` | `'cw-'` | The attribute prefix, as passed to `start()` |
 | `manifest` | `'.vite/cyclewire.json'` | Where the build writes the manifest, inside `outDir`, or `false` |

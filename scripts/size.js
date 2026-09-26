@@ -28,6 +28,8 @@ const budgets = {
     'signals.min.js': { brotli: 3520 },
     'stream.min.js': { brotli: 4096 },
     'prefetch.min.js': { brotli: 768 },
+    // Inlined in every page's <head>.
+    'early.min.js': { brotli: 512 },
     'bootstrap.min.js': { brotli: 2304 },
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
@@ -43,6 +45,7 @@ const notes = {
     'morph.min.js': 'includes what it needs from dom',
     'stream.min.js': 'includes dom and morph',
     'prefetch.min.js': 'a plugin',
+    'early.min.js': 'inline, before the core',
     'devtools.min.js': 'development only',
     'cyclewire.full.global.min.js': 'everything',
 };

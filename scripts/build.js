@@ -18,8 +18,9 @@ const banner = `/*! CycleWire v${pkg.version} | MIT License | https://github.com
 const define = (dev) => ({ __DEV__: String(dev), __VERSION__: JSON.stringify(pkg.version) });
 const common = { target: 'es2020', logLevel: 'warning', legalComments: 'inline' };
 
-// The full classic-script build's entry is not a module of its own.
-const skip = new Set(['full.js']);
+// The full classic-script build's entry is not a module of its own, and the
+// early script is built on its own, below.
+const skip = new Set(['full.js', 'early.js']);
 const sources = (await readdir('src'))
     .filter((file) => file.endsWith('.js') && !skip.has(file))
     .map((file) => `src/${file}`);
@@ -38,6 +39,23 @@ for (const [dir, dev] of [['esm', false], ['esm-dev', true]]) {
         minifySyntax: !dev,
     });
 }
+
+// cyclewire/early hands out its script as source text, from
+// Function.prototype.toString(), so it is minified in both directories: the
+// text a page inlines is the minified one.
+for (const dir of ['esm', 'esm-dev']) {
+    await build({ ...common, entryPoints: ['src/early.js'], outfile: `dist/${dir}/early.js`, format: 'esm', minify: true });
+}
+// The same script to inline as it is, with the default prefix.
+await build({
+    ...common,
+    stdin: { contents: "import { capture } from './src/early.js'; capture('cw-');", resolveDir: '.', loader: 'js' },
+    outfile: 'dist/early.min.js',
+    bundle: true,
+    minify: true,
+    format: 'iife',
+    legalComments: 'none',
+});
 
 // A module whose imports from another were all development-only keeps a bare
 // `import "./util.js";`: built one file at a time, esbuild cannot see that the

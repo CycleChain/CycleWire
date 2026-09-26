@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire early fixture</title>
+    <script>
+        // The early script, as a page would inline it at the top of <head>;
+        // ?early=0 leaves it out, to show what it keeps.
+        if (new URLSearchParams(location.search).get('early') !== '0') document.write('<script src="/dist/early.min.js"><\/script>');
+    </script>
+    <script src="/fixtures/harness.js"></script>
+    <script type="module">
+        // CycleWire starts when the spec says so, as it would once a slow
+        // connection delivered it: everything before that is "early".
+        await new Promise((resolve) => { window.__go = resolve; });
+        const wire = await import('/dist/esm-dev/index.js');
+        window.CW = wire;
+        wire.start({ actions: { log: '/fixtures/actions/log.js' } });
+        window.__started = true;
+    </script>
+</head>
+<body>
+    <button id="like" type="button" cw-action="log">Like</button>
+    <input id="search" cw-on-input="log">
+    <a id="away" href="/fixtures/boot.html" cw-on-click="log#second">Leave</a>
+    <div cw-ignore><button id="ignored" type="button" cw-action="log">Ignored</button></div>
+    <button id="plain" type="button">Plain</button>
+    <a id="top" href="#" cw-action="log">Top</a>
+    <form action="/fixtures/boot.html" target="sink"><button id="send" cw-action="log">Send</button></form>
+    <form id="subscribe" action="/fixtures/boot.html" target="sink" cw-action="log"><input id="email" name="email"></form>
+    <iframe name="sink" title="sink"></iframe>
+</body>
+</html>

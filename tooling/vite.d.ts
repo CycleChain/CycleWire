@@ -7,6 +7,8 @@ export interface Options {
     types?: string | false;
     /** Open cyclewire/devtools during development. */
     devtools?: boolean;
+    /** Inline cyclewire/early first in index.html's <head>, after <meta charset>, so taps before CycleWire starts are kept. Default: false. */
+    early?: boolean;
     /** Warn about unknown actions and invalid values in index.html. Default: true. */
     check?: boolean;
     /** The attribute prefix, as passed to start(). Default: "cw-". */

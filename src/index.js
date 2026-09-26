@@ -7,7 +7,7 @@
  * hydrated and no component is re-rendered on boot.
  */
 import { splitName } from './attrs.js';
-import { attach, detachAll, listen as delegateTypes } from './delegate.js';
+import { attach, detachAll, listen as delegateTypes, onEvent } from './delegate.js';
 import * as registry from './registry.js';
 import { abortAll, announce, dispatch } from './runner.js';
 import { api, opts, plugins, setPrefix, setStarted, started, types } from './state.js';
@@ -84,6 +84,8 @@ import { warn } from './util.js';
 export const version = __VERSION__;
 
 const KEY = Symbol.for('cyclewire');
+/** Where cyclewire/early keeps what happened before start(). */
+const EARLY = Symbol.for('cyclewire.early');
 
 /**
  * Starts delegating events and activating triggers. Safe to call more than
@@ -114,6 +116,8 @@ export function start(options = {}) {
 
     attach(document);
     triggers.watch(document);
+    // What people did before now, kept by cyclewire/early, runs now, in order.
+    for (const [event, path] of global[EARLY]?.() || []) onEvent(event, document, event.type, path);
     const activate = () => started && scan(document);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', activate, { once: true });
     else activate();

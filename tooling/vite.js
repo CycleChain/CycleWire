@@ -28,6 +28,7 @@ const UPDATE = 'cyclewire:update';
  * @property {string} [actions]            the actions directory, relative to Vite's root. Default: the first of src/actions, actions, …
  * @property {string | false} [types]      the declaration file to keep up to date, relative to the root, or false. Default: cyclewire-actions.d.ts next to the actions directory
  * @property {boolean} [devtools]          open cyclewire/devtools during development
+ * @property {boolean} [early]             inline cyclewire/early first in index.html's <head>, after <meta charset>, so taps before CycleWire starts are kept
  * @property {boolean} [check]             warn about unknown actions and invalid values in index.html. Default: true
  * @property {string} [prefix]             the attribute prefix, as passed to start(). Default: "cw-"
  * @property {string | false} [manifest]   where the build writes the manifest for `cyclewire check`, inside outDir, or false. Default: .vite/cyclewire.json
@@ -37,11 +38,23 @@ const toSlash = (/** @type {string} */ path) => path.split(sep).join('/');
 const exists = (/** @type {string} */ path) => stat(path).then(() => true, () => false);
 
 /**
+ * cyclewire/early, minified as the package ships it; in this repository
+ * before a build, its source. (Paths in variables: the tooling's types know
+ * nothing of the DOM the script runs in.)
+ * @returns {Promise<{ earlyScript(prefix?: string): string }>}
+ */
+async function earlyModule() {
+    const built = '../dist/esm/early.js';
+    const source = '../src/early.js';
+    return import(built).catch(() => import(source));
+}
+
+/**
  * @param {Options} [options]
  * @returns {any} a Vite plugin
  */
 export default function cyclewire(options = {}) {
-    const { devtools = false, check = true, prefix = 'cw-' } = options;
+    const { devtools = false, check = true, prefix = 'cw-', early = false } = options;
     let root = process.cwd();
     let serving = false;
     /** @type {string} */
@@ -145,14 +158,22 @@ export default function cyclewire(options = {}) {
              * @param {string} html
              * @param {{ filename?: string }} context
              */
-            handler(html, context) {
+            async handler(html, context) {
                 if (check) {
                     const file = toSlash(relative(root, context.filename ?? join(root, 'index.html')));
                     const { problems } = checkTemplate(html, { file, registry: registryOf(modules, toSlash(relative(root, dir))), prefix });
                     for (const problem of problems) logger.warn(`[cyclewire] ${problem.file}:${problem.line}:${problem.column} ${problem.message}`);
                 }
+                if (early) {
+                    // First in <head>, before anything that could hold it up,
+                    // but after <meta charset>, which has to be in the first 1024 bytes.
+                    const script = `<script>${(await earlyModule()).earlyScript(prefix)}</script>`;
+                    const at = /<meta\s[^>]*charset[^>]*>/i.exec(html) ?? /<head(\s[^>]*)?>/i.exec(html);
+                    const end = at ? at.index + at[0].length : 0;
+                    html = html.slice(0, end) + script + html.slice(end);
+                }
                 if (!serving || !devtools) return html;
-                return [{ tag: 'script', attrs: { type: 'module' }, children: "import('cyclewire/devtools').then(({ install }) => install());", injectTo: 'body' }];
+                return { html, tags: [{ tag: 'script', attrs: { type: 'module' }, children: "import('cyclewire/devtools').then(({ install }) => install());", injectTo: 'body' }] };
             },
         },
 

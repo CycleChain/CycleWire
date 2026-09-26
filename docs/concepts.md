@@ -26,7 +26,7 @@ reading an attribute.
 
 ```text
                  load                         intent                     interaction
-Server HTML ─► [ 4.9 kB core ] ─► pointerover/focus ─► modulepreload ─► click ─► import ─► yield ─► run
+Server HTML ─► [ 5.0 kB core ] ─► pointerover/focus ─► modulepreload ─► click ─► import ─► yield ─► run
                     │
                     └─ triggers: load · idle (after load) · visible (IntersectionObserver) · media:(query)
 ```

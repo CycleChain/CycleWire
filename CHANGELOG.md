@@ -6,6 +6,16 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **`cyclewire/early`** (0.4 kB brotli), a script to inline at the top of `<head>`. Until
+  CycleWire starts, it keeps the clicks, typing and changes on bound elements, and marks
+  a tapped control `cw-pending` at once; `start()` then runs them in order. Links and
+  forms are left to the browser, and where CycleWire would have taken the place of their
+  default (a submit button, a link with `cw-prevent`), the action does not run as well.
+  `earlyScript(prefix)` returns the script for a server to inline, `dist/early.min.js`
+  is the same for the default prefix, and the Vite plugin adds it with `early: true`.
+
 ## [1.1.0] - 2026-09-26
 
 ### Added

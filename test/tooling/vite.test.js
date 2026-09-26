@@ -81,3 +81,14 @@ test('in development, a changed action is registered again instead of reloading 
         await server.close();
     }
 });
+
+test('early: true puts the early script first in <head>, after <meta charset>, with the prefix start() uses', async () => {
+    const { root, config } = await setup({ early: true, prefix: 'data-cw-' });
+    const out = join(root, 'dist');
+    await build({ ...config, build: { outDir: out, emptyOutDir: true, minify: false } });
+    const page = await readFile(join(out, 'index.html'), 'utf8');
+    const charset = '<meta charset="utf-8">';
+    const script = page.slice(page.indexOf(charset) + charset.length);
+    assert.match(script, /^<script>\(function \w+\(\w+\)/);
+    assert.match(script.slice(0, script.indexOf('</script>')), /\("data-cw-"\)$/);
+});

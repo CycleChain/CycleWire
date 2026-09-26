@@ -80,6 +80,11 @@
       "development": "./dist/esm-dev/prefetch.js",
       "default": "./dist/esm/prefetch.js"
     },
+    "./early": {
+      "types": "./types/early.d.ts",
+      "development": "./dist/esm-dev/early.js",
+      "default": "./dist/esm/early.js"
+    },
     "./bootstrap": {
       "types": "./types/bootstrap.d.ts",
       "development": "./dist/esm-dev/bootstrap.js",

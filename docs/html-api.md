@@ -164,6 +164,8 @@ Its action does not run, and no ancestor's action runs either.
 Present while a run is in flight. For `drop` runs (clicks, submits) `aria-busy="true"` is
 set too. Both are reference counted, and whatever values the server rendered are put back
 afterwards. CycleWire never sets `disabled`, because that would throw focus to `<body>`.
+[`cyclewire/early`](early.md) also sets it on a control tapped before CycleWire starts,
+until the tap runs.
 
 ## Configuration block
 

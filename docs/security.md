@@ -84,6 +84,8 @@ block.
   SRI hash from the release notes.
 - **Action stylesheets** (`cyclewire/css`) are ordinary `<link rel="stylesheet">`
   elements, so `style-src` must allow their URLs.
+- **[`cyclewire/early`](early.md#content-security-policy)** is the one inline script you
+  may add: give it the page's nonce, or allow its hash.
 
 ## Stylesheet URLs come from the registry too
 

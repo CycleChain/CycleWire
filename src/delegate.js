@@ -32,11 +32,10 @@ const isDisabled = (el) => el.matches(':disabled') || el.getAttribute('aria-disa
  * is disabled (the event is swallowed), or null. Stops at the listener's root.
  * Nothing inside `cw-ignore` binds, not even an element that carries its own
  * action, so the whole path up to the root is checked.
- * @param {Event} event @param {Node} root @param {string} type
+ * @param {EventTarget[]} path the event's composedPath() @param {Node} root @param {string} type
  * @returns {[Element, string] | false | null}
  */
-function resolve(event, root, type) {
-    const path = event.composedPath();
+function resolve(path, root, type) {
     const on = attrs.on + type;
     // A non-bubbling event can only run a binding on its own target.
     const own = NON_BUBBLING.has(type);
@@ -75,10 +74,14 @@ function shouldPrevent(el, type) {
         && !!control.form;
 }
 
-/** @param {Event} event @param {Node} root @param {string} type */
-function onEvent(event, root, type) {
+/**
+ * @param {Event} event @param {Node} root @param {string} type
+ * @param {EventTarget[]} [path] its composedPath(), which cyclewire/early keeps
+ * for an event from before start(), since an event over has none
+ */
+export function onEvent(event, root, type, path = event.composedPath()) {
     if (handled.has(event)) return;
-    const found = resolve(event, root, type);
+    const found = resolve(path, root, type);
     if (found === null) return;
     handled.add(event);
     if (!found) return;
@@ -95,9 +98,12 @@ function onEvent(event, root, type) {
     const prevent = shouldPrevent(el, type);
     const mouse = /** @type {MouseEvent} */ (event);
     // "Open in new tab" and friends keep working on clicks CycleWire prevents.
-    if (prevent && type === 'click' && (mouse.button > 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey)) return;
+    // An event from before start() is over, and its default done (a link
+    // followed, a form submitted): where CycleWire would have taken the place
+    // of that default, the action does not run as well. "#" goes nowhere.
+    if (prevent && (type === 'click' && (mouse.button > 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey) || !event.eventPhase && !event.defaultPrevented && el.getAttribute('href') !== '#')) return;
     // Captured now: after dispatch, event.target is null for shadow DOM events.
-    const target = event.composedPath()[0] || event.target;
+    const target = path[0] || event.target;
     if (!announce(el, action, event)) {
         if (__DEV__) trace({ type: 'skip', element: el, action, event, reason: 'cancelled' });
         return;

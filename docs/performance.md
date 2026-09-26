@@ -2,7 +2,7 @@
 
 ## What the page pays on load
 
-- **One script.** The core is 4.9 kB brotli, or 5.1 kB for the classic-script build
+- **One script.** The core is 5.0 kB brotli, or 5.2 kB for the classic-script build
   that also starts itself.
 - **No action code** until someone reaches for it, or a trigger or preload asks for it.
   On screens that cannot hover, the modules of the actions in view are fetched once the
@@ -20,14 +20,16 @@ CycleWire.loaded(); // → [] after load
 ## Load CycleWire early
 
 Clicks that land before CycleWire starts fall back to the browser: links navigate and
-forms submit, but plain buttons do nothing. Start early:
+forms submit, but plain buttons do nothing. [`cyclewire/early`](early.md), 0.4 kB inline
+at the top of `<head>`, keeps those taps, shows them as pending and runs them once
+CycleWire starts. Starting early shortens the wait itself:
 
 ```html
 <link rel="modulepreload" href="/assets/app.js">
 <script type="module" src="/assets/app.js"></script> <!-- in <head> -->
 ```
 
-For the fastest possible activation, inline the 5.1 kB classic-script build in the
+For the fastest possible activation, inline the 5.2 kB classic-script build in the
 `<head>`, the way Qwik inlines its loader. It starts CycleWire while the page is still
 parsing, from the JSON block before it:
 
