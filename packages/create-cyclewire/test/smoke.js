@@ -32,9 +32,12 @@ const freePort = () => new Promise((resolve) => {
     });
 });
 
-/** Starts a server and resolves once it answers. */
+/**
+ * Starts a server and resolves once it answers. It gets a process group of
+ * its own, so stop() ends what `npm run preview` starts too, not only npm.
+ */
 async function serve(command, args, cwd, port) {
-    const child = spawn(command, args, { cwd, env: { ...process.env, PORT: String(port) }, stdio: 'pipe', shell: process.platform === 'win32' });
+    const child = spawn(command, args, { cwd, env: { ...process.env, PORT: String(port) }, stdio: 'pipe', shell: process.platform === 'win32', detached: process.platform !== 'win32' });
     let output = '';
     child.stdout.on('data', (chunk) => (output += chunk));
     child.stderr.on('data', (chunk) => (output += chunk));
@@ -47,8 +50,20 @@ async function serve(command, args, cwd, port) {
         }
         await new Promise((resolve) => setTimeout(resolve, 250));
     }
-    child.kill();
+    stop(child);
     throw new Error(`The server did not start:\n${output}`);
+}
+
+/** Ends a server started by serve(), with everything it started. @param {import('node:child_process').ChildProcess} child */
+function stop(child) {
+    try {
+        if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, 'SIGTERM');
+        else child.kill();
+    } catch {
+        child.kill();
+    }
+    child.stdout?.destroy();
+    child.stderr?.destroy();
 }
 
 const work = await mkdtemp(join(tmpdir(), 'cyclewire-smoke-'));
@@ -98,10 +113,11 @@ for (const template of templates) {
         failed = true;
         console.error(`FAIL ${template}: ${/** @type {Error} */ (error).message}`);
     } finally {
-        server?.kill();
+        if (server) stop(server);
     }
 }
 
 await browser.close();
 await rm(work, { recursive: true, force: true }).catch(() => {});
-process.exitCode = failed ? 1 : 0;
+// A server that outlives its group would keep this process open until CI's timeout.
+process.exit(failed ? 1 : 0);
