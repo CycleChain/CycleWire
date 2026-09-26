@@ -15,7 +15,7 @@ export const APPS = fileURLToPath(new URL('../apps/', import.meta.url));
 const PROXY = fileURLToPath(new URL('../proxy/main.js', import.meta.url));
 
 /** Builds and servers run without phoning home: it changes nothing measured. */
-const NO_TELEMETRY = { NEXT_TELEMETRY_DISABLED: '1', ASTRO_TELEMETRY_DISABLED: '1', NUXT_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1' };
+const NO_TELEMETRY = { NEXT_TELEMETRY_DISABLED: '1', ASTRO_TELEMETRY_DISABLED: '1', NUXT_TELEMETRY_DISABLED: '1', NG_CLI_ANALYTICS: 'false', DO_NOT_TRACK: '1' };
 
 /** Every stack with a bench.json, controls first. */
 export function available() {

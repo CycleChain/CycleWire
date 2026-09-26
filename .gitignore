@@ -13,3 +13,5 @@ docs-site/node_modules/
 docs-site/dist/
 docs-site/.astro/
 docs-site/src/content/docs/
+# Angular CLI keeps its build cache next to the main checkout when it builds in a git worktree.
+/.angular/

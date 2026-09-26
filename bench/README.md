@@ -47,7 +47,8 @@ how a variant (another documented way to build the page with a stack) joins.
 
 ## Run it
 
-Node 22.19 or later (the Nuxt app needs it; CI uses Node 24).
+Node 24.15 or later, or 22.22.3 or later: the Angular app's CLI needs one of them, and
+CI uses Node 24.
 
 ```bash
 cd bench
