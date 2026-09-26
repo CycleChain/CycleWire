@@ -1,0 +1,80 @@
+// The shop. The server renders it for every request from what +handler.ts
+// loads; without JavaScript its links and forms load the next page. In the
+// browser Marko resumes it: the search, the category, the cart and the quick
+// view are state in this template, and only the code that updates them ships.
+import { CATEGORIES, EAGER_IMAGES, categoryName, formatPrice, matches, resultText } from "../../../../scenario/markup.js";
+
+static const CATEGORY_LINKS = [{ id: "", name: "All" }, ...CATEGORIES];
+
+// A click meant to open the link elsewhere (a new tab or window) keeps its default.
+static function opensElsewhere(event: MouseEvent) {
+  return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+}
+
+<const/{ products, filters } = $global.data>
+<let/cart=$global.data.cart>
+<let/q=filters.q>
+<let/category=filters.category>
+<let/quickView=$global.data.quickView>
+<const/visible=products.filter((product) => matches(product, { q, category }))>
+// The first cards the server shows load their image eagerly, as in the reference.
+<const/eager=new Set(products.filter((product) => matches(product, filters)).slice(0, EAGER_IMAGES))>
+
+<header class="top">
+  <a class="brand" href="/">Wirestore</a>
+  <p class="cart">Cart <span id="cart-count">${cart.count}</span> · <span id="cart-total">${formatPrice(cart.total)}</span></p>
+</header>
+<main>
+  <section class="intro">
+    <h1>Everyday objects, made well</h1>
+    <p>Lamps, chairs, pans and pens from small workshops. Free returns for 60 days.</p>
+  </section>
+  // Without JavaScript, a GET form that loads the page with the results. In
+  // the page the results follow the box as you type, so it is not sent.
+  <form class="search" role="search" action="/" method="get" onSubmit(event) { event.preventDefault() }>
+    <label for="q">Search products</label>
+    <div class="search__row"><input id="q" name="q" type="search" value:=q autocomplete="off"><if=category><input type="hidden" name="category" value=category></if><button>Search</button></div>
+  </form>
+  // Links that load each category, or choose it in place once the page runs.
+  // They leave the search out, so choosing one clears it.
+  <nav class="categories" id="categories" aria-label="Categories">
+    <for|link| of=CATEGORY_LINKS>
+      <a
+        href=Run.href("/", { search: { category: link.id || undefined } })
+        aria-current=(link.id === category && "page")
+        onClick(event) {
+          if (opensElsewhere(event)) return;
+          event.preventDefault();
+          category = link.id;
+          q = "";
+        }
+      >${link.name}</a>
+    </for>
+  </nav>
+  <p class="count" id="result-count" role="status">${resultText(visible.length)}</p>
+  // Every card is rendered and the ones the filters leave out are hidden, as in
+  // the reference, so filtering only toggles `hidden`.
+  <ul class="grid" id="products">
+    <for|product| of=products>
+      <li class="card" data-product=product.id data-category=product.category hidden=!visible.includes(product)>
+        <img src=`/images/${product.id}.webp` alt="" width="480" height="360" loading=(eager.has(product) ? "eager" : "lazy") decoding="async">
+        <h3>${product.name}</h3>
+        <p class="meta"><span>${categoryName(product.category)}</span> <span class="price">${formatPrice(product.price)}</span></p>
+        <div class="actions"><add-to-cart id=product.id cart:=cart/><a
+          class="quick"
+          href=Run.href("/", { search: { view: product.id } })
+          async onClick(event) {
+            if (opensElsewhere(event)) return;
+            event.preventDefault();
+            // The listing has no descriptions: ask for this product's, then open.
+            const response = await fetch(Run.href("/products/$id", { params: { id: product.id } }));
+            if (response.ok) quickView = await response.json();
+          }
+        >Quick view</a></div>
+      </li>
+    </for>
+  </ul>
+  <newsletter-form status=$global.data.newsletter/>
+</main>
+<quick-view product:=quickView cart:=cart/>
+<footer class="bottom"><p>Wirestore is a benchmark scenario. Nothing here is for sale.</p></footer>

@@ -1,0 +1,38 @@
+// The quick view: a native <dialog>, open on a product and empty otherwise.
+// On a page loaded as /?view=<id> the server renders it open, which is how it
+// shows without JavaScript, and it stays that way (not modal) until closed.
+// Given a product in the page, it opens as a modal: showModal() makes the page
+// behind it inert, moves the focus into it and lets Escape close it. Its Close
+// button is a <form method="dialog">, which closes it with or without
+// JavaScript; closing it clears the product.
+import { categoryName, formatPrice } from "../../../../scenario/markup.js";
+
+static type Detail = { id: string; name: string; category: string; price: number; description: string };
+static type Cart = { count: number; total: number };
+
+export interface Input {
+  product: Detail | null;
+  productChange?: (product: Detail | null) => void;
+  cart: Cart;
+  cartChange?: (cart: Cart) => void;
+}
+
+<let/product:=input.product>
+
+<dialog/dialog id="quick-view" aria-labelledby="quick-view-title" open=Boolean(product) onClose() { product = null }>
+  <if=product>
+    <div class="quick-view">
+      <img src=`/images/${product.id}.webp` alt="" width="480" height="360">
+      <div class="quick-view__body">
+        <h2 id="quick-view-title">${product.name}</h2>
+        <p class="meta"><span>${categoryName(product.category)}</span> <span class="price">${formatPrice(product.price)}</span></p>
+        <p>${product.description}</p>
+        <div class="actions"><add-to-cart id=product.id cart:=input.cart/><form method="dialog"><button>Close</button></form></div>
+      </div>
+    </div>
+  </if>
+</dialog>
+
+<script>
+  if (product && !dialog().open) dialog().showModal();
+</script>

@@ -1,0 +1,18 @@
+{
+  "name": "bench-marko",
+  "description": "The Wirestore page built with Marko 6 and Marko Run",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "marko-run",
+    "build": "marko-run build",
+    "preview": "marko-run preview",
+    "start": "node --enable-source-maps ./dist/index.mjs"
+  },
+  "dependencies": {
+    "marko": "6.3.56"
+  },
+  "devDependencies": {
+    "@marko/run": "0.11.13"
+  }
+}

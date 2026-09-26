@@ -1,0 +1,25 @@
+// The newsletter sign-up. Without JavaScript the browser posts the form to
+// /newsletter (routes/newsletter/+handler.ts), which redirects to
+// /?subscribed=<email> or /?newsletter=invalid, and the server renders the
+// message for that address as `status`. In the page, the same request goes
+// out with fetch and the message the server answers with is shown in place.
+export interface Input {
+  status: string;
+}
+
+<let/status=input.status>
+
+<section class="newsletter" aria-labelledby="newsletter-title">
+  <h2 id="newsletter-title">Get the Wirestore letter</h2>
+  <p>New arrivals and restocks, once a month.</p>
+  <form id="newsletter" action="/newsletter" method="post" async onSubmit(event, form) {
+    event.preventDefault();
+    const response = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { accept: "application/json" } });
+    status = (await response.json()).message;
+    if (response.ok) form.reset();
+  }>
+    <label for="email">Email</label>
+    <div class="newsletter__row"><input id="email" name="email" type="email" required autocomplete="email"><button>Subscribe</button></div>
+  </form>
+  <p id="newsletter-status" role="status">${status}</p>
+</section>

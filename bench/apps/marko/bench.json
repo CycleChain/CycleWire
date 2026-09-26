@@ -1,0 +1,108 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "marko",
+  "name": "Marko",
+  "kind": "framework",
+  "summary": "The page rendered per request by Marko Run's Node server and resumed in the browser by Marko 6, whose one client bundle holds only the code for what can change. A route handler loads the listing and the cart cookie; search and category are template state that toggles the cards' hidden attribute; the forms post to route handlers and are sent with fetch once the page runs; the quick view is a dialog on ?view=, filled from a JSON route when opened in the page.",
+  "build": "npm run build",
+  "start": "node --enable-source-maps ./dist/index.mjs",
+  "search": "live",
+  "packages": [
+    "marko",
+    "@marko/run"
+  ],
+  "idioms": [
+    {
+      "choice": "The project is laid out the way `npm init marko -- -t basic` writes it: marko in dependencies and @marko/run in devDependencies, the starter's scripts, tsconfig.json and .gitignore (plus .marko-run/, the route types each build writes), routes in src/routes/ and custom tags in src/tags/, and no Vite config, so Marko Run's defaults apply.",
+      "docs": "https://markojs.com/docs/introduction/installation#marko-run-setup-recommended"
+    },
+    {
+      "choice": "Built with `marko-run build` (the starter's `npm run build`) and started with the starter's start script, `node --enable-source-maps ./dist/index.mjs`. No adapter package is installed, so the build uses the Node-based adapter that ships with @marko/run, whose entry is a standalone Node http server with compression and the static files of dist/public. It listens on PORT and has no host setting, so it listens on every interface, 127.0.0.1 included.",
+      "docs": "https://markojs.com/docs/marko-run/adapters#choosing-an-adapter"
+    },
+    {
+      "choice": "The server's request adapter takes the site's origin from the ORIGIN environment variable, which the runner sets to the proxy's address, so ctx.url and the absolute Location of every redirect use the address the browser uses. Without it (or TRUST_PROXY=1), the origin would come from the Host header, over http.",
+      "docs": "https://github.com/marko-js/run/blob/main/packages/run/src/adapter/middleware.ts"
+    },
+    {
+      "choice": "The document (doctype, a <head> with the title, the viewport and the stylesheet, and <body>) is src/routes/+layout.marko, as in the starter, and the page renders everything inside <body>. The header lives in the page rather than the layout because its cart is state that the page's forms update.",
+      "docs": "https://markojs.com/docs/marko-run/file-based-routing#layoutmarko"
+    },
+    {
+      "choice": "Marko's defaults for rendering: the page is rendered for every request, and nothing is prerendered or cached. In the browser it resumes from the state the server serialized into the page, without re-rendering or hydrating anything.",
+      "docs": "https://markojs.com/docs/explanation/why-is-marko-fast#resumability"
+    },
+    {
+      "choice": "Marko's defaults for code: the compiler ships only what can change. The page's one client bundle updates the cart, the filters, the quick view and the newsletter message, and holds no template for the header, the cards, the newsletter or the footer. No tag is lazily loaded with `import … with { load }`, which is opt-in.",
+      "docs": "https://markojs.com/docs/explanation/fine-grained-bundling"
+    },
+    {
+      "choice": "A GET handler, src/routes/+handler.ts, loads the page's data and passes it on with next(), which renders the page with it as $global.data: the product listing without descriptions, the cart summary from the `cart` cookie, the filters and the quick view's product from the query string (read with the scenario's stateFrom), and the newsletter message. It is all synchronous, so the page has no <await>.",
+      "docs": "https://markojs.com/docs/marko-run/data-loading#passing-data"
+    },
+    {
+      "choice": "The page's state is <let> tags seeded from $global.data (the search, the category, the cart and the quick view's product), and the visible products are a <const> derived from the search and the category. The listing and the filters, which the browser needs to recompute them, are serialized into the page with the rest of the state.",
+      "docs": "https://markojs.com/docs/reference/core-tag#let"
+    },
+    {
+      "choice": "Every card is rendered, as in the reference, and filtering toggles each card's hidden attribute, the pattern the docs show for switching the visibility of server-rendered content: the browser gets code that updates the attribute and the count, and none that renders cards. Results change on every key without a request, so there is no debounce.",
+      "docs": "https://markojs.com/docs/explanation/targeted-compilation#environment-coordination"
+    },
+    {
+      "choice": "The search box is bound with value:=q, the change handler the docs recommend over syncing an input with onInput. It sits in a GET form that loads the filtered page without JavaScript; in the page, the form's onSubmit handler prevents sending it, since the results already follow the box.",
+      "docs": "https://markojs.com/docs/reference/native-tag#change-handlers"
+    },
+    {
+      "choice": "Categories are links to /?category=…, a page load without JavaScript. In the page, each link's onClick handler sets the category and clears the search, and leaves a click with a modifier key (a new tab or window) to the browser. aria-current follows the category.",
+      "docs": "https://markojs.com/docs/reference/native-tag#event-handlers"
+    },
+    {
+      "choice": "Add to cart and the newsletter are HTML forms that post to route handlers (+handler.ts files exporting Run.POST) at /cart and /newsletter. They read the field with the form option's validator and redirect with a 303 (Post/Redirect/Get): /cart back to the page it was posted from with ctx.back, /newsletter to /?subscribed=<email> or /?newsletter=invalid. The forms work without JavaScript and before the page resumes.",
+      "docs": "https://markojs.com/docs/marko-run/data-loading#forms"
+    },
+    {
+      "choice": "Once the page runs, each form's async onSubmit handler prevents the submission and sends the same FormData with fetch, as the docs' form example does, asking for JSON. The handlers answer such a request with Response.json instead of a redirect: the new cart summary, or the message, with a 422 for an address they refuse. A successful sign-up also resets the form.",
+      "docs": "https://markojs.com/docs/reference/native-tag#handler-arguments"
+    },
+    {
+      "choice": "The cart is state in the page, bound to each <add-to-cart> tag with cart:=cart. The tag's controllable <let/cart:=input.cart> takes the cart the server answers with, which updates the header; there is no optimistic update.",
+      "docs": "https://markojs.com/docs/explanation/controllable-components#controllable-let"
+    },
+    {
+      "choice": "The handlers read the cart from the Cookie header with the scenario's readCart and write it with a Set-Cookie header from its cartCookie() (HttpOnly, SameSite=Lax, Path=/): Marko Run hands handlers a standard Request, takes a standard Response, and has no cookie helper.",
+      "docs": "https://markojs.com/docs/marko-run/runtime#context"
+    },
+    {
+      "choice": "The app's endpoints are at /cart, /newsletter and /products/<id> rather than under /api/, which the benchmark's proxy sends to the shared server. The page uses none of the shared JSON endpoints.",
+      "docs": "https://markojs.com/docs/marko-run/file-based-routing#handler"
+    },
+    {
+      "choice": "The URLs the page builds from data (the category and Quick view links, and the quick view's request to /products/$id) come from Run.href, which checks the path, params and search against the app's routes; the client build compiles the call to a template string.",
+      "docs": "https://markojs.com/docs/marko-run/runtime#typed-urls"
+    },
+    {
+      "choice": "The quick view is a native <dialog id=\"quick-view\"> in a <quick-view> tag. Each Quick view link goes to /?view=<id>, which the server renders with the dialog open, the way it shows without JavaScript. In the page, the link's async onClick handler fetches the product with its description from /products/<id>, a GET handler in routes/products/$id/ that answers with Response.json, and sets it as the dialog's product, bound with product:=.",
+      "docs": "https://markojs.com/docs/marko-run/file-based-routing#dynamic-directories"
+    },
+    {
+      "choice": "Given a product in the page, the dialog opens as a modal with showModal() from a <script> effect, which runs once the product is rendered, as the docs advise for a modal dialog: open= renders it open but not modal, which is how a page loaded as /?view=<id> keeps it until it is closed. Its Close button is a <form method=\"dialog\">, and its onClose handler clears the product.",
+      "docs": "https://markojs.com/docs/reference/native-tag#dialog-openchange"
+    },
+    {
+      "choice": "The newsletter's message is state in its own <newsletter-form> tag, seeded with the message the server renders for ?subscribed= or ?newsletter=invalid, since nothing else on the page reads it.",
+      "docs": "https://markojs.com/docs/explanation/nested-reactivity#case-1-local-state"
+    },
+    {
+      "choice": "Handlers and tags are TypeScript, as in the starter; the build compiles them without a type check. Marko Run writes route types to .marko-run/routes.d.ts on every build, so $global.data is typed from what the handler passes to next().",
+      "docs": "https://markojs.com/docs/marko-run/typescript#generated-types"
+    },
+    {
+      "choice": "The handlers and templates import the scenario's modules (catalog, cart, markup, and stateFrom from render.js) from bench/scenario/ by relative path. Vite bundles them into the server, and the browser bundle takes only the markup helpers its code uses (formatting prices and category names, result counts, query matching), with no product data.",
+      "docs": "https://markojs.com/docs/reference/language#import"
+    },
+    {
+      "choice": "Scenario-forced: the shared stylesheet is a <link> in the layout's <head>, and no template has a <style> block, the docs' way to style a component, which Marko Run would bundle into a CSS file. The build emits no CSS.",
+      "docs": "https://markojs.com/docs/guide/styling#inline-styles"
+    }
+  ]
+}

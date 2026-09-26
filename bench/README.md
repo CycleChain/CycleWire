@@ -34,6 +34,7 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `hotwire` | Hotwire: Turbo Drive, Frames and Streams from the server, Stimulus for the rest |
 | `angular` | Angular with @angular/ssr: incremental hydration, httpResource, query parameters as state |
 | `astro` | Astro with Preact islands, nanostores and Astro Actions |
+| `marko` | Marko: Marko Run route handlers, Tags API state, resumed rather than hydrated |
 | `next` | Next.js App Router: Server Components, Server Actions, an intercepted modal |
 | `next--searchparams` | Variant: the list filtered in the browser, the URL kept with the History API |
 | `nuxt` | Nuxt: universal rendering, useFetch, Nitro server routes |

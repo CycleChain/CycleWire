@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.vscode/settings.json
+*.log
+dist
+node_modules
+Thumbs.db
+
+# Route types Marko Run writes on every build and dev start
+.marko-run
