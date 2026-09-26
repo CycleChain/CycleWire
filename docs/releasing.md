@@ -1,8 +1,8 @@
 # Releasing (maintainers)
 
 CycleWire uses [Semantic Versioning](https://semver.org), annotated git tags (`vX.Y.Z`),
-GitHub Releases and npm with trusted publishing. Nothing is published from a laptop
-after the first release.
+GitHub Releases and npm with trusted publishing. Once trusted publishing works, nothing
+is published from a laptop.
 
 ## Every release
 
@@ -33,6 +33,23 @@ The tag starts `.github/workflows/release.yml`, which:
 
 The landing page and the live examples redeploy on every push to `main`
 (`.github/workflows/pages.yml`), the release commit included.
+
+## Publishing by hand
+
+Until trusted publishing works, a maintainer publishes the release commit from a clean
+checkout, then pushes the tag:
+
+```bash
+git switch main && git pull
+npm ci
+npx playwright install chromium firefox webkit
+npm publish --access public     # prepublishOnly builds and tests first; npm asks for the second factor
+git tag -a vX.Y.Z -m "CycleWire vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+The Release workflow still verifies the commit, finds the version already on npm, skips
+publishing, and creates the GitHub Release with the notes and SRI hashes.
 
 ## Pre-releases
 
