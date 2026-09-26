@@ -58,7 +58,7 @@ function profile(entry, title) {
         '',
     ];
     if (found.length) {
-        lines.push(`Where another stack beats CycleWire here, beyond the noise: ${found.map(({ metric: item, ours, best }) => `${item.label} (${best.stack.name} ${item.format(best.summary.median)}, CycleWire ${item.format(ours.median)})`).join('; ')}.`, '');
+        lines.push(`Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): ${found.map(({ metric: item, ours, best }) => `${item.label} (${best.stack.name} ${item.format(best.summary.median)}, CycleWire ${item.format(ours.median)})`).join('; ')}.`, '');
     }
     return lines.join('\n');
 }

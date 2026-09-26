@@ -74,10 +74,14 @@ const byId = (metrics, id) => metrics.find((metric) => metric.id === id);
 /** Whether two confidence intervals overlap. */
 const overlaps = (a, b) => !a.ci95 || !b.ci95 || (a.ci95[0] <= b.ci95[1] && b.ci95[0] <= a.ci95[1]);
 
+/** Smaller differences are not reported, however narrow the intervals: 1 ms in 250 is not a finding. */
+export const MATERIAL = 0.03;
+
 /**
  * Where CycleWire is not the best: metrics on which another stack that is
  * not a control has a lower median, with confidence intervals that do not
- * overlap. Controls are baselines, not choices, so they are left out.
+ * overlap and a difference of at least 3% of CycleWire's median. Controls are
+ * baselines, not choices, so they are left out.
  */
 export function notBest(results) {
     const stacks = results.stacks.filter((stack) => stack.measured);
@@ -92,6 +96,7 @@ export function notBest(results) {
         for (const stack of rivals) {
             const theirs = metric.read(stack.summaries);
             if (!theirs?.n || theirs.median === null || theirs.median >= ours.median || overlaps(ours, theirs)) continue;
+            if (ours.median - theirs.median < ours.median * MATERIAL) continue;
             if (!best || theirs.median < best.summary.median) best = { stack, summary: theirs };
         }
         if (best) findings.push({ metric, ours, best });
@@ -161,7 +166,7 @@ function findings(results) {
     const list = notBest(results);
     const hasRivals = results.stacks.some((stack) => stack.measured && stack.id !== 'cyclewire' && stack.kind !== 'control');
     if (!hasRivals) return '<p class="muted">This run measured CycleWire only against the controls, so there is nothing to compare it with yet.</p>';
-    if (!list.length) return '<p>In this run, no other stack beat CycleWire on any metric below by more than the noise (their 95% confidence intervals overlap).</p>';
+    if (!list.length) return '<p>In this run, no other stack beat CycleWire on any metric below by more than the noise (95% confidence intervals that overlap, or a difference under 3%).</p>';
     return `<ul class="findings">${list.map(({ metric, ours, best }) => `<li><b>${esc(metric.label)}</b>: ${esc(best.stack.name)} ${esc(metric.format(best.summary.median))}, CycleWire ${esc(metric.format(ours.median))}.</li>`).join('')}</ul>`;
 }
 
@@ -182,6 +187,7 @@ function profileSection(id, entry) {
 ${skipped.length ? `<p class="warning">Not measured, because they failed a conformance check: ${skipped.map((stack) => esc(stack.name)).join(', ')}.</p>` : ''}
 <section class="block" aria-labelledby="${id}-findings">
 <h3 id="${id}-findings">Where CycleWire is not the best</h3>
+<p class="muted">Metrics on which a stack that is not a control has a lower median, with 95% confidence intervals that do not overlap and a difference of at least 3%.</p>
 ${findings(results)}
 </section>
 <section class="block" aria-labelledby="${id}-load">

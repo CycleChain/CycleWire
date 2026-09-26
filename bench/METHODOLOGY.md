@@ -183,6 +183,11 @@ interval for the median from 2,000 bootstrap resamples (seeded, so recomputing g
 same interval). Differences whose intervals overlap should not be read as differences.
 There is no composite score.
 
+The results list the metrics on which another stack beats CycleWire: a stack that is not
+a control has a lower median, the two 95% intervals do not overlap, and the difference is
+at least 3% of CycleWire's median. The last condition keeps out differences that are real
+but too small to matter, such as 1 ms in 250, which very stable metrics can produce.
+
 ## 10. Limitations
 
 - Chromium only: the measurements rely on the Chrome DevTools Protocol.

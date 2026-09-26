@@ -169,8 +169,9 @@ try {
             })),
             failures,
         });
+        // Compact: a run holds every sample. scripts/report.js prints one readably.
         const save = async (value) => {
-            await writeFile(`${out}.tmp`, `${JSON.stringify(value, null, 2)}\n`);
+            await writeFile(`${out}.tmp`, `${JSON.stringify(value)}\n`);
             await rename(`${out}.tmp`, out);
         };
 

@@ -34,9 +34,11 @@ test('lists the metrics where a non-control stack clearly beats CycleWire', () =
         stack('cyclewire', 'library'),
         stack('fast', 'framework', { cold: { lcp: summary(900) }, journeys: { filter: { effect: summary(100) } } }),
         stack('close', 'framework', { cold: { settled: summary(2995) } }),
+        // Clearly separate, but only 2% lower: not a finding.
+        stack('slight', 'framework', { journeys: { cart: { effect: summary(686, 1) } } }),
     ]);
     const found = notBest(run).map(({ metric, best }) => [metric.id, best.stack.id]);
-    // The control's faster FCP and the overlapping settle time are not listed.
+    // The control's faster FCP, the overlapping settle time and the 2% difference are not listed.
     assert.deepEqual(found, [['lcp', 'fast'], ['effect-filter', 'fast']]);
 });
 
