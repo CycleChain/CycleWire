@@ -64,8 +64,8 @@ const COMMENTS = {
     script: [BLOCK_COMMENT, LINE_COMMENT],
 };
 
-/** Signs that a template language builds (part of) an attribute value. */
-const BUILT = /\{\{|\{%|\{!!|<\?|<%|\$\{|@\{/;
+/** Signs that a template language builds (part of) an attribute value, Blade directives such as `@json(…)` included. */
+const BUILT = /\{\{|\{%|\{!!|<\?|<%|\$\{|@\{|@\w+\(/;
 
 /** Replaces comments with spaces, keeping every line break, so positions stay right. */
 function blank(/** @type {string} */ source, /** @type {Syntax} */ syntax) {

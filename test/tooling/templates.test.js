@@ -29,7 +29,9 @@ test('HTML: quoted, unquoted and bare attributes, with positions', () => {
 
 test('values built by a template language are dynamic', () => {
     const blade = '<button data-cw-action="{{ $action }}" data-cw-props=\'@json($props)\'>';
-    assert.deepEqual(values(blade, { syntax: 'blade' }), [['action', 'data-cw-action', null], ['props', 'data-cw-props', '@json($props)']]);
+    assert.deepEqual(values(blade, { syntax: 'blade' }), [['action', 'data-cw-action', null], ['props', 'data-cw-props', null]]);
+    // An email address is not a directive.
+    assert.deepEqual(values(`<a data-cw-props='{"to":"ada@example.com"}'>`), [['props', 'data-cw-props', '{"to":"ada@example.com"}']]);
     assert.deepEqual(values('<a data-cw-action="<%= name %>">', { syntax: 'erb' }), [['action', 'data-cw-action', null]]);
     assert.deepEqual(values('<a data-cw-action="{% if x %}a{% endif %}">', { syntax: 'jinja' }), [['action', 'data-cw-action', null]]);
     assert.deepEqual(values('<a data-cw-action="cart#{kind}">', { syntax: 'svelte' }), [['action', 'data-cw-action', null]]);
