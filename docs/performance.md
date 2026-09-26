@@ -54,6 +54,27 @@ For the fastest possible activation, inline the 4.8 kB classic-script build in t
 Speculative preloads are skipped when the user asked to save data or is on a 2G
 connection. An explicit `preload()` call is not.
 
+## What the benchmark shows
+
+The [benchmark](../bench/README.md) builds one product page with CycleWire and with other
+stacks, and measures loads, the time from an input to its result, a tap in the first frame
+after first paint, and a repeat visit, on a throttled phone and on a desktop
+([results](https://cyclechain.github.io/CycleWire/bench/)). What it shows about CycleWire,
+and what to do about it:
+
+- **Loading costs about what plain HTML costs.** The core is the only script on load and
+  nothing runs, so first paint, layout shift and blocking time stay close to the page
+  without JavaScript.
+- **An action's first use waits for its code.** On a slow network that is a round trip
+  before the handler runs. On touch screens there is no hover, so intent preloading only
+  starts when the finger lands. Fetch the features most visitors use once the page is idle
+  (`idle`), and features that are likely to be used as they come into view (`visible`).
+- **Code, then data.** A handler that fetches data after its module arrives pays two round
+  trips on its first use. Preload those modules earlier.
+- **Let the bundler preload an action's imports.** Vite fetches the chunks an action
+  imports together with the action; a bundler that does not makes the browser find them
+  one import at a time.
+
 ## Triggers
 
 - `idle` waits for the window's `load` event and then `requestIdleCallback`, so analytics

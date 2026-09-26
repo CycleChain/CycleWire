@@ -333,6 +333,57 @@ Minified, measured by `npm run size` and enforced in CI:
 
 ---
 
+## 📊 Benchmark
+
+One product page, built with each stack the way its documentation recommends and measured
+the same way in Chromium on GitHub's runners:
+[results](https://cyclechain.github.io/CycleWire/bench/) ·
+[methodology](bench/METHODOLOGY.md) · [run it yourself](bench/README.md). The benchmark is
+maintained by the authors of CycleWire, which is one of the stacks measured, so every app,
+the runner and the raw data are in [`bench/`](bench/), and corrections from the other
+projects are welcome. There is no overall score.
+
+<!-- bench:start -->
+Medians, lower is better. Time to effect runs from the input to the frame that shows the result;
+"Early tap" is a tap on "Add to cart" in the first frame after first paint. Confidence intervals,
+every other metric and each stack's choices are on the [results page](https://cyclechain.github.io/CycleWire/bench/).
+
+**Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-25, INTEL(R) XEON(R) PLATINUM 8573C (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
+
+| Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Static HTML (control) | 0.0 kB | 1,580 ms | 0 ms | 1,355 ms | 750 ms | 787 ms | 769 ms | 1,371 ms | by a page load, 1,606 ms |
+| Vanilla JS (control) | 1.2 kB | 1,588 ms | 0 ms | 698 ms | 114 ms | 11 ms | 697 ms | 701 ms | in the page, 818 ms |
+| Alpine.js | 17.9 kB | 1,728 ms | 27 ms | 700 ms | 128 ms | 20 ms | 700 ms | 703 ms | by a page load, 1,683 ms |
+| Astro + Preact | 13.1 kB | 1,580 ms | 0 ms | 703 ms | 116 ms | 13 ms | 707 ms | 701 ms | by a page load, 1,649 ms |
+| CycleWire | 8.7 kB | 1,612 ms | 0 ms | 717 ms | 606 ms | 32 ms | 1,189 ms | 714 ms | in the page, 1,835 ms |
+| htmx | 15.4 kB | 1,540 ms | 0 ms | 712 ms | 741 ms | 834 ms | 710 ms | 711 ms | in the page, 855 ms |
+| Next.js | 120.1 kB | 2,012 ms | 76 ms | 759 ms | 729 ms | 832 ms | 1,303 ms | 717 ms | by a page load, 988 ms |
+| Qwik City | 37.4 kB | 1,724 ms | 0 ms | 790 ms | 176 ms | 28 ms | 766 ms | 798 ms | in the page, 2,466 ms |
+| SvelteKit | 32.8 kB | 1,804 ms | 0 ms | 1,299 ms | 136 ms | 18 ms | 632 ms | 1,295 ms | by a page load, 946 ms |
+
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,200 ms, CycleWire 1,248 ms); Largest Contentful Paint (htmx 1,540 ms, CycleWire 1,612 ms); Requests (Alpine.js 24, CycleWire 26); Category filter (Astro + Preact 116 ms, CycleWire 606 ms); Live search (Astro + Preact 13 ms, CycleWire 32 ms); Quick view (SvelteKit 632 ms, CycleWire 1,189 ms); Event listeners (Qwik City 17, CycleWire 18).
+
+**Desktop**: fast connection, no CPU slowdown, mouse. 15 iterations on 2026-09-25, AMD EPYC 9V74 80-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
+
+| Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Static HTML (control) | 0.0 kB | 364 ms | 0 ms | 419 ms | 260 ms | 311 ms | 264 ms | 421 ms | by a page load, 501 ms |
+| Vanilla JS (control) | 1.2 kB | 364 ms | 0 ms | 250 ms | 85 ms | 10 ms | 250 ms | 251 ms | in the page, 284 ms |
+| Alpine.js | 17.9 kB | 364 ms | 0 ms | 250 ms | 100 ms | 25 ms | 251 ms | 251 ms | in the page, 290 ms |
+| Astro + Preact | 13.1 kB | 368 ms | 0 ms | 251 ms | 86 ms | 9 ms | 251 ms | 251 ms | by a page load, 512 ms |
+| CycleWire | 8.7 kB | 364 ms | 0 ms | 251 ms | 116 ms | 29 ms | 266 ms | 251 ms | in the page, 384 ms |
+| htmx | 15.3 kB | 408 ms | 0 ms | 250 ms | 252 ms | 370 ms | 251 ms | 251 ms | in the page, 284 ms |
+| Next.js | 120.1 kB | 368 ms | 0 ms | 252 ms | 250 ms | 367 ms | 404 ms | 250 ms | in the page 13/15, by a page load 2/15, 439 ms |
+| Qwik City | 37.4 kB | 368 ms | 0 ms | 283 ms | 101 ms | 27 ms | 267 ms | 283 ms | in the page, 500 ms |
+| SvelteKit | 32.7 kB | 376 ms | 0 ms | 400 ms | 113 ms | 10 ms | 89 ms | 401 ms | in the page, 522 ms |
+
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 336 ms, CycleWire 364 ms); Requests (Alpine.js 40, CycleWire 42); Category filter (Astro + Preact 86 ms, CycleWire 116 ms); Live search (Astro + Preact 9 ms, CycleWire 29 ms); Quick view (SvelteKit 89 ms, CycleWire 266 ms); Event listeners (Qwik City 17, CycleWire 18).
+
+<!-- bench:end -->
+
+---
+
 ## 🔒 Security
 
 - Markup can only reach code through names you register. There is no `eval`, no

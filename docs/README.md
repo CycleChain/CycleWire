@@ -40,7 +40,8 @@ for it.
 - [Examples](../examples/README.md): runnable React, Vue, Svelte and library examples.
 - [CSS strategy](css.md): what to defer, what not to, and stylesheets that ship with
   an action.
-- [Performance](performance.md)
+- [Performance](performance.md), and the [benchmark](../bench/README.md): one page built
+  with each stack, measured the same way.
 - [Security](security.md)
 - [Browser support](browser-support.md)
 - [Releasing](releasing.md), for maintainers.
