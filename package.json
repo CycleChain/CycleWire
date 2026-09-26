@@ -98,7 +98,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "cyclewire": "./tooling/bin.js"
+    "cyclewire": "tooling/bin.js"
   },
   "main": "./dist/esm/index.js",
   "types": "./types/index.d.ts",

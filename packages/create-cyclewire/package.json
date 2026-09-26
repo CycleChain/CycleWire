@@ -28,7 +28,7 @@
   },
   "type": "module",
   "bin": {
-    "create-cyclewire": "./index.js"
+    "create-cyclewire": "index.js"
   },
   "files": [
     "index.js",
