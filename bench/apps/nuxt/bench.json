@@ -1,0 +1,104 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "nuxt",
+  "name": "Nuxt",
+  "kind": "meta-framework",
+  "summary": "The page rendered per request by Nuxt's Node server and hydrated by Vue. useFetch loads the products and the cart from Nitro server routes; search and category live in the URL and filter the list in the browser; the forms post to server routes and are sent with $fetch once hydrated; the quick view is a dialog on ?view=, filled with useAsyncData.",
+  "build": "npm run build",
+  "start": "node .output/server/index.mjs",
+  "search": "live",
+  "packages": [
+    "nuxt",
+    "vue"
+  ],
+  "idioms": [
+    {
+      "choice": "Built with `nuxt build` (the starter's `npm run build`) and started with `node .output/server/index.mjs`, the Node.js server entry of the deployment docs. It reads PORT and HOST (127.0.0.1) from the environment, and runs with NODE_ENV=production, as the docs ask.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/deployment#nodejs-server"
+    },
+    {
+      "choice": "The project is laid out the way `npm create nuxt` writes it: Nuxt 4's app/ directory, the starter's nuxt.config.ts (compatibilityDate, devtools), tsconfig.json and scripts, and <NuxtRouteAnnouncer> in app.vue. The starter's generate script and public/ folder are left out: nothing is prerendered, and /favicon.ico is answered by the shared server.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/installation#create-a-new-project"
+    },
+    {
+      "choice": "The shop is app/pages/index.vue, shown by <NuxtPage>, with the header and the footer around it in app.vue, where the docs put markup every page shares when there is one layout. The pages directory brings in vue-router, as it would in a shop with more than one page; the docs note that an app made of app.vue alone leaves it out.",
+      "docs": "https://nuxt.com/docs/4.x/directory-structure/app/app#usage-with-pages"
+    },
+    {
+      "choice": "Universal rendering, Nuxt's default: the server renders every request and Vue hydrates the page. There are no route rules, so nothing is prerendered or cached, and SSR streaming, an experimental option, is off.",
+      "docs": "https://nuxt.com/docs/4.x/guide/concepts/rendering#universal-rendering"
+    },
+    {
+      "choice": "A `#scenario` alias in nuxt.config points at the shared modules in bench/scenario/, and Nuxt passes its aliases on to Nitro. The server routes import the catalog and the cart from them; the Vue app imports only the markup helpers (prices, result counts, query matching), so no product data is bundled for the browser.",
+      "docs": "https://nuxt.com/docs/4.x/api/nuxt-config#alias"
+    },
+    {
+      "choice": "The app's endpoints are Nitro server routes in server/routes/ (GET /products, GET /products/<id>, GET and POST /cart, POST /newsletter) rather than server/api/: the benchmark's proxy sends every /api/ path to the shared server, and server/routes/ is where the docs put routes without the /api prefix. The page uses none of the shared JSON endpoints.",
+      "docs": "https://nuxt.com/docs/4.x/directory-structure/server#server-routes"
+    },
+    {
+      "choice": "Data is loaded with useFetch: the page fetches the product listing (without descriptions), and app.vue the cart, with the key 'cart'. On the server, useFetch calls the routes in-process and forwards the request's cookies, and the results reach the browser in the payload, so hydration fetches nothing.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/data-fetching#passing-headers-and-cookies"
+    },
+    {
+      "choice": "The server routes read and write the cart cookie with h3's utilities, as the docs show for cookies in server routes: the Cookie header goes to the scenario's readCart, and setCookie writes the name, value and attributes of its cartCookie() (HttpOnly, SameSite=Lax, Path=/). The cookie is HttpOnly, so the page gets the cart from the server rather than from useCookie.",
+      "docs": "https://nuxt.com/docs/4.x/api/composables/use-cookie#cookies-in-api-routes"
+    },
+    {
+      "choice": "Search and category are query parameters, read with useRoute(). The list is a computed over the listing the page already has, the way Vue's guide shows a filtered list, so a filter change is a client-side navigation with no request, and no debounce.",
+      "docs": "https://vuejs.org/guide/essentials/list.html#displaying-filtered-sorted-results"
+    },
+    {
+      "choice": "The search box is a GET form (action=\"/\") that loads the results without JavaScript. With it, every input calls navigateTo with the new ?q= and replace: true, keeping the category, so results update as you type without a history entry per key.",
+      "docs": "https://nuxt.com/docs/4.x/api/utils/navigate-to"
+    },
+    {
+      "choice": "Categories are <NuxtLink>s to /?category=…: a client-side navigation with JavaScript, a page load without it. They leave ?q= out, so choosing a category clears the search. Vue Router marks a link as current by its path and parameters, not its query, so the category and Quick view links set aria-current themselves.",
+      "docs": "https://nuxt.com/docs/4.x/api/components/nuxt-link"
+    },
+    {
+      "choice": "NuxtLink keeps its default prefetching of links in view, which starts once the page is idle: their route's code is already loaded here, and checking whether their pages were prerendered fetches Nuxt's app manifest (/_nuxt/builds/meta/<buildId>.json) once. appManifest is on by default.",
+      "docs": "https://nuxt.com/docs/4.x/guide/going-further/experimental-features#appmanifest"
+    },
+    {
+      "choice": "navigationRepaint, on by default, is kept: before each client-side navigation (a key typed in the search box, a category, a quick view) the router waits for one animation frame, so the browser can paint first.",
+      "docs": "https://nuxt.com/docs/4.x/guide/going-further/experimental-features#navigationrepaint"
+    },
+    {
+      "choice": "Add to cart and the newsletter are HTML forms that post to server routes, which set the cookie or check the address and then redirect with h3's sendRedirect (303 See Other), the docs' way to redirect from a server route, so the forms work without JavaScript and before hydration.",
+      "docs": "https://nuxt.com/docs/4.x/directory-structure/server#sending-redirect"
+    },
+    {
+      "choice": "Once the page is hydrated, @submit.prevent sends the same request with $fetch, which the docs recommend for requests made from event handlers. $fetch asks for JSON, so the route answers with the new cart or the message instead of a redirect.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/data-fetching#fetch"
+    },
+    {
+      "choice": "The cart the server answers with is written to the 'cart' data through useNuxtData('cart'), the docs' way to update fetched data after a mutation, so the header updates without another request. The header waits for the server's answer: there is no optimistic update.",
+      "docs": "https://nuxt.com/docs/4.x/api/composables/use-nuxt-data"
+    },
+    {
+      "choice": "An address the server rejects gets a 422 with the scenario's message (setResponseStatus), which the form shows; without JavaScript, the redirect to ?newsletter=invalid shows the same message.",
+      "docs": "https://nuxt.com/docs/4.x/directory-structure/server#status-codes"
+    },
+    {
+      "choice": "The quick view is a native <dialog id=\"quick-view\">. Each Quick view link is a <NuxtLink> to ?view=<id> that keeps the search and the category, and the dialog's product, with the description the listing leaves out, comes from useAsyncData with a reactive key on that id, which fetches /products/<id> when it changes. Loaded with ?view=<id>, the server renders the dialog open, which is how it shows without JavaScript.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/data-fetching#reactive-keys"
+    },
+    {
+      "choice": "Opened in the page, the dialog is shown with showModal() once its product has arrived, which makes the page behind it inert and lets Escape close it. Closing it (its Close button is a <form method=\"dialog\">) goes back in history when the page opened it, so Back and Forward stay in step with the screen, and otherwise replaces the address with one without ?view=.",
+      "docs": "https://router.vuejs.org/guide/essentials/navigation.html#Traverse-history"
+    },
+    {
+      "choice": "Scenario-forced: the shared stylesheet is a <link> in app.head in nuxt.config, the docs' way to include an external stylesheet, next to the title and lang. No component has a <style> block, so the build emits no CSS for the page.",
+      "docs": "https://nuxt.com/docs/4.x/getting-started/styling#external-stylesheets"
+    },
+    {
+      "choice": "Scenario-forced: product images are plain <img> elements with the reference's attributes, rather than <NuxtImg> from Nuxt Image, which the performance guide recommends for optimising images.",
+      "docs": "https://nuxt.com/docs/4.x/guide/best-practices/performance#images"
+    },
+    {
+      "choice": "Code loading keeps Nuxt's defaults: the entry and the chunks the page needs are modulepreloaded, the error pages' chunks are prefetched, and no component is lazy-loaded or lazily hydrated, two optimisations the performance guide suggests considering.",
+      "docs": "https://nuxt.com/docs/4.x/guide/best-practices/performance#lazy-hydration"
+    }
+  ]
+}
