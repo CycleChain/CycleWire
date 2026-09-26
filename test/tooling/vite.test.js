@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, readdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -11,7 +11,11 @@ const repo = fileURLToPath(new URL('../..', import.meta.url));
 
 /** A copy of the fixture app, and a Vite configuration that uses the plugin and this checkout's sources. */
 async function setup(options = {}) {
-    const root = await mkdtemp(join(tmpdir(), 'cyclewire-vite-'));
+    // The real path: on Windows the temp folder can be a short 8.3 name
+    // (C:\Users\RUNNER~1\…). Vite refuses to load files under one, and only
+    // expands the root itself when a check it starts in the background has
+    // finished, so the test failed now and then.
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'cyclewire-vite-')));
     await cp(fileURLToPath(new URL('./fixtures/vite-app', import.meta.url)), root, { recursive: true });
     const warnings = [];
     const logger = createLogger('silent');
