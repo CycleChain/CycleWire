@@ -38,6 +38,8 @@ for it.
 - [stream](stream.md): the server changes the page with HTML messages, over Server-Sent
   Events or in any response.
 - [plugins](plugins.md): the Bootstrap data-API plugin, and writing your own.
+- [devtools](devtools.md): an in-page inspector for actions, runs, the trace, triggers and
+  bindings, as a plugin, from code or as a bookmarklet.
 
 ## Guides
 

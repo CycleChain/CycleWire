@@ -47,6 +47,7 @@ const bundles = {
     'signals.min.js': 'src/signals.js',
     'stream.min.js': 'src/stream.js',
     'bootstrap.min.js': 'src/bootstrap.js',
+    'devtools.min.js': 'src/devtools.js',
 };
 
 for (const [file, entry] of Object.entries(bundles)) {

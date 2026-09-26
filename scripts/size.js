@@ -19,6 +19,7 @@ const budgets = {
     'signals.min.js': { brotli: 3200 },
     'stream.min.js': { brotli: 4096 },
     'bootstrap.min.js': { brotli: 2304 },
+    'devtools.min.js': { brotli: 8192 },
     'cyclewire.global.min.js': { brotli: 5120 },
     'cyclewire.full.global.min.js': { brotli: 14336 },
 };

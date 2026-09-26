@@ -27,7 +27,6 @@ All notable changes to CycleWire are documented here. The format follows
   directory as chunks; an edited action is registered again instead of reloading the
   page; the declarations stay up to date; `index.html` is checked; and the build writes a
   manifest `cyclewire check` can read. `vite` is an optional peer dependency.
-
 - **`cyclewire/stream`** (3.3 kB brotli with `dom` and `morph`): the server changes the
   page with `<cw-stream op="append|prepend|before|after|inner|outer|morph|remove">`
   messages, over Server-Sent Events (`connect()`) or in any response (`apply()`).
@@ -37,6 +36,14 @@ All notable changes to CycleWire are documented here. The format follows
   to the channels you list, on your own origin only. `<cw-stream>` is not a custom
   element, so markup that reaches the page any other way does nothing. The full
   classic-script build includes it.
+- **`cyclewire/devtools`**: an inspector that runs inside the page. Its panel lists the
+  registered actions (loaded or not, the elements that bind them, runs and errors), every
+  run with its event, concurrency mode, duration and status, the development build's
+  trace and the `cw:*` events, the triggers and scheduled preloads in the page, and the
+  bindings of any element you pick. Open it with the `devtools()` plugin, with `install()`,
+  or from a bookmarklet on any page; Alt+Shift+W toggles it. It also works with the
+  production build and with 1.0.x, and costs nothing unless imported (`devtools.min.js`,
+  about 7 kB brotli).
 
 ### Changed
 

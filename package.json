@@ -80,6 +80,11 @@
       "development": "./dist/esm-dev/bootstrap.js",
       "default": "./dist/esm/bootstrap.js"
     },
+    "./devtools": {
+      "types": "./types/devtools.d.ts",
+      "development": "./dist/esm-dev/devtools.js",
+      "default": "./dist/esm/devtools.js"
+    },
     "./vite": {
       "types": "./tooling/vite.d.ts",
       "default": "./tooling/vite.js"
