@@ -37,8 +37,7 @@ there are no runtime dependencies.
   Nothing heavy runs on load, and the page stays bfcache friendly.
 - **Works with anything.** Laravel, Rails, Django, plain PHP, Astro, Web Components,
   React/Vue/Svelte islands, htmx or Turbo. The attributes are short (`cw-action`) and
-  pass through JSX and every template language; `start({ prefix: 'data-cw-' })` makes
-  them `data-cw-*` for HTML validators.
+  pass through JSX and every template language; their prefix is an option.
 - **Modern platform features where they exist:**
   - Shadow DOM and declarative shadow DOM
   - Invoker Commands
