@@ -15,12 +15,12 @@
   "devDependencies": {
     "@builder.io/qwik": "1.20.1",
     "@builder.io/qwik-city": "1.20.1",
-    "@types/node": "20.19.0",
-    "ignore": "5.3.1",
-    "typescript": "5.4.5",
-    "undici": "7.30.0",
-    "vite": "7.3.6",
-    "vite-tsconfig-paths": "4.3.2"
+    "@types/node": "26.6.2",
+    "ignore": "7.0.10",
+    "typescript": "7.0.2",
+    "undici": "8.11.0",
+    "vite": "8.3.0",
+    "vite-tsconfig-paths": "6.1.1"
   },
   "//": "The qwik CLI (qwik build) loads 'ignore' but @builder.io/qwik 1.20.1 does not declare it; the starter only gets it through ESLint, so it is listed here at the version Qwik pins.",
   "engines": {
