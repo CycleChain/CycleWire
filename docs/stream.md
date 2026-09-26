@@ -124,8 +124,10 @@ export async function send({ element, signal }) {
 }
 ```
 
-`apply()` takes only markup marked with `html.raw()`: plain strings are refused, so text
-from anywhere else can never be applied as HTML by mistake.
+`apply()` takes only markup marked with `html.raw()`, or nodes you have parsed already:
+plain strings are refused, so text from anywhere else can never be applied as HTML by
+mistake. With [`cyclewire/request`](request.md) you need no action of your own: the
+messages at the top level of a response are applied for you.
 
 ## On the server
 

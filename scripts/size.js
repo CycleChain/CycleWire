@@ -28,14 +28,15 @@ const budgets = {
     'signals.min.js': { brotli: 3520 },
     'stream.min.js': { brotli: 4096 },
     'prefetch.min.js': { brotli: 768 },
+    'request.min.js': { brotli: 2048 },
     // Inlined in every page's <head>.
     'early.min.js': { brotli: 512 },
     'bootstrap.min.js': { brotli: 2304 },
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
     'cyclewire.global.min.js': { brotli: 5376 },
-    // With 1.1's signals and morph: measured at 15022 B.
-    'cyclewire.full.global.min.js': { brotli: 15488 },
+    // With 1.2's request: measured at 16095 B.
+    'cyclewire.full.global.min.js': { brotli: 16384 },
 };
 
 /** How the README names each bundle. */
@@ -45,6 +46,7 @@ const notes = {
     'morph.min.js': 'includes what it needs from dom',
     'stream.min.js': 'includes dom and morph',
     'prefetch.min.js': 'a plugin',
+    'request.min.js': 'an action; morph and stream load when used',
     'early.min.js': 'inline, before the core',
     'devtools.min.js': 'development only',
     'cyclewire.full.global.min.js': 'everything',

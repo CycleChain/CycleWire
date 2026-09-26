@@ -10,7 +10,8 @@
                 "widget": { "module": "/fixtures/actions/styled.js", "css": "/fixtures/styles/widget.css" },
                 "state": "/fixtures/actions/state.js"
             },
-            "streams": { "channels": { "feed": "/sse/listen?channel=full-fixture" } }
+            "streams": { "channels": { "feed": "/sse/listen?channel=full-fixture" } },
+            "request": true
         }
     </script>
     <script src="/dist/cyclewire.full.global.min.js"></script>
@@ -22,5 +23,7 @@
         <button id="inc" cw-action="state#inc">+1</button>
     </section>
     <ul id="feed" cw-stream="feed"></ul>
+    <button id="bump" type="button" cw-action="request" cw-get="/fixtures/partials/counter.html" cw-target="#counter" cw-swap="morph">Bump</button>
+    <div id="counter"><input id="keep" aria-label="Keep"><span>0</span></div>
 </body>
 </html>

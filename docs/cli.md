@@ -20,7 +20,7 @@ the file is `cart.js` but the export is `addItem`, or when a template says `crat
 | `unknown-export` | The module has no such export, with suggestions |
 | `no-handler` | A bare name, but the module has neither a `run` nor a default export |
 | `invalid-name` | Not a name the registry accepts (letters, digits, `_`, `-`, `.`, then `#export`) |
-| `invalid-trigger`, `invalid-preload`, `invalid-concurrency`, `invalid-debounce` | A value CycleWire does not understand |
+| `invalid-trigger`, `invalid-preload`, `invalid-concurrency`, `invalid-debounce`, `invalid-swap` | A value CycleWire does not understand |
 | `invalid-props` | `cw-props` that is not valid JSON |
 | `duplicate-name`, `invalid-file-name` | Warnings about the actions directory itself |
 | `unused-action` | With `--unused`: an export no template names (warning) |

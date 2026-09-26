@@ -183,7 +183,8 @@ until the tap runs.
 
 Read by `cyclewire/auto` and the classic-script builds. Place it before the CycleWire
 script. The full build also accepts `"signals": false`, `"bootstrap": true` (or
-`{ "global": true }`) and `"streams": { "channels": { … } }`.
+`{ "global": true }`), `"streams": { "channels": { … } }` and `"request": true`, which
+registers the [request](request.md) action as `request`.
 
 ## Module attributes
 
@@ -192,3 +193,5 @@ These belong to the optional modules and are documented with them:
 - [morph](morph.md): `cw-key`, `cw-preserve`.
 - [stream](stream.md): `cw-stream`, and the `cw-stream-state` it sets.
 - [prefetch](prefetch.md): `cw-prefetch`, a URL fetched on intent.
+- [request](request.md): `cw-get`, `cw-post`, `cw-put`, `cw-patch`, `cw-delete`,
+  `cw-target`, `cw-swap`, `cw-select`.

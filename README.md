@@ -257,6 +257,9 @@ connect('/rooms/42/events'); // the server streams <cw-stream op="append" target
 import { prefetch } from 'cyclewire/prefetch';
 start({ plugins: [prefetch()] }); // cw-prefetch data arrives with the code, not after it
 
+start({ actions: { request: () => import('cyclewire/request') } });
+// <button cw-action="request" cw-get="/cart" cw-target="#cart" cw-swap="morph">: HTML from the server, no JS of yours
+
 import { earlyScript } from 'cyclewire/early'; // on the server, inline at the top of <head>:
 const head = `<script>${earlyScript()}</script>`; // taps before start() are kept, then run
 ```
@@ -359,11 +362,12 @@ Minified, measured by `npm run size` and enforced in CI:
 | `signals.min.js` | 3.4 kB | 3.8 kB |
 | `stream.min.js` (includes dom and morph) | 3.7 kB | 4.1 kB |
 | `prefetch.min.js` (a plugin) | 0.5 kB | 0.6 kB |
+| `request.min.js` (an action; morph and stream load when used) | 1.9 kB | 2.1 kB |
 | `early.min.js` (inline, before the core) | 0.4 kB | 0.5 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
 | `devtools.min.js` (development only) | 7.0 kB | 7.9 kB |
 | `cyclewire.global.min.js` (core + auto start) | 5.2 kB | 5.7 kB |
-| `cyclewire.full.global.min.js` (everything) | 15.1 kB | 16.6 kB |
+| `cyclewire.full.global.min.js` (everything) | 16.1 kB | 17.8 kB |
 <!-- size:end -->
 
 ---

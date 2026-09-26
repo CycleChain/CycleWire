@@ -80,12 +80,13 @@ function one(message, root, source) {
 
 /**
  * Applies the <cw-stream> messages in trusted server markup, in order.
- * @param {SafeHTML} content  mark your server's markup with `html.raw()`; plain strings are refused
+ * @param {SafeHTML | Node} content  mark your server's markup with `html.raw()`; plain strings are refused. Nodes, such
+ *     as a fragment already parsed, are taken as they are
  * @param {{ root?: ParentNode, source?: string | null }} [options]  `root`: where targets are looked up, the document by default
  * @returns {Promise<void>} settles once every change is in place
  */
 export function apply(content, { root = document, source = null } = {}) {
-    if (!isSafeHTML(content)) throw new TypeError('[CycleWire] apply() takes SafeHTML: mark trusted server markup with html.raw(markup)');
+    if (!isSafeHTML(content) && !(content instanceof Node)) throw new TypeError('[CycleWire] apply() takes SafeHTML or a Node: mark trusted server markup with html.raw(markup)');
     const messages = [...fragment(content).querySelectorAll('cw-stream')].filter((message) => !message.parentElement?.closest('cw-stream'));
     return Promise.all(messages.map((message) => one(message, root, source))).then(() => {});
 }

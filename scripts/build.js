@@ -6,7 +6,7 @@
  *   dist/esm-dev/*.js    same, with development warnings ("development" export condition)
  *   dist/<name>.min.js   bundled + minified ES modules for CDNs and <script type="module">
  *   dist/cyclewire.global.min.js        classic script: core, auto-starts, sets window.CycleWire
- *   dist/cyclewire.full.global.min.js   classic script: core + css + dom + morph + signals + stream + prefetch + bootstrap
+ *   dist/cyclewire.full.global.min.js   classic script: core + css + dom + morph + signals + stream + prefetch + request + bootstrap
  *
  * Type declarations are emitted separately by `tsc` (see the "build" npm script).
  */
@@ -77,8 +77,19 @@ const bundles = {
     'signals.min.js': 'src/signals.js',
     'stream.min.js': 'src/stream.js',
     'prefetch.min.js': 'src/prefetch.js',
+    'request.min.js': 'src/request.js',
     'bootstrap.min.js': 'src/bootstrap.js',
     'devtools.min.js': 'src/devtools.js',
+};
+
+// A module a bundle imports only when it needs it (request's morph and stream)
+// stays a file of its own, next to the bundle on the CDN.
+/** @type {import('esbuild').Plugin} */
+const later = {
+    name: 'later',
+    setup(bundler) {
+        bundler.onResolve({ filter: /^\.\/\w+\.js$/ }, ({ path, kind }) => (kind === 'dynamic-import' ? { path: path.replace(/\.js$/, '.min.js'), external: true } : undefined));
+    },
 };
 
 for (const [file, entry] of Object.entries(bundles)) {
@@ -92,6 +103,7 @@ for (const [file, entry] of Object.entries(bundles)) {
         sourcemap: 'linked',
         define: define(false),
         banner: { js: banner },
+        plugins: [later],
     });
 }
 

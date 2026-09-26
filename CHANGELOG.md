@@ -15,6 +15,20 @@ All notable changes to CycleWire are documented here. The format follows
   default (a submit button, a link with `cw-prevent`), the action does not run as well.
   `earlyScript(prefix)` returns the script for a server to inline, `dist/early.min.js`
   is the same for the default prefix, and the Vite plugin adds it with `early: true`.
+- **`cyclewire/request`** (1.9 kB brotli): links, forms and buttons that fetch HTML and
+  put it into the page, declared in markup. `cw-get`, `cw-post`, `cw-put`, `cw-patch` and
+  `cw-delete` name the method and URL (empty, the element's own), `cw-target` where the
+  answer goes (a selector, or `closest …`), `cw-swap` how (`inner`, `outer`, `before`,
+  `after`, `prepend`, `append`, `morph`, `remove` or `none`, and `transition`), and
+  `cw-select` which part of it. It is an action, registered like any other, so it loads
+  when first used and runs with the element's debounce, concurrency, trigger and pending
+  state. It sends a form's fields and the CSRF token of `<meta name="csrf-token">`, asks
+  the page's own origin only, shows 422 answers, applies the `<cw-stream>` messages in an
+  answer, and never runs its scripts. The full classic-script build registers it with
+  `"request": true`.
+- An empty `cw-prefetch` fetches the element's own URL: its `cw-get`, or a link's `href`.
+- `apply()` from `cyclewire/stream` also takes nodes already parsed.
+- `cyclewire check` reports `cw-swap` values CycleWire does not know (`invalid-swap`).
 
 ## [1.1.0] - 2026-09-26
 

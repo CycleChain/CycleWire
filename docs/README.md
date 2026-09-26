@@ -40,6 +40,8 @@ for it.
 - [stream](stream.md): the server changes the page with HTML messages, over Server-Sent
   Events or in any response.
 - [prefetch](prefetch.md): data fetched on intent, next to the action's code.
+- [request](request.md): links, forms and buttons that fetch HTML and put it into the
+  page, declared in markup.
 - [early](early.md): taps and typing before CycleWire starts, kept and run once it
   does.
 - [plugins](plugins.md): the Bootstrap data-API plugin, and writing your own.

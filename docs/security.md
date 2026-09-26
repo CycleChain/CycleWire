@@ -102,6 +102,13 @@ can only subscribe to streams you chose. Stream messages are HTML your server wr
 applied like `html.raw()`: `<script>` elements in them never run, and `<cw-stream>` is not
 a custom element, so a message that reaches the page any other way does nothing.
 
+## Requests stay on your origin
+
+[`cyclewire/request`](request.md) refuses a URL on another origin before sending
+anything, and an answer a redirect brought from one: markup never sends the page's data
+to another site, nor puts another site's HTML into the page. Like any action, injected
+markup can reach it once you register it, so keep user content inside `cw-ignore`.
+
 ## Trusted Types
 
 When the page enforces `require-trusted-types-for 'script'`, `cyclewire/dom`,

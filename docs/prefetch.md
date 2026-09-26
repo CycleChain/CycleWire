@@ -41,6 +41,9 @@ arrive together instead of one after the other.
 - **A failed prefetch costs nothing.** `ctx.fetch` then asks again, and reports what that
   request returns.
 
+An empty `cw-prefetch` names the URL the element itself leads to: its `cw-get`
+([request](request.md)), or a link's `href`.
+
 Only name URLs that are safe to fetch early: a GET must not change anything on the
 server, as HTTP intends.
 

@@ -11,10 +11,10 @@ test.describe('full classic-script build', () => {
 
     test('exposes every module on window.CycleWire', async ({ page }) => {
         const shape = await page.evaluate(() => {
-            const { css, dom, morph, signals, stream, bootstrap } = window.CycleWire;
-            return [typeof css, typeof dom.html, typeof morph, typeof signals.signal, typeof stream.connect, typeof bootstrap.bootstrap];
+            const { css, dom, morph, signals, stream, request, bootstrap } = window.CycleWire;
+            return [typeof css, typeof dom.html, typeof morph, typeof signals.signal, typeof stream.connect, typeof request.run, typeof bootstrap.bootstrap];
         });
-        expect(shape).toEqual(['function', 'function', 'function', 'function', 'function', 'function']);
+        expect(shape).toEqual(['function', 'function', 'function', 'function', 'function', 'function', 'function']);
     });
 
     test('opens the stream channels the JSON config lists', async ({ page }) => {
@@ -28,5 +28,12 @@ test.describe('full classic-script build', () => {
     test('resumes server state with the signals plugin', async ({ page }) => {
         await page.click('#inc');
         await expect(page.locator('#count')).toHaveText('3');
+    });
+
+    test('registers the request action when the JSON config asks for it', async ({ page }) => {
+        await page.fill('#keep', 'typed');
+        await page.click('#bump');
+        await expect(page.locator('#counter span')).toHaveText('1');
+        await expect(page.locator('#keep')).toHaveValue('typed');
     });
 });

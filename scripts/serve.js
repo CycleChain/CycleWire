@@ -15,7 +15,7 @@
  * Test helpers:
  *   ?delay=ms                       hold the response
  *   /fail-once/<token>/<path>       answer 500 the first time a token is seen, then serve <path>
- *   /echo                           echo a (form) request back as HTML
+ *   /echo                           echo a (form) request back as HTML, with its X-CSRF-Token; ?status= sets the status
  *   /health                         readiness probe
  *   /sse/listen?channel=            a Server-Sent Events stream (retry: 200 ms)
  *   /sse/fail?channel=&times=       answers 500 that many times for the channel, then streams
@@ -125,7 +125,9 @@ async function echo(req, res) {
     const url = new URL(req.url, 'http://localhost');
     const fields = new URLSearchParams(req.method === 'GET' ? url.search : body);
     const rows = [...fields].map(([k, v]) => `<li data-field="${escape(k)}">${escape(k)}=${escape(v)}</li>`).join('');
-    send(res, 200, `<!doctype html><title>echo</title><h1 id="echo">${escape(req.method)} /echo</h1><ul>${rows}</ul>`, types['.html']);
+    const token = req.headers['x-csrf-token'];
+    const csrf = token ? `<p id="csrf">${escape(token)}</p>` : '';
+    send(res, Number(url.searchParams.get('status')) || 200, `<!doctype html><title>echo</title><h1 id="echo">${escape(req.method)} /echo</h1>${csrf}<ul>${rows}</ul>`, types['.html']);
 }
 
 createServer(async (req, res) => {

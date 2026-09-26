@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CycleWire request fixture</title>
+    <meta name="csrf-token" content="t0ken">
+    <script src="/fixtures/harness.js"></script>
+    <script type="module">
+        // ?build=esm (production) | esm-dev (default, with warnings) | min (the
+        // CDN files, where request loads morph and stream as files of their own);
+        // ?prefix=data-cw- renames the attributes and starts with that prefix.
+        const query = new URLSearchParams(location.search);
+        const build = query.get('build') || 'esm-dev';
+        const prefix = query.get('prefix');
+        if (prefix) {
+            for (const el of document.querySelectorAll('*')) {
+                for (const name of el.getAttributeNames()) {
+                    if (!name.startsWith('cw-')) continue;
+                    el.setAttribute(prefix + name.slice(3), el.getAttribute(name));
+                    el.removeAttribute(name);
+                }
+            }
+        }
+        const file = (name) => (build === 'min' ? `/dist/${name === 'index' ? 'cyclewire' : name}.min.js` : `/dist/${build}/${name}.js`);
+        const [core, { prefetch }] = await Promise.all([import(file('index')), import(file('prefetch'))]);
+        window.CW = core;
+        window.__errors = [];
+        addEventListener('cw:error', (event) => window.__errors.push(String(event.detail.error.message)));
+        core.start({ prefix: prefix ?? undefined, actions: { request: file('request') }, plugins: [prefetch()], onError: () => {} });
+        window.__ready = true;
+    </script>
+</head>
+<body>
+    <ul id="list"><li>one</li></ul>
+    <a id="more" href="/fixtures/partials/page.html" cw-action="request" cw-prevent cw-target="#list" cw-select="#items > li" cw-swap="append">More</a>
+    <a id="ahead" href="/fixtures/partials/page.html?ahead" cw-action="request" cw-prevent cw-prefetch cw-target="#list" cw-select="#items > li" cw-swap="append">More, fetched ahead</a>
+
+    <form id="signup" action="/echo" method="post" cw-action="request" cw-swap="outer">
+        <input name="email" value="a@b.c" aria-label="Email">
+        <button id="join" name="plan" value="pro">Join</button>
+    </form>
+
+    <form id="invalid" action="/echo?status=422" method="post" cw-action="request" cw-swap="outer">
+        <button id="send-invalid">Send</button>
+    </form>
+
+    <input id="q" name="q" aria-label="Search" cw-on-input="request" cw-get="/echo" cw-target="#results" cw-debounce="50">
+    <div id="results"><p id="before">before</p></div>
+
+    <button id="add" type="button" cw-action="request" cw-post="/echo" cw-target="#cart">Add</button>
+    <div id="cart"></div>
+
+    <button id="streamed" type="button" cw-action="request" cw-get="/fixtures/partials/stream.html" cw-target="#box">Stream</button>
+    <div id="box"></div>
+    <p id="a">a</p>
+    <p id="b">b</p>
+
+    <div id="counter"><input id="keep" aria-label="Keep"><span>0</span></div>
+    <button id="bump" type="button" cw-action="request" cw-get="/fixtures/partials/counter.html" cw-target="#counter" cw-swap="morph">Bump</button>
+
+    <div class="card"><button id="close" type="button" cw-action="request" cw-delete="/echo" cw-target="closest .card" cw-swap="remove">Close</button></div>
+    <div class="note"><button id="dismiss" type="button" cw-action="request" cw-delete="/echo?status=204" cw-target="closest .note" cw-swap="remove">Dismiss</button></div>
+    <button id="quiet" type="button" cw-action="request" cw-post="/echo?status=204" cw-target="#cart">Quiet</button>
+    <button id="nowhere" type="button" cw-action="request" cw-get="/echo?nowhere" cw-target="#missing">Nowhere</button>
+
+    <button id="away" type="button" cw-action="request" cw-get="https://example.com/away">Away</button>
+    <button id="broken" type="button" cw-action="request" cw-get="/echo?status=500" cw-target="#results">Broken</button>
+    <button id="script" type="button" cw-action="request" cw-get="/fixtures/partials/script.html" cw-target="#results">Script</button>
+
+    <section id="lazy" cw-action="request" cw-trigger="visible" cw-get="/fixtures/partials/lazy.html" cw-swap="outer">Loading…</section>
+</body>
+</html>

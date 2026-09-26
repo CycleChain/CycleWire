@@ -15,6 +15,7 @@ action runs.
 | `cyclewire/signals` | Signals, reactive stores, `cw-bind` resumed from server JSON | 3.4 kB |
 | `cyclewire/stream` | Server-sent HTML messages that change the page, over Server-Sent Events or in responses | 3.7 kB |
 | `cyclewire/prefetch` | Data fetched on intent next to the action's code, taken by `ctx.fetch` | 0.5 kB |
+| `cyclewire/request` | Links, forms and buttons that fetch HTML and put it into the page, declared in markup; an action | 1.9 kB |
 | `cyclewire/early` | Taps and typing before CycleWire starts, kept and run once it does; inline in `<head>` | 0.4 kB |
 | `cyclewire/bootstrap` | Bootstrap 5's data API without its JavaScript | 2.1 kB |
 
@@ -138,6 +139,7 @@ export function command({ event }) {
 | A region refreshed from server HTML while keeping focus, typed input, iframes and media | [`cyclewire/morph`](morph.md), with `html.raw()` from `dom` |
 | Several places on the page reflecting the same state (cart badge, counters), or inputs bound to state | [`cyclewire/signals`](signals.md) |
 | Bootstrap 5 components on a site that should not ship Bootstrap's JavaScript | [`cyclewire/bootstrap`](plugins.md) |
+| Server HTML fetched and put into the page by links, forms and buttons, with no JavaScript of your own | [`cyclewire/request`](request.md) |
 | Buttons that keep a tap made before CycleWire has arrived on a slow connection | [`cyclewire/early`](early.md) |
 
 If none of these apply, stay on the core.
@@ -212,14 +214,16 @@ you need two-way inputs.
 
 ### One script with everything
 
-For prototypes and small sites, `cyclewire.full.global.min.js` (15.1 kB) bundles every
+For prototypes and small sites, `cyclewire.full.global.min.js` (16.1 kB) bundles every
 module into one classic script:
-- It exposes `CycleWire.css`, `CycleWire.dom`, `CycleWire.morph`, `CycleWire.signals` and
-  `CycleWire.bootstrap`.
-- The styles plugin is installed, so `{ "module": …, "css": … }` entries work.
+- It exposes `CycleWire.css`, `CycleWire.dom`, `CycleWire.morph`, `CycleWire.signals`,
+  `CycleWire.stream`, `CycleWire.prefetch`, `CycleWire.request` and `CycleWire.bootstrap`.
+- The styles and prefetch plugins are installed, so `{ "module": …, "css": … }` entries
+  and `cw-prefetch` work.
 - The signals plugin is installed unless the config says `"signals": false`.
 - The Bootstrap plugin is installed only when the config asks for it with
-  `"bootstrap": true`.
+  `"bootstrap": true`, and the [request](request.md) action is registered only when it
+  says `"request": true`.
 
 ```html
 <script type="application/json" data-cyclewire>{ "actions": { "cart": "/js/actions/cart.js" } }</script>

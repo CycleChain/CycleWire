@@ -35,6 +35,7 @@ test('check reports unknown actions and exports with suggestions, and invalid va
         'invalid-debounce views/page.html:7',
         'invalid-props views/page.html:8',
         'invalid-name views/page.html:10',
+        'invalid-swap views/page.html:11',
     ]);
     const message = (code) => report.problems.find((problem) => problem.code === code).message;
     assert.equal(message('unknown-export'), '"cart" has no export "ad"; did you mean "cart#add"?');
@@ -57,13 +58,13 @@ test('the command exits 1 on errors, 2 on usage errors, and prints GitHub annota
     const text = await run(['check', '--root', app]);
     assert.equal(text.status, 1);
     assert.match(text.out, /^views\/page\.html:3:7  error  "cart" has no export "ad"; did you mean "cart#add"\?  \(unknown-export\)$/m);
-    assert.match(text.out, /7 errors, 0 warnings in 3 templates: \d+ values checked against src\/actions, 1 value built by the templates not checked\.$/);
+    assert.match(text.out, /8 errors, 0 warnings in 3 templates: \d+ values checked against src\/actions, 1 value built by the templates not checked\.$/);
 
     const github = await run(['check', '--root', app, '--format', 'github']);
     assert.match(github.out, /^::error file=views\/page\.html,line=4,col=9,title=unknown-action::"crat#add" is not registered; did you mean "cart#add"\?$/m);
 
     const json = await run(['check', '--root', app, '--format', 'json']);
-    assert.equal(JSON.parse(json.out).problems.length, 7);
+    assert.equal(JSON.parse(json.out).problems.length, 8);
 
     assert.equal((await run(['check', '--root', app, '--format', 'xml'])).status, 2);
     assert.equal((await run(['check', '--root', app, '--config', 'missing.json'])).status, 2);

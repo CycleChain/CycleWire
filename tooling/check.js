@@ -1,7 +1,7 @@
 /**
  * Checks the `cw-*` values in templates against the registry: every
  * action must be registered and export what the markup names, and triggers,
- * preloads, concurrency, debounce and props must hold values CycleWire
+ * preloads, concurrency, debounce, props and swaps must hold values CycleWire
  * understands. Values the template language builds cannot be checked and are
  * counted instead.
  */
@@ -34,6 +34,7 @@ import { referencesIn, syntaxOf } from './templates.js';
 const TRIGGER = /^(?:load|idle|visible|media:\s*\(.+\))$/;
 const PRELOAD = /^(?:intent|visible|idle|load|none)$/;
 const CONCURRENCY = /^(?:drop|restart|latest|parallel)$/;
+const SWAP = /^(?:inner|outer|before|after|prepend|append|morph|remove|none)(?:\s+transition)?$/;
 
 /**
  * What is wrong with a value that is not an action, or null.
@@ -46,6 +47,7 @@ function invalidValue({ kind, attribute, value }) {
     if (kind === 'preload' && text && !PRELOAD.test(text)) return ['invalid-preload', `${attribute}="${text}" is not a preload: use intent, visible, idle, load or none.`];
     if (kind === 'concurrency' && !CONCURRENCY.test(text)) return ['invalid-concurrency', `${attribute}="${text}" is not a concurrency mode: use drop, restart, latest or parallel.`];
     if (kind === 'debounce' && !/^\d+$/.test(text)) return ['invalid-debounce', `${attribute}="${text}" is not a number of milliseconds.`];
+    if (kind === 'swap' && text && !SWAP.test(text)) return ['invalid-swap', `${attribute}="${text}" is not a swap: use inner, outer, before, after, prepend, append, morph, remove or none, and transition after it if you like.`];
     if (kind === 'props' && text) {
         try {
             JSON.parse(text);

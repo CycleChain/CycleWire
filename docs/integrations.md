@@ -159,6 +159,9 @@ Both swap server HTML into the page. CycleWire's MutationObserver picks up trigg
 swapped-in content, and its document listeners survive Turbo Drive's body replacement.
 When a swap removes an element, its running actions are aborted.
 
+CycleWire can also make those requests itself: [`cyclewire/request`](request.md) has
+htmx's attributes as an action, with a table from one to the other.
+
 ## Web Components
 
 See [shadow DOM](shadow-dom.md).

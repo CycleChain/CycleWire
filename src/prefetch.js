@@ -12,7 +12,9 @@
  * When the pointer or focus reaches the element, a GET of `cw-prefetch`
  * starts next to the action's module, and the handler's `ctx.fetch()` of the
  * same URL takes that response instead of asking again. The code and the data
- * then arrive together, not one after the other.
+ * then arrive together, not one after the other. An empty `cw-prefetch` names
+ * the URL the element itself leads to: its `cw-get` (cyclewire/request), or a
+ * link's href.
  */
 import { trace } from './util.js';
 
@@ -70,14 +72,15 @@ export function fetchAhead(input, init) {
  * @returns {import('./index.js').Plugin}
  */
 export function prefetch() {
-    let attr = 'cw-prefetch';
+    let base = 'cw-';
     return {
         setup({ prefix }) {
-            attr = `${prefix || 'data-'}prefetch`;
+            base = prefix || 'data-';
         },
         intent(element) {
-            const url = element.getAttribute(attr);
-            if (url) start(url);
+            const url = element.getAttribute(`${base}prefetch`);
+            const own = url === '' ? element.getAttribute(`${base}get`) || /** @type {any} */ (element).href : url;
+            if (own) start(own);
         },
         context(ctx) {
             ctx.fetch = fetchAhead;

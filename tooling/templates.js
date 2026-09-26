@@ -9,7 +9,7 @@
  */
 
 /**
- * @typedef {'action' | 'trigger' | 'preload' | 'concurrency' | 'debounce' | 'props' | 'prevent' | 'once'} Kind
+ * @typedef {'action' | 'trigger' | 'preload' | 'concurrency' | 'debounce' | 'props' | 'prevent' | 'once' | 'swap'} Kind
  */
 
 /**
@@ -134,7 +134,7 @@ export function referencesIn(source, { syntax = 'html', prefix = 'cw-' } = {}) {
     };
     // An empty prefix means data-, as in the browser.
     const quoted = (prefix || 'data-').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const attribute = new RegExp(`(?<![\\w:.-])(:|v-bind:)?(${quoted}(action|on-[a-z][\\w:.-]*|trigger|preload|concurrency|debounce|props|prevent|once))(?![\\w-])(?:\\s*=\\s*("[^"]*"|'[^']*'|\\{|[^\\s>"'=<\`]+))?`, 'gi');
+    const attribute = new RegExp(`(?<![\\w:.-])(:|v-bind:)?(${quoted}(action|on-[a-z][\\w:.-]*|trigger|preload|concurrency|debounce|props|prevent|once|swap))(?![\\w-])(?:\\s*=\\s*("[^"]*"|'[^']*'|\\{|[^\\s>"'=<\`]+))?`, 'gi');
     for (const match of text.matchAll(attribute)) {
         const [, bound, name, suffix, raw] = match;
         const index = /** @type {number} */ (match.index) + (bound?.length ?? 0);
