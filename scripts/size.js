@@ -17,7 +17,10 @@ const budgets = {
     'cyclewire.min.js': { brotli: 5120, gzip: 5632 },
     'css.min.js': { brotli: 768 },
     'dom.min.js': { brotli: 2304 },
-    'morph.min.js': { brotli: 2048 },
+    // 1.1 pairs children first and moves only those out of the longest run in
+    // order, and leaves subtrees equal to their new markup alone: two to three
+    // times faster, measured at 2196 B brotli.
+    'morph.min.js': { brotli: 2304 },
     // 1.1's reactive core walks the last run's reads instead of rebuilding its
     // subscriptions, checks versions before a computed runs again, and keeps a
     // lone subscriber without a set: two to five times faster, measured at
@@ -29,7 +32,8 @@ const budgets = {
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
     'cyclewire.global.min.js': { brotli: 5376 },
-    'cyclewire.full.global.min.js': { brotli: 14848 },
+    // With 1.1's signals and morph: measured at 15022 B.
+    'cyclewire.full.global.min.js': { brotli: 15488 },
 };
 
 /** How the README names each bundle. */

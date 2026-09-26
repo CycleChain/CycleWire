@@ -61,6 +61,49 @@ test.describe('cyclewire/morph', () => {
         expect(await page.evaluate(() => [...document.querySelectorAll('.row')].map((el) => el.__key))).toEqual(['2', '1']);
     });
 
+    test('a swap moves the two elements, not every element between them', async ({ page }) => {
+        const rows = (order) => `<ul id="list">${order.map((n) => `<li id="r${n}">${n}</li>`).join('\n')}</ul>`;
+        const count = 50;
+        const order = Array.from({ length: count }, (_, i) => i);
+        await boot(page, { html: rows(order) });
+        [order[1], order[count - 2]] = [order[count - 2], order[1]];
+        const records = await page.evaluate(async (markup) => {
+            const seen = [];
+            const observer = new MutationObserver((list) => seen.push(...list));
+            observer.observe(document.getElementById('app'), { childList: true, subtree: true, characterData: true, attributes: true });
+            await window.CWX.morph.morph(document.getElementById('app'), window.CWX.dom.html.raw(markup));
+            seen.push(...observer.takeRecords());
+            observer.disconnect();
+            return seen.reduce((sum, record) => sum + record.addedNodes.length + record.removedNodes.length, 0);
+        }, rows(order));
+        expect(await page.evaluate(() => [...document.querySelectorAll('li')].map((li) => li.id).join())).toBe(order.map((n) => `r${n}`).join());
+        // Two elements and the line breaks after them, each removed and added once.
+        expect(records).toBeLessThanOrEqual(8);
+    });
+
+    test('content equal to its new markup is not touched; a template inside is still updated', async ({ page }) => {
+        await boot(page, { html: '<section id="same"><p>kept <b>as is</b></p></section><div id="tpl"><template><i>old</i></template></div>' });
+        await tag(page, ['same']);
+        const records = await page.evaluate(async () => {
+            let count = 0;
+            const observer = new MutationObserver((list) => { count += list.length; });
+            observer.observe(document.getElementById('same'), { childList: true, subtree: true, characterData: true, attributes: true });
+            await window.CWX.morph.morph(document.getElementById('app'), window.CWX.dom.html.raw('<section id="same"><p>kept <b>as is</b></p></section><div id="tpl"><template><i>new</i></template></div>'));
+            count += observer.takeRecords().length;
+            observer.disconnect();
+            return count;
+        });
+        expect(records).toBe(0);
+        expect(await kept(page, ['same'])).toEqual([true]);
+        expect(await page.evaluate(() => document.querySelector('#tpl template').innerHTML)).toBe('<i>new</i>');
+    });
+
+    test('an xlink:href added to SVG is in the XLink namespace', async ({ page }) => {
+        await boot(page, { html: '<svg id="icon" width="16" height="16"><use></use></svg>' });
+        await morph(page, '<svg id="icon" width="16" height="16"><use xlink:href="#check"></use></svg>');
+        expect(await page.evaluate(() => document.querySelector('use').getAttributeNS('http://www.w3.org/1999/xlink', 'href'))).toBe('#check');
+    });
+
     test('cw-preserve leaves an element alone', async ({ page }) => {
         await boot(page, { html: '<div id="widget" cw-preserve class="client">client state</div>' });
         await morph(page, '<div id="widget" cw-preserve class="server">server</div>');

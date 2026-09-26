@@ -42,7 +42,7 @@ updated. Without `transition`, the update itself is synchronous.
 | `children` | `true` | Morph the target's children. `false` morphs the target element itself (its attributes too) |
 | `key` | `'cw-key'` | Attribute that pairs siblings without ids |
 | `preserve` | `'cw-preserve'` | Attribute marking elements to leave untouched |
-| `beforeUpdate(from, to)` | – | Return `false` to leave `from` as it is |
+| `beforeUpdate(from, to)` | – | Return `false` to leave `from` as it is. Not called for an element already equal to its new markup |
 | `beforeRemove(node)` | – | Return `false` to keep a node the new HTML no longer has |
 | `transition` | `false` | Run inside a View Transition where supported |
 
@@ -53,13 +53,20 @@ For each node in the new content, in order:
 1. **Same `id`, anywhere in the old tree.** The old element is moved into place.
    `Element.moveBefore()` (Chrome 133+, Firefox 144+) moves it without resetting iframes,
    media or focus. Safari falls back to `insertBefore`.
-2. **Same `cw-key`** among the remaining siblings.
-3. **Same tag at the current position**, unless the old element is reserved by an id or
-   key needed elsewhere.
+2. **Same `cw-key`** among the old siblings.
+3. **Same tag**, looked for first right after the last old sibling matched, then further
+   on, unless the old element is reserved by an id or key needed elsewhere. Text and
+   comments match only the old node right after the last match.
 
 Otherwise the new node is inserted. Old nodes left over are removed. Nodes that still
 hold an id needed further on are parked until the end, so an element can move to a
 different parent without losing its state.
+
+Of the old siblings that were matched, the longest run already in the new order stays
+where it is and only the others move, so swapping two rows of a thousand moves two rows.
+An element already equal to its new markup, attributes and descendants alike, is left
+alone without being walked, unless the new content holds a `<template>`, whose content
+equality does not see.
 
 Give list items ids or keys, just as you would give them keys in React.
 

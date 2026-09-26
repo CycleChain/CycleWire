@@ -38,6 +38,8 @@ All notable changes to CycleWire are documented here. The format follows
   versions of what it read, as the documentation always said it did.
 - A computed whose function threw runs again the next time it is read, instead of
   returning its last value; an effect disposed during its own run stays unsubscribed.
+- `morph()` puts an `xlink:href` it adds to SVG in the XLink namespace, so a `<use>` it
+  gives one points at its symbol.
 - The production modules of `cyclewire/prefetch` and `cyclewire/stream` no longer
   import `util.js` for nothing: a page that loads them without a bundler makes one
   request fewer, and esbuild stops warning about the import.
@@ -51,6 +53,14 @@ All notable changes to CycleWire are documented here. The format follows
   benchmark's micro suite it moved from last in every scenario to first on dynamic
   graphs, ahead of Vue on most, and close to Preact and alien-signals on the rest.
   `signals.min.js` grows to 3417 B brotli (budget 3520 B).
+- **`morph()` moves only what changed places, and skips what did not change.** It pairs
+  the new children with the old ones first, then leaves the longest run already in
+  order where it is: swapping two rows of a thousand moves two rows instead of every row
+  between them (8 DOM mutations instead of 3,990). A subtree equal to its new markup is
+  left alone after one native comparison. On 1,000 keyed rows it is now faster than
+  morphdom at every operation the micro suite measures, for example 6.4 ms against
+  10.7 ms to update every tenth row (15 ms before). `morph.min.js` grows to 2196 B
+  brotli (budget 2304 B); the full classic build's budget becomes 15488 B.
 - The pointer-over handler skips elements without attributes, the look-ahead decides
   once per scanned subtree instead of once per element, and plugins' `preload` hooks run
   once per module instead of on every hover.
