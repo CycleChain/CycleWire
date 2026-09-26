@@ -1,0 +1,16 @@
+{
+  "name": "cyclewire-docs",
+  "private": true,
+  "type": "module",
+  "description": "The documentation site: docs/*.md, built with Starlight into /CycleWire/docs/.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/check-js.js",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.4",
+    "astro": "7.3.5",
+    "starlight-links-validator": "0.26.0"
+  }
+}

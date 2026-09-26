@@ -1,8 +1,9 @@
 name: Pages
 
-# Deploys the landing page (site/ plus the built dist/) and the live examples
-# (examples/dist/, under /examples/) to GitHub Pages on every push to main, so
-# the live site always matches main. Run it by hand to redeploy.
+# Deploys the landing page (site/ plus the built dist/), the live examples
+# (examples/dist/, under /examples/) and the documentation (docs-site/, under
+# /docs/) to GitHub Pages on every push to main, so the live site always
+# matches main. Run it by hand to redeploy.
 
 on:
   push:
@@ -31,6 +32,9 @@ jobs:
       - run: npm run size
       - name: Build the examples
         run: npm run examples -- --production
+      - name: Build the documentation
+        working-directory: docs-site
+        run: npm ci && npm run build
       - name: Assemble the site
         run: node scripts/site.js
       - uses: actions/configure-pages@v6

@@ -5,6 +5,7 @@
  *   /               site/ (the landing page)
  *   /dist/          dist/*.min.js, their source maps and sizes.json
  *   /examples/      examples/dist/, the live examples, when built
+ *   /docs/          docs-site/dist/, the documentation site, when built
  *   /bench/         the raw benchmark results, and a redirect from the old results page
  *
  * The package version is stamped into every element marked `data-version`,
@@ -16,6 +17,7 @@
  * previews match.
  *
  *   npm run build && npm run size && npm run examples -- --production
+ *   (cd docs-site && npm ci && npm run build)
  *   node scripts/site.js
  */
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -92,6 +94,10 @@ export async function assemble(out) {
     const examples = join(root, 'examples', 'dist');
     if (await exists(examples)) await cp(examples, join(out, 'examples'), { recursive: true });
     else console.warn('examples/dist is missing, so the site has no live examples: run `npm run examples -- --production`.');
+
+    const docs = join(root, 'docs-site', 'dist');
+    if (await exists(docs)) await cp(docs, join(out, 'docs'), { recursive: true });
+    else console.warn('docs-site/dist is missing, so the site has no documentation: run `npm ci && npm run build` in docs-site/.');
 
     const bench = await buildSite({ out: join(out, 'bench') });
     if (!bench.profiles.length) console.warn('bench/results has no published results, so the Benchmark section says so.');

@@ -24,6 +24,8 @@ for it.
   your templates; `cyclewire types` writes the declarations.
 - [Vite plugin](vite.md): an actions directory as chunks, edits without reloads, and the
   declarations kept up to date.
+- [Devtools](devtools.md): an in-page inspector for actions, runs, the trace, triggers and
+  bindings, as a plugin, from code or as a bookmarklet.
 
 ## Optional modules
 
@@ -38,8 +40,6 @@ for it.
 - [stream](stream.md): the server changes the page with HTML messages, over Server-Sent
   Events or in any response.
 - [plugins](plugins.md): the Bootstrap data-API plugin, and writing your own.
-- [devtools](devtools.md): an in-page inspector for actions, runs, the trace, triggers and
-  bindings, as a plugin, from code or as a bookmarklet.
 
 ## Guides
 
@@ -60,3 +60,11 @@ for it.
 - [Security](security.md)
 - [Browser support](browser-support.md)
 - [Releasing](releasing.md), for maintainers.
+
+## Elsewhere
+
+- [Home](https://cyclechain.github.io/CycleWire/): the live demos.
+- [Benchmark](https://cyclechain.github.io/CycleWire/#benchmark): one store page, built with
+  each stack, measured the same way.
+- [Changelog](../CHANGELOG.md)
+- [GitHub](https://github.com/CycleChain/CycleWire)

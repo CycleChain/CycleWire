@@ -1,0 +1,29 @@
+/* The landing page's colours: teal accents on neutral greys, in both themes. */
+:root {
+    --sl-color-accent-low: #0b3b37;
+    --sl-color-accent: #14b8a6;
+    --sl-color-accent-high: #99f6e4;
+    --sl-color-white: #ffffff;
+    --sl-color-gray-1: #e8ebf0;
+    --sl-color-gray-2: #c4cad4;
+    --sl-color-gray-3: #a0a9b8;
+    --sl-color-gray-4: #6b7485;
+    --sl-color-gray-5: #333c4a;
+    --sl-color-gray-6: #171c25;
+    --sl-color-black: #0a0c10;
+}
+
+:root[data-theme='light'] {
+    --sl-color-accent-low: #ccfbf1;
+    --sl-color-accent: #0f766e;
+    --sl-color-accent-high: #134e4a;
+    --sl-color-white: #0d1321;
+    --sl-color-gray-1: #1c2433;
+    --sl-color-gray-2: #333c4a;
+    --sl-color-gray-3: #4c5668;
+    --sl-color-gray-4: #7a8394;
+    --sl-color-gray-5: #cbd2de;
+    --sl-color-gray-6: #eef1f5;
+    --sl-color-gray-7: #f7f8fa;
+    --sl-color-black: #ffffff;
+}

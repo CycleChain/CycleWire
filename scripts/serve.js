@@ -5,6 +5,7 @@
  *   /            → site/          (the landing page, so its "./dist/…" links resolve as on GitHub Pages)
  *   /dist/       → dist/
  *   /examples/   → examples/dist/ (built with `npm run examples`, laid out as on GitHub Pages)
+ *   /docs/       → docs-site/dist/ (built with `npm run build` in docs-site/)
  *   /bench/      → the raw benchmark results, as on GitHub Pages
  *   /fixtures/   → test/fixtures/
  *
@@ -44,6 +45,7 @@ const landing = join(root, 'site', 'index.html');
 const mounts = [
     ['/dist/', join(root, 'dist')],
     ['/examples/', join(root, 'examples', 'dist')],
+    ['/docs/', join(root, 'docs-site', 'dist')],
     ['/bench/', benchPage],
     ['/fixtures/', join(root, 'test', 'fixtures')],
     ['/', join(root, 'site')],

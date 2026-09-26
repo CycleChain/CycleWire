@@ -51,6 +51,10 @@ All notable changes to CycleWire are documented here. The format follows
   tested in its own language against one set of shared cases, and CI checks that the
   docs quote the tested files.
 
+- **A documentation site** at [cyclechain.github.io/CycleWire/docs/](https://cyclechain.github.io/CycleWire/docs/),
+  built from `docs/*.md` with search. The Markdown files stay the only source; the build
+  checks every link and anchor.
+
 ### Changed
 
 - **Touch screens look ahead.** Where the primary input cannot hover, intent arrives
