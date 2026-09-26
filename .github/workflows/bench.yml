@@ -9,7 +9,9 @@ name: Benchmark
 #          one machine behind each metric, and neither comes near the job
 #          time limit.
 # merge:   joins each profile's parts into one results file (scripts/merge.js),
-#          kept as an artifact.
+#          kept as an artifact, and says in its summary what changed since the
+#          published run (scripts/drift.js), so drift in the runners or in
+#          Chrome is seen before it is read as a change in a stack.
 # crosscheck: next to measure, Lighthouse and the harness's cold load in turn on
 #          one runner, to check the harness's load metrics (crosscheck/run.js);
 #          the table is in the job's summary.
@@ -158,6 +160,8 @@ jobs:
         run: |
           mkdir -p merged
           node scripts/merge.js --out-dir=merged parts/${{ matrix.profile }}-*.json
+      - name: What changed since the published run
+        run: node scripts/drift.js merged/*.json
       - uses: actions/upload-artifact@v7
         with:
           name: bench-results-${{ matrix.profile }}
