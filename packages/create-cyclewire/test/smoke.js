@@ -34,7 +34,7 @@ const freePort = () => new Promise((resolve) => {
 
 /**
  * Starts a server and resolves once it answers. It gets a process group of
- * its own, so stop() ends what `npm run preview` starts too, not only npm.
+ * its own, so stop() ends whatever the server starts too.
  */
 async function serve(command, args, cwd, port) {
     const child = spawn(command, args, { cwd, env: { ...process.env, PORT: String(port) }, stdio: 'pipe', shell: process.platform === 'win32', detached: process.platform !== 'win32' });
@@ -50,20 +50,42 @@ async function serve(command, args, cwd, port) {
         }
         await new Promise((resolve) => setTimeout(resolve, 250));
     }
-    stop(child);
+    await stop(child, port);
     throw new Error(`The server did not start:\n${output}`);
 }
 
-/** Ends a server started by serve(), with everything it started. @param {import('node:child_process').ChildProcess} child */
-function stop(child) {
-    try {
-        if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, 'SIGTERM');
-        else child.kill();
-    } catch {
-        child.kill();
+/**
+ * Ends a server started by serve(), with everything it started: politely,
+ * then for good if it is still there after two seconds. Astro's preview
+ * server starts itself again in a process group of its own, so whatever
+ * still listens on the port is ended too (with lsof, where there is one).
+ * @param {import('node:child_process').ChildProcess} child
+ * @param {number} port
+ */
+async function stop(child, port) {
+    /** @param {NodeJS.Signals} signal */
+    const send = (signal) => {
+        try {
+            if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal);
+            else child.kill(signal);
+        } catch {
+            // Already gone.
+        }
+    };
+    if (child.exitCode === null && child.signalCode === null) {
+        const exited = new Promise((resolve) => child.once('exit', () => resolve(true)));
+        send('SIGTERM');
+        if (!(await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 2000, false))]))) send('SIGKILL');
     }
     child.stdout?.destroy();
     child.stderr?.destroy();
+    if (process.platform === 'win32') return;
+    try {
+        const { stdout } = await run('lsof', ['-t', `-iTCP:${port}`, '-sTCP:LISTEN']);
+        for (const pid of stdout.split('\n').filter(Boolean)) process.kill(Number(pid), 'SIGKILL');
+    } catch {
+        // No lsof, or nothing listens any more.
+    }
 }
 
 const work = await mkdtemp(join(tmpdir(), 'cyclewire-smoke-'));
@@ -94,7 +116,13 @@ for (const template of templates) {
             await writeFile(manifest, JSON.stringify(pkg, null, 2));
             await run(npm, ['install', '--no-audit', '--no-fund'], { cwd: dir, shell: process.platform === 'win32' });
             await run(npm, ['run', 'build'], { cwd: dir, shell: process.platform === 'win32' });
-            server = await serve(npm, ['run', 'preview', '--', '--port', String(port), '--host', '127.0.0.1'], dir, port);
+            // The preview script's own binary, not `npm run preview`: npm starts a
+            // script in a process group of its own, which stop() would not reach.
+            const [bin, ...rest] = pkg.scripts.preview.split(' ');
+            const args = [...rest, '--port', String(port), '--host', '127.0.0.1'];
+            server = process.platform === 'win32'
+                ? await serve(npm, ['run', 'preview', '--', ...args.slice(rest.length)], dir, port)
+                : await serve(join(dir, 'node_modules', '.bin', bin), args, dir, port);
         }
         const page = await browser.newPage();
         const errors = [];
@@ -113,7 +141,7 @@ for (const template of templates) {
         failed = true;
         console.error(`FAIL ${template}: ${/** @type {Error} */ (error).message}`);
     } finally {
-        if (server) stop(server);
+        if (server) await stop(server, port);
     }
 }
 
