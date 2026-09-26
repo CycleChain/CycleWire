@@ -9,6 +9,9 @@ module CycleWire
   ACTION = /\A[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?\z/
   EVENT = /\A[a-z][a-z0-9:_-]*\z/
   PREFIX = /\A(?:[a-z0-9-]*-)?\z/
+  ANY = /\A.+\z/m
+  # cyclewire/request's methods: a URL, or true for the element's own.
+  METHODS = %i[get post put patch delete].freeze
   # Options printed after the action and props, in this order, with the strings
   # they accept. debounce takes an Integer instead, and once only true.
   OPTIONS = {
@@ -17,7 +20,15 @@ module CycleWire
     concurrency: /\A(?:drop|restart|latest|parallel)\z/,
     debounce: nil,
     once: nil,
-    prevent: /\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/
+    prevent: /\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/,
+    get: ANY,
+    post: ANY,
+    put: ANY,
+    patch: ANY,
+    delete: ANY,
+    target: ANY,
+    swap: /\A(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?\z/,
+    select: ANY
   }.freeze
   ESCAPES = { '&' => '&amp;', '"' => '&quot;', "'" => '&#39;', '<' => '&lt;', '>' => '&gt;' }.freeze
 
@@ -40,6 +51,7 @@ module CycleWire
 
     on = options[:on]
     raise ArgumentError, "CycleWire: invalid on #{on.inspect}" unless on.nil? || (on.is_a?(String) && EVENT.match?(on))
+    raise ArgumentError, 'CycleWire: give one of get, post, put, patch and delete at most' if METHODS.count { |name| options.key?(name) } > 1
 
     # An empty prefix means data-: a bare "action" is already a form attribute.
     base = prefix.empty? ? 'data-' : prefix
@@ -58,7 +70,7 @@ module CycleWire
   end
 
   def self.valid?(name, value)
-    return %i[once prevent].include?(name) if value == true
+    return (%i[once prevent] + METHODS).include?(name) if value == true
     return value.is_a?(Integer) && value >= 0 if name == :debounce
 
     value.is_a?(String) && !OPTIONS[name].nil? && OPTIONS[name].match?(value)

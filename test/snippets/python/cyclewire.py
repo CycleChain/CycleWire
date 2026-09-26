@@ -9,6 +9,9 @@ import re
 _ACTION = re.compile(r'[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?')
 _EVENT = re.compile(r'[a-z][a-z0-9:_-]*')
 _PREFIX = re.compile(r'(?:[a-z0-9-]*-)?')
+_ANY = re.compile(r'.+', re.S)
+# cyclewire/request's methods: a URL, or True for the element's own.
+_METHODS = ('get', 'post', 'put', 'patch', 'delete')
 # Options printed after the action and props, in this order, with the strings
 # they accept. debounce takes an integer instead, and once only True.
 _OPTIONS = {
@@ -18,13 +21,21 @@ _OPTIONS = {
     'debounce': None,
     'once': None,
     'prevent': re.compile(r'[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*'),
+    'get': _ANY,
+    'post': _ANY,
+    'put': _ANY,
+    'patch': _ANY,
+    'delete': _ANY,
+    'target': _ANY,
+    'swap': re.compile(r'(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?'),
+    'select': _ANY,
 }
 _ESCAPES = str.maketrans({'&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;'})
 
 
 def _valid(name, value):
     if value is True:
-        return name in ('once', 'prevent')
+        return name in ('once', 'prevent') + _METHODS
     if name == 'debounce':
         return type(value) is int and value >= 0  # not bool, which is an int too
     pattern = _OPTIONS[name]
@@ -52,6 +63,8 @@ def cw(action, props=None, **options):
     on = options.get('on')
     if on is not None and (not isinstance(on, str) or not _EVENT.fullmatch(on)):
         raise ValueError(f'CycleWire: invalid on {on!r}')
+    if sum(name in options for name in _METHODS) > 1:
+        raise ValueError('CycleWire: give one of get, post, put, patch and delete at most')
 
     # An empty prefix means data-: a bare "action" is already a form attribute.
     base = prefix or 'data-'

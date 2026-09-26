@@ -46,6 +46,10 @@ maps nest as deep as you like. Floats work too, but each language prints them it
 | `debounce` | a whole number of milliseconds, 0 or more | `cw-debounce` |
 | `once` | `true` | `cw-once`, with no value |
 | `prevent` | `true`, or event names separated by single spaces: `click submit`, `none` | `cw-prevent`, with no value for `true` |
+| `get`, `post`, `put`, `patch`, `delete` | for [`cyclewire/request`](request.md): a URL, or `true` for the element's own; one of them at most | `cw-get` and so on, with no value for `true` |
+| `target` | a selector, or `closest <selector>` | `cw-target` |
+| `swap` | `inner`, `outer`, `before`, `after`, `prepend`, `append`, `morph`, `remove` or `none`, then ` transition` if you like | `cw-swap` |
+| `select` | a selector | `cw-select` |
 | `prefix` | the prefix you give `start()`: `''`, or lowercase letters, digits and `-`, ending in `-` | the `cw-` in every name (`cw-` by default; `''` means `data-`) |
 
 An option set to null or `false` is left out, so a value can come straight from a variable.
@@ -54,6 +58,16 @@ argument error: `InvalidArgumentException` in PHP, `ArgumentError` in Ruby, `Val
 Python and `TypeError` in JavaScript. A typo fails where you wrote it, not silently in the
 browser. An event outside CycleWire's default list still needs
 [`listen()`](js-api.md#listentypes-options).
+
+A request, with its URL escaped for you:
+
+```blade
+<button @cw('request', null, ['get' => route('products', ['page' => 2, 'sort' => 'new']), 'target' => '#grid', 'swap' => 'append'])>More</button>
+```
+
+```html
+<button cw-action="request" cw-get="https://shop.test/products?page=2&amp;sort=new" cw-target="#grid" cw-swap="append">More</button>
+```
 
 The output has a fixed shape: `cw-action` (or `cw-on-<event>`), then
 `cw-props`, then the options in the table's order. Each value is in double quotes and
@@ -113,7 +127,8 @@ namespace CycleWire;
  * @param string $action "module" or "module#export"
  * @param mixed $props anything json_encode() takes, or null for none; [] is a list,
  *                     so pass (object) [] for an empty map
- * @param array<string, mixed> $options on, trigger, preload, concurrency, debounce, once, prevent, prefix
+ * @param array<string, mixed> $options on, trigger, preload, concurrency, debounce, once, prevent,
+ *                                      get, post, put, patch, delete, target, swap, select, prefix
  * @throws \InvalidArgumentException for a bad name, option or value
  * @throws \JsonException for props that JSON cannot hold
  */
@@ -121,6 +136,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
 {
     // Options printed after the action and props, in this order, with the strings
     // they accept. debounce takes an integer instead, and once only true.
+    $any = '/\A.+\z/s';
     $strings = [
         'trigger' => '/\A(?:load|idle|visible|media:.+)\z/s',
         'preload' => '/\A(?:intent|visible|idle|load|none)\z/',
@@ -128,7 +144,17 @@ function cw(string $action, mixed $props = null, array $options = []): string
         'debounce' => null,
         'once' => null,
         'prevent' => '/\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/',
+        'get' => $any,
+        'post' => $any,
+        'put' => $any,
+        'patch' => $any,
+        'delete' => $any,
+        'target' => $any,
+        'swap' => '/\A(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?\z/',
+        'select' => $any,
     ];
+    // cyclewire/request's methods: a URL, or true for the element's own.
+    $methods = ['get', 'post', 'put', 'patch', 'delete'];
     foreach (array_keys($options) as $name) {
         if (!array_key_exists($name, $strings) && $name !== 'on' && $name !== 'prefix') {
             throw new \InvalidArgumentException("CycleWire: unknown option \"$name\"");
@@ -147,6 +173,9 @@ function cw(string $action, mixed $props = null, array $options = []): string
     if ($on !== null && (!is_string($on) || preg_match('/\A[a-z][a-z0-9:_-]*\z/', $on) !== 1)) {
         throw new \InvalidArgumentException('CycleWire: invalid on ' . var_export($on, true));
     }
+    if (count(array_intersect_key($options, array_flip($methods))) > 1) {
+        throw new \InvalidArgumentException('CycleWire: give one of get, post, put, patch and delete at most');
+    }
 
     // An empty prefix means data-: a bare "action" is already a form attribute.
     $base = $prefix === '' ? 'data-' : $prefix;
@@ -161,7 +190,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
         }
         $value = $options[$name];
         $valid = match (true) {
-            $value === true => $name === 'once' || $name === 'prevent',
+            $value === true => in_array($name, ['once', 'prevent', ...$methods], true),
             $name === 'debounce' => is_int($value) && $value >= 0,
             default => is_string($value) && $pattern !== null && preg_match($pattern, $value) === 1,
         };
@@ -243,6 +272,9 @@ module CycleWire
   ACTION = /\A[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?\z/
   EVENT = /\A[a-z][a-z0-9:_-]*\z/
   PREFIX = /\A(?:[a-z0-9-]*-)?\z/
+  ANY = /\A.+\z/m
+  # cyclewire/request's methods: a URL, or true for the element's own.
+  METHODS = %i[get post put patch delete].freeze
   # Options printed after the action and props, in this order, with the strings
   # they accept. debounce takes an Integer instead, and once only true.
   OPTIONS = {
@@ -251,7 +283,15 @@ module CycleWire
     concurrency: /\A(?:drop|restart|latest|parallel)\z/,
     debounce: nil,
     once: nil,
-    prevent: /\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/
+    prevent: /\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/,
+    get: ANY,
+    post: ANY,
+    put: ANY,
+    patch: ANY,
+    delete: ANY,
+    target: ANY,
+    swap: /\A(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?\z/,
+    select: ANY
   }.freeze
   ESCAPES = { '&' => '&amp;', '"' => '&quot;', "'" => '&#39;', '<' => '&lt;', '>' => '&gt;' }.freeze
 
@@ -274,6 +314,7 @@ module CycleWire
 
     on = options[:on]
     raise ArgumentError, "CycleWire: invalid on #{on.inspect}" unless on.nil? || (on.is_a?(String) && EVENT.match?(on))
+    raise ArgumentError, 'CycleWire: give one of get, post, put, patch and delete at most' if METHODS.count { |name| options.key?(name) } > 1
 
     # An empty prefix means data-: a bare "action" is already a form attribute.
     base = prefix.empty? ? 'data-' : prefix
@@ -292,7 +333,7 @@ module CycleWire
   end
 
   def self.valid?(name, value)
-    return %i[once prevent].include?(name) if value == true
+    return (%i[once prevent] + METHODS).include?(name) if value == true
     return value.is_a?(Integer) && value >= 0 if name == :debounce
 
     value.is_a?(String) && !OPTIONS[name].nil? && OPTIONS[name].match?(value)
@@ -355,6 +396,9 @@ import re
 _ACTION = re.compile(r'[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?')
 _EVENT = re.compile(r'[a-z][a-z0-9:_-]*')
 _PREFIX = re.compile(r'(?:[a-z0-9-]*-)?')
+_ANY = re.compile(r'.+', re.S)
+# cyclewire/request's methods: a URL, or True for the element's own.
+_METHODS = ('get', 'post', 'put', 'patch', 'delete')
 # Options printed after the action and props, in this order, with the strings
 # they accept. debounce takes an integer instead, and once only True.
 _OPTIONS = {
@@ -364,13 +408,21 @@ _OPTIONS = {
     'debounce': None,
     'once': None,
     'prevent': re.compile(r'[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*'),
+    'get': _ANY,
+    'post': _ANY,
+    'put': _ANY,
+    'patch': _ANY,
+    'delete': _ANY,
+    'target': _ANY,
+    'swap': re.compile(r'(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?'),
+    'select': _ANY,
 }
 _ESCAPES = str.maketrans({'&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;'})
 
 
 def _valid(name, value):
     if value is True:
-        return name in ('once', 'prevent')
+        return name in ('once', 'prevent') + _METHODS
     if name == 'debounce':
         return type(value) is int and value >= 0  # not bool, which is an int too
     pattern = _OPTIONS[name]
@@ -398,6 +450,8 @@ def cw(action, props=None, **options):
     on = options.get('on')
     if on is not None and (not isinstance(on, str) or not _EVENT.fullmatch(on)):
         raise ValueError(f'CycleWire: invalid on {on!r}')
+    if sum(name in options for name in _METHODS) > 1:
+        raise ValueError('CycleWire: give one of get, post, put, patch and delete at most')
 
     # An empty prefix means data-: a bare "action" is already a form attribute.
     base = prefix or 'data-'
@@ -485,7 +539,10 @@ const ACTION = /^[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?$/;
 const EVENT = /^[a-z][a-z0-9:_-]*$/;
 const PREFIX = /^(?:[a-z0-9-]*-)?$/;
 // Options printed after the action and props, in this order.
-const ORDER = ['trigger', 'preload', 'concurrency', 'debounce', 'once', 'prevent'];
+const ORDER = ['trigger', 'preload', 'concurrency', 'debounce', 'once', 'prevent', 'get', 'post', 'put', 'patch', 'delete', 'target', 'swap', 'select'];
+// cyclewire/request's methods: a URL, or true for the element's own.
+const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
+const ANY = /^.+$/s;
 // The strings each option accepts. debounce takes an integer instead, and once only true.
 /** @type {Record<string, RegExp | undefined>} */
 const STRINGS = {
@@ -493,6 +550,14 @@ const STRINGS = {
     preload: /^(?:intent|visible|idle|load|none)$/,
     concurrency: /^(?:drop|restart|latest|parallel)$/,
     prevent: /^[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*$/,
+    get: ANY,
+    post: ANY,
+    put: ANY,
+    patch: ANY,
+    delete: ANY,
+    target: ANY,
+    swap: /^(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?$/,
+    select: ANY,
 };
 /** @type {Record<string, string>} */
 const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;' };
@@ -506,6 +571,14 @@ const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': 
  * @property {number | null | false} [debounce]  milliseconds
  * @property {boolean | null} [once]
  * @property {boolean | string | null} [prevent]  true, or event names such as 'click submit'
+ * @property {boolean | string | null} [get]  cyclewire/request: a URL, or true for the element's own; one method at most
+ * @property {boolean | string | null} [post]
+ * @property {boolean | string | null} [put]
+ * @property {boolean | string | null} [patch]
+ * @property {boolean | string | null} [delete]
+ * @property {string | null | false} [target]  a selector, or 'closest <selector>'
+ * @property {string | null | false} [swap]  inner, outer, before, after, prepend, append, morph, remove or none, then ' transition' if you like
+ * @property {string | null | false} [select]  a selector
  * @property {string | null | false} [prefix]  the prefix given to start(); 'cw-' by default
  */
 
@@ -514,7 +587,7 @@ const escape = (value) => value.replace(/[&"'<>]/g, (char) => ENTITIES[char]);
 
 /** @param {string} name @param {unknown} value */
 function valid(name, value) {
-    if (value === true) return name === 'once' || name === 'prevent';
+    if (value === true) return name === 'once' || name === 'prevent' || METHODS.includes(name);
     if (name === 'debounce') return Number.isSafeInteger(value) && Number(value) >= 0;
     return typeof value === 'string' && !!STRINGS[name]?.test(value);
 }
@@ -548,6 +621,9 @@ export function cw(action, props = null, options = {}) {
     }
     if (on !== undefined && (typeof on !== 'string' || !EVENT.test(on))) {
         throw new TypeError(`CycleWire: invalid on ${JSON.stringify(on)}`);
+    }
+    if (METHODS.filter((name) => name in given).length > 1) {
+        throw new TypeError('CycleWire: give one of get, post, put, patch and delete at most');
     }
 
     /** @type {Record<string, string>} */

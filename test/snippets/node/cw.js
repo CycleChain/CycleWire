@@ -8,7 +8,10 @@ const ACTION = /^[A-Za-z0-9_.-]+(?:#[A-Za-z0-9_$]*)?$/;
 const EVENT = /^[a-z][a-z0-9:_-]*$/;
 const PREFIX = /^(?:[a-z0-9-]*-)?$/;
 // Options printed after the action and props, in this order.
-const ORDER = ['trigger', 'preload', 'concurrency', 'debounce', 'once', 'prevent'];
+const ORDER = ['trigger', 'preload', 'concurrency', 'debounce', 'once', 'prevent', 'get', 'post', 'put', 'patch', 'delete', 'target', 'swap', 'select'];
+// cyclewire/request's methods: a URL, or true for the element's own.
+const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
+const ANY = /^.+$/s;
 // The strings each option accepts. debounce takes an integer instead, and once only true.
 /** @type {Record<string, RegExp | undefined>} */
 const STRINGS = {
@@ -16,6 +19,14 @@ const STRINGS = {
     preload: /^(?:intent|visible|idle|load|none)$/,
     concurrency: /^(?:drop|restart|latest|parallel)$/,
     prevent: /^[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*$/,
+    get: ANY,
+    post: ANY,
+    put: ANY,
+    patch: ANY,
+    delete: ANY,
+    target: ANY,
+    swap: /^(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?$/,
+    select: ANY,
 };
 /** @type {Record<string, string>} */
 const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;' };
@@ -29,6 +40,14 @@ const ENTITIES = { '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': 
  * @property {number | null | false} [debounce]  milliseconds
  * @property {boolean | null} [once]
  * @property {boolean | string | null} [prevent]  true, or event names such as 'click submit'
+ * @property {boolean | string | null} [get]  cyclewire/request: a URL, or true for the element's own; one method at most
+ * @property {boolean | string | null} [post]
+ * @property {boolean | string | null} [put]
+ * @property {boolean | string | null} [patch]
+ * @property {boolean | string | null} [delete]
+ * @property {string | null | false} [target]  a selector, or 'closest <selector>'
+ * @property {string | null | false} [swap]  inner, outer, before, after, prepend, append, morph, remove or none, then ' transition' if you like
+ * @property {string | null | false} [select]  a selector
  * @property {string | null | false} [prefix]  the prefix given to start(); 'cw-' by default
  */
 
@@ -37,7 +56,7 @@ const escape = (value) => value.replace(/[&"'<>]/g, (char) => ENTITIES[char]);
 
 /** @param {string} name @param {unknown} value */
 function valid(name, value) {
-    if (value === true) return name === 'once' || name === 'prevent';
+    if (value === true) return name === 'once' || name === 'prevent' || METHODS.includes(name);
     if (name === 'debounce') return Number.isSafeInteger(value) && Number(value) >= 0;
     return typeof value === 'string' && !!STRINGS[name]?.test(value);
 }
@@ -71,6 +90,9 @@ export function cw(action, props = null, options = {}) {
     }
     if (on !== undefined && (typeof on !== 'string' || !EVENT.test(on))) {
         throw new TypeError(`CycleWire: invalid on ${JSON.stringify(on)}`);
+    }
+    if (METHODS.filter((name) => name in given).length > 1) {
+        throw new TypeError('CycleWire: give one of get, post, put, patch and delete at most');
     }
 
     /** @type {Record<string, string>} */

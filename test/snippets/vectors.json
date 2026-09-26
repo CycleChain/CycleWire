@@ -700,6 +700,97 @@
       "props": null,
       "options": {"prefix":true},
       "error": true
+    },
+    {
+      "name": "a request: its URL, target, swap and select",
+      "action": "request",
+      "props": null,
+      "options": {"get":"/products?page=2&sort=new","target":"#grid","swap":"append","select":"#grid > .card"},
+      "expected": "cw-action=\"request\" cw-get=\"/products?page=2&amp;sort=new\" cw-target=\"#grid\" cw-swap=\"append\" cw-select=\"#grid &gt; .card\""
+    },
+    {
+      "name": "a request to the element's own URL is a bare attribute",
+      "action": "request",
+      "props": null,
+      "options": {"post":true,"swap":"outer transition"},
+      "expected": "cw-action=\"request\" cw-post cw-swap=\"outer transition\""
+    },
+    {
+      "name": "a request on input, debounced, into the closest form",
+      "action": "request",
+      "props": null,
+      "options": {"on":"input","get":"/search","debounce":150,"target":"closest form"},
+      "expected": "cw-on-input=\"request\" cw-debounce=\"150\" cw-get=\"/search\" cw-target=\"closest form\""
+    },
+    {
+      "name": "delete, then remove the row",
+      "action": "request",
+      "props": null,
+      "options": {"delete":"/cart/items/42","target":"closest tr","swap":"remove"},
+      "expected": "cw-action=\"request\" cw-delete=\"/cart/items/42\" cw-target=\"closest tr\" cw-swap=\"remove\""
+    },
+    {
+      "name": "patch, morphed in",
+      "action": "request",
+      "props": null,
+      "options": {"patch":"/profile","swap":"morph"},
+      "expected": "cw-action=\"request\" cw-patch=\"/profile\" cw-swap=\"morph\""
+    },
+    {
+      "name": "a method left out does not count",
+      "action": "request",
+      "props": null,
+      "options": {"get":"/a","post":null,"put":false},
+      "expected": "cw-action=\"request\" cw-get=\"/a\""
+    },
+    {
+      "name": "one method at most",
+      "action": "request",
+      "props": null,
+      "options": {"get":"/a","post":"/b"},
+      "error": true
+    },
+    {
+      "name": "an unknown swap",
+      "action": "request",
+      "props": null,
+      "options": {"swap":"sideways"},
+      "error": true
+    },
+    {
+      "name": "transition alone is no swap",
+      "action": "request",
+      "props": null,
+      "options": {"swap":"transition"},
+      "error": true
+    },
+    {
+      "name": "an empty URL: true is the element's own",
+      "action": "request",
+      "props": null,
+      "options": {"get":""},
+      "error": true
+    },
+    {
+      "name": "an empty target",
+      "action": "request",
+      "props": null,
+      "options": {"target":""},
+      "error": true
+    },
+    {
+      "name": "a URL is a string",
+      "action": "request",
+      "props": null,
+      "options": {"get":42},
+      "error": true
+    },
+    {
+      "name": "target true",
+      "action": "request",
+      "props": null,
+      "options": {"target":true},
+      "error": true
     }
   ]
 }

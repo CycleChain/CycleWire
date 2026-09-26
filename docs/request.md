@@ -89,6 +89,9 @@ itself is morphed onto it.
 `cw-prevent` stops a link from being followed as well. Forms and submit buttons need
 nothing: CycleWire takes their submit in any case.
 
+The [server helpers](server-helpers.md) write these attributes too, and escape the URL:
+`cw('request', null, { get: '/products?page=2', target: '#grid', swap: 'append' })`.
+
 ## What is sent
 
 - **A form** sends its fields, and the button that submitted it.

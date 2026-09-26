@@ -17,7 +17,8 @@ namespace CycleWire;
  * @param string $action "module" or "module#export"
  * @param mixed $props anything json_encode() takes, or null for none; [] is a list,
  *                     so pass (object) [] for an empty map
- * @param array<string, mixed> $options on, trigger, preload, concurrency, debounce, once, prevent, prefix
+ * @param array<string, mixed> $options on, trigger, preload, concurrency, debounce, once, prevent,
+ *                                      get, post, put, patch, delete, target, swap, select, prefix
  * @throws \InvalidArgumentException for a bad name, option or value
  * @throws \JsonException for props that JSON cannot hold
  */
@@ -25,6 +26,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
 {
     // Options printed after the action and props, in this order, with the strings
     // they accept. debounce takes an integer instead, and once only true.
+    $any = '/\A.+\z/s';
     $strings = [
         'trigger' => '/\A(?:load|idle|visible|media:.+)\z/s',
         'preload' => '/\A(?:intent|visible|idle|load|none)\z/',
@@ -32,7 +34,17 @@ function cw(string $action, mixed $props = null, array $options = []): string
         'debounce' => null,
         'once' => null,
         'prevent' => '/\A[a-z][a-z0-9:_-]*(?: [a-z][a-z0-9:_-]*)*\z/',
+        'get' => $any,
+        'post' => $any,
+        'put' => $any,
+        'patch' => $any,
+        'delete' => $any,
+        'target' => $any,
+        'swap' => '/\A(?:inner|outer|before|after|prepend|append|morph|remove|none)(?: transition)?\z/',
+        'select' => $any,
     ];
+    // cyclewire/request's methods: a URL, or true for the element's own.
+    $methods = ['get', 'post', 'put', 'patch', 'delete'];
     foreach (array_keys($options) as $name) {
         if (!array_key_exists($name, $strings) && $name !== 'on' && $name !== 'prefix') {
             throw new \InvalidArgumentException("CycleWire: unknown option \"$name\"");
@@ -51,6 +63,9 @@ function cw(string $action, mixed $props = null, array $options = []): string
     if ($on !== null && (!is_string($on) || preg_match('/\A[a-z][a-z0-9:_-]*\z/', $on) !== 1)) {
         throw new \InvalidArgumentException('CycleWire: invalid on ' . var_export($on, true));
     }
+    if (count(array_intersect_key($options, array_flip($methods))) > 1) {
+        throw new \InvalidArgumentException('CycleWire: give one of get, post, put, patch and delete at most');
+    }
 
     // An empty prefix means data-: a bare "action" is already a form attribute.
     $base = $prefix === '' ? 'data-' : $prefix;
@@ -65,7 +80,7 @@ function cw(string $action, mixed $props = null, array $options = []): string
         }
         $value = $options[$name];
         $valid = match (true) {
-            $value === true => $name === 'once' || $name === 'prevent',
+            $value === true => in_array($name, ['once', 'prevent', ...$methods], true),
             $name === 'debounce' => is_int($value) && $value >= 0,
             default => is_string($value) && $pattern !== null && preg_match($pattern, $value) === 1,
         };

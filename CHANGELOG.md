@@ -6,6 +6,13 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The server helpers (`docs/server-helpers.md`) write `cyclewire/request`'s attributes:
+  `get`, `post`, `put`, `patch` and `delete` (a URL, or `true` for the element's own; one
+  at most), `target`, `swap` and `select`, checked and escaped like the others, in PHP,
+  Ruby, Python and JavaScript.
+
 ### Changed
 
 - `cw-debounce` no longer holds up a submit: it runs at once, and a run still waiting for
