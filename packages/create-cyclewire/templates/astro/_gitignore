@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.astro/
+# Written by cyclewire/vite on every start.
+src/cyclewire-actions.d.ts

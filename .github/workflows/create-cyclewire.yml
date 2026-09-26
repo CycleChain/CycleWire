@@ -1,0 +1,70 @@
+name: create-cyclewire
+
+# Pushing a tag such as create-cyclewire-v1.0.1 tests the starter templates
+# and publishes packages/create-cyclewire to npm through trusted publishing
+# (OIDC, with provenance). Its first version is published by hand, since npm
+# can only trust a workflow for a package that exists. See docs/releasing.md.
+
+on:
+  push:
+    tags: ['create-cyclewire-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: create-cyclewire-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check that the tag matches package.json
+        run: |
+          version="$(node -p "require('./packages/create-cyclewire/package.json').version")"
+          if [ "create-cyclewire-v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match packages/create-cyclewire version $version"
+            exit 1
+          fi
+      - run: npm run build
+      - run: npm test --prefix packages/create-cyclewire
+      - run: npx playwright install --with-deps chromium
+      - run: node packages/create-cyclewire/test/smoke.js
+
+  publish:
+    name: Publish ${{ github.ref_name }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    defaults:
+      run:
+        working-directory: packages/create-cyclewire
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Use an npm that supports trusted publishing
+        run: npm install -g npm@12
+      - name: Publish to npm
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "create-cyclewire@$version" version > /dev/null 2>&1; then
+            echo "create-cyclewire@$version is already on npm; skipping."
+            exit 0
+          fi
+          node ../../scripts/npm-oidc.js .
+          npm publish --provenance --access public --ignore-scripts

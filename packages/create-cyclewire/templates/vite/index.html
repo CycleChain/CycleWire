@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CycleWire</title>
+    <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+    <main>
+        <h1>Hello, CycleWire</h1>
+        <p>This page is plain HTML. Watch the network panel: each action's code arrives when you reach for it.</p>
+
+        <button type="button" class="like" data-cw-action="like" aria-pressed="false">
+            ♥ Like <span class="like__count">12</span>
+        </button>
+
+        <label for="search">Filter the list</label>
+        <input id="search" type="search" autocomplete="off" data-cw-action="search" data-cw-debounce="100"
+               data-cw-props='{"list": "tools"}'>
+        <ul id="tools">
+            <li>Vite</li>
+            <li>Astro</li>
+            <li>Laravel</li>
+            <li>Rails</li>
+            <li>Django</li>
+        </ul>
+        <p id="tools-count" aria-live="polite">5 of 5</p>
+    </main>
+</body>
+</html>

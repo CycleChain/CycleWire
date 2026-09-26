@@ -91,6 +91,28 @@ add `packages/c/cyclewire.json` and open a pull request:
 
 cdnjs has no `@1`-style ranges, so its URLs always name an exact version.
 
+## `create-cyclewire`
+
+The starter templates are a package of their own, in `packages/create-cyclewire/`, with
+their own version and changelog. CI builds each template and uses it in Chromium on every
+change.
+
+1. **The first version, by hand.** npm can only trust a workflow for a package that
+   exists, so publish 1.0.0 yourself: `cd packages/create-cyclewire && npm publish
+   --access public` (npm asks for your second factor).
+2. **Then trust the workflow.** In the package's settings on npmjs.com, add a trusted
+   publisher: GitHub Actions, `CycleChain/CycleWire`, workflow `create-cyclewire.yml`.
+3. **Every later version.** Update `version` and `CHANGELOG.md` in
+   `packages/create-cyclewire/`, commit, and push a tag named after it:
+
+   ```bash
+   git tag -a create-cyclewire-v1.0.1 -m "create-cyclewire v1.0.1"
+   git push origin main --follow-tags
+   ```
+
+   `.github/workflows/create-cyclewire.yml` tests the templates and publishes it with
+   provenance, skipping a version npm already has.
+
 ## If something fails
 
 - **Tests or budgets fail:** nothing was published. Fix, commit, delete and recreate the

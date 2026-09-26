@@ -51,6 +51,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck:tooling
       - run: npm run test:tooling
+      - name: create-cyclewire
+        run: npm test --prefix packages/create-cyclewire
 
   snippets:
     name: Server helpers in PHP, Ruby, Python and Node
@@ -83,6 +85,21 @@ jobs:
       - run: php test/snippets/php/test.php
       - run: ruby test/snippets/ruby/test.rb
       - run: python test/snippets/python/test_cyclewire.py -v
+
+  templates:
+    name: Starter templates, built and used in Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: node packages/create-cyclewire/test/smoke.js
 
   docs:
     name: Documentation site

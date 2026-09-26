@@ -10,7 +10,8 @@
  *
  * Needs `permissions: id-token: write`. Exits 1 when the exchange fails.
  *
- *   node scripts/npm-oidc.js
+ *   node scripts/npm-oidc.js                 the library
+ *   node scripts/npm-oidc.js <package-dir>   another package, such as packages/create-cyclewire
  */
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
@@ -74,7 +75,9 @@ export async function check({ name, env = process.env, fetch = globalThis.fetch,
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-    const { name } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+    // The package in the given directory (packages/create-cyclewire, say), or the library.
+    const manifest = process.argv[2] ? pathToFileURL(`${process.argv[2].replace(/\/$/, '')}/package.json`) : new URL('../package.json', import.meta.url);
+    const { name } = JSON.parse(await readFile(manifest, 'utf8'));
     const { ok, details, message } = await check({ name });
     for (const line of details) console.log(line);
     console.log(ok ? message : `::error title=Trusted publishing::${message}`);

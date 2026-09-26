@@ -1,0 +1,45 @@
+{
+  "name": "create-cyclewire",
+  "version": "1.0.0",
+  "description": "Start a CycleWire project: npm create cyclewire@latest",
+  "keywords": [
+    "cyclewire",
+    "create",
+    "template",
+    "starter",
+    "vite",
+    "astro",
+    "laravel"
+  ],
+  "homepage": "https://cyclechain.github.io/CycleWire/docs/getting-started/",
+  "bugs": {
+    "url": "https://github.com/CycleChain/CycleWire/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CycleChain/CycleWire.git",
+    "directory": "packages/create-cyclewire"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "CycleChain",
+    "email": "fatih.dogancan@cyclechain.io",
+    "url": "https://cyclechain.io"
+  },
+  "type": "module",
+  "bin": {
+    "create-cyclewire": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "create.js",
+    "templates",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  }
+}

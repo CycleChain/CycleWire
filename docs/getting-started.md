@@ -2,7 +2,14 @@
 
 ## 1. Install
 
-With a bundler:
+The quickest start is a new project from a template (Vite, no build step, Astro, or an
+existing Laravel app):
+
+```bash
+npm create cyclewire@latest
+```
+
+To add CycleWire to a project you have, with a bundler:
 
 ```bash
 npm install cyclewire
