@@ -98,3 +98,46 @@ test('the upstream is asked for identity, and a compressed answer is recompresse
     assert.equal(headers['content-encoding'], 'br');
     assert.deepEqual(JSON.parse(zlib.brotliDecompressSync(await readAll(stream)).toString()), { ok: true });
 });
+
+test('a GET on a kept-alive socket the server has closed is sent again, on a new one', async () => {
+    // Answers the first request on each connection, then drops the connection
+    // the moment the next request arrives on it, as a server whose keep-alive
+    // timeout has just run out does.
+    let requests = 0;
+    const flaky = http.createServer((req, res) => {
+        requests++;
+        const socket = /** @type {any} */ (req.socket);
+        socket.served = (socket.served ?? 0) + 1;
+        if (socket.served > 1) return socket.destroy();
+        res.writeHead(200, { 'content-type': 'text/plain' });
+        res.end(`answer ${requests}`);
+    });
+    flaky.listen(0, '127.0.0.1');
+    await once(flaky, 'listening');
+    const { key, cert } = certificate();
+    const server = createProxy({ key, cert, route: () => ({ port: flaky.address().port }) });
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const session = http2.connect(`https://localhost:${server.address().port}`, { rejectUnauthorized: false });
+    const read = (path) => new Promise((resolve, reject) => {
+        const stream = session.request({ ':path': path });
+        let body = '';
+        let status;
+        stream.on('response', (headers) => { status = headers[':status']; });
+        stream.setEncoding('utf8');
+        stream.on('data', (chunk) => { body += chunk; });
+        stream.on('end', () => resolve({ status, body }));
+        stream.on('error', reject);
+    });
+    try {
+        assert.equal((await read('/one')).status, 200);
+        // The same kept-alive socket is dropped on this request; the proxy asks again.
+        const second = await read('/two');
+        assert.equal(second.status, 200);
+        assert.equal(requests, 3);
+    } finally {
+        session.close();
+        server.close();
+        flaky.close();
+    }
+});

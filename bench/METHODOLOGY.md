@@ -49,7 +49,11 @@ Every stack runs its own production server, and the browser reaches it through
 - The stylesheet, the images and the JSON API are served by one shared server behind the
   same proxy, so they are the same bytes for every stack.
 
-The proxy runs in its own process, so compression never delays the runner.
+The proxy runs in its own process, so compression never delays the runner. It keeps
+connections to the stacks' servers open between requests, and closes idle ones after
+four seconds, before a Node server's default five; a GET that still lands on a connection
+the server has just closed is sent once more on a new one, so no stack's page fails
+with a gateway error.
 
 ## 3. Conformance
 

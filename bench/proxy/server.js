@@ -65,7 +65,10 @@ async function collect(stream) {
  * @param {(pathname: string) => { port: number, host?: string }} options.route picks the upstream
  */
 export function createProxy({ key, cert, route }) {
-    const agent = new http.Agent({ keepAlive: true, maxSockets: 256 });
+    // Idle connections to the stacks' servers close after 4 s, before Node's
+    // servers close them (5 s by default): reusing a socket the server is
+    // closing is how a request fails with a reset.
+    const agent = new http.Agent({ keepAlive: true, maxSockets: 256, timeout: 4000 });
     /** Compressed static assets by content hash: compressing at quality 11 costs time once. */
     const compressed = new Map();
 
@@ -156,9 +159,20 @@ export function createProxy({ key, cert, route }) {
             'x-forwarded-for': '127.0.0.1',
         });
         const target = route(new URL(req.url, 'https://localhost').pathname);
-        const upstream = http.request({ host: target.host ?? '127.0.0.1', port: target.port, method: req.method, path: req.url, headers, agent }, (response) => respond(req, res, response));
-        upstream.on('error', (error) => fail(res, error));
-        req.pipe(upstream);
+        const safe = req.method === 'GET' || req.method === 'HEAD';
+        /** @param {boolean} retried */
+        const send = (retried) => {
+            const upstream = http.request({ host: target.host ?? '127.0.0.1', port: target.port, method: req.method, path: req.url, headers, agent }, (response) => respond(req, res, response));
+            upstream.on('error', (error) => {
+                // A kept-alive socket the server had just closed: a GET or HEAD
+                // goes once more, on a new connection, as Node's docs advise.
+                if (!retried && safe && upstream.reusedSocket && /** @type {any} */ (error).code === 'ECONNRESET') send(true);
+                else fail(res, error);
+            });
+            if (safe) upstream.end();
+            else req.pipe(upstream);
+        };
+        send(false);
     }
 
     return http2.createSecureServer({ key, cert, allowHTTP1: true }, forward);
