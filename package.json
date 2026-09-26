@@ -88,8 +88,9 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "node scripts/build.js && tsc -p tsconfig.json",
+    "build": "node scripts/build.js && tsc -p tsconfig.json && node scripts/types.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:types": "tsc -p test/types/named && tsc -p test/types/plain",
     "check:es": "node scripts/check-es.js",
     "dev": "node scripts/serve.js",
     "examples": "node examples/build.js",
@@ -97,7 +98,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "node --import ./test/unit/setup.js --test \"test/unit/**/*.test.js\"",
     "test:e2e": "playwright test",
-    "prepublishOnly": "npm run build && npm run check:es && npm run size && npm test"
+    "prepublishOnly": "npm run build && npm run check:es && npm run size && npm run test:types && npm test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

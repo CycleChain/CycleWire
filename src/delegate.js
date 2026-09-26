@@ -2,7 +2,7 @@ import { actionsOf, defaultEvent, isPassive, NON_BUBBLING, splitName } from './a
 import * as registry from './registry.js';
 import { announce, dispatch } from './runner.js';
 import { attrs, opts, types } from './state.js';
-import { noop, saveData, warn } from './util.js';
+import { noop, saveData, trace, warn } from './util.js';
 
 /**
  * One listener per event type and root (the document, or a shadow root given
@@ -85,7 +85,10 @@ function onEvent(event, root, type) {
     const [el, action] = found;
     if (!registry.has(action)) {
         // Links and forms fall back to what the browser would do anyway.
-        if (__DEV__) warn(`No action registered as "${action}"; the ${type} is left to the browser.`, el);
+        if (__DEV__) {
+            warn(`No action registered as "${action}"; the ${type} is left to the browser.`, el);
+            trace({ type: 'skip', element: el, action, event, reason: 'unregistered' });
+        }
         return;
     }
     const prevent = shouldPrevent(el, type);
@@ -94,7 +97,10 @@ function onEvent(event, root, type) {
     if (prevent && type === 'click' && (mouse.button > 0 || mouse.metaKey || mouse.ctrlKey || mouse.shiftKey || mouse.altKey)) return;
     // Captured now: after dispatch, event.target is null for shadow DOM events.
     const target = event.composedPath()[0] || event.target;
-    if (!announce(el, action, event)) return;
+    if (!announce(el, action, event)) {
+        if (__DEV__) trace({ type: 'skip', element: el, action, event, reason: 'cancelled' });
+        return;
+    }
     if (prevent) event.preventDefault();
     if (__DEV__ && type === 'click' && !warnedFocus.has(el) && !el.matches(INTERACTIVE)) {
         warnedFocus.add(el);
@@ -122,7 +128,7 @@ function onIntent(/** @type {Event} */ event) {
     }
     // Intent fetches now what a scheduled preload would fetch later; only "none" opts out.
     if (names && mode?.trim() !== 'none' && !saveData()) {
-        for (const name of names) registry.preload(splitName(name)[0]);
+        for (const name of names) registry.preload(splitName(name)[0], 'intent');
     }
 }
 

@@ -6,6 +6,17 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `registered()`: the names of the registered action modules, imported or not.
+- `defineAction(handler)`: returns the handler, typed with its props and element:
+  `defineAction<{ sku: string }, HTMLFormElement>(…)`.
+- A `trace(event)` plugin hook, called by the development build only, that reports what
+  the core schedules, fetches, skips and runs. The production build carries none of it.
+- Generic types: `Context<Props, Element>` and `Action<Props, Element>`. Once a global
+  `CycleWireActions` interface lists the actions, `ActionName` is their union, `run()`
+  and `preload()` accept only those names, and `PropsOf<Name>` is a handler's props.
+
 ### Changed
 
 - **Touch screens look ahead.** Where the primary input cannot hover, intent arrives

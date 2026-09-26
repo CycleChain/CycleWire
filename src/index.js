@@ -21,24 +21,27 @@ import { warn } from './util.js';
 /** @typedef {import('./attrs.js').Concurrency} Concurrency */
 
 /**
- * What every action handler receives.
- * @typedef {object} Context
- * @property {Event | null} event          the triggering event; null for triggers and run()
- * @property {EventTarget | null} target   the innermost event target, captured during dispatch
- * @property {Element} element             the element carrying the binding
- * @property {AbortSignal} signal          aborted when a newer run supersedes this one, when the element is removed, or on stop()
- * @property {any} props                   parsed `data-cw-props` JSON; null when absent
- * @property {string} action               the action name, e.g. "cart#add"
- * @property {Wire} wire                   the CycleWire API
- * @property {any} [state]                 the element's reactive scope (signals plugin)
- * @property {(name: string, init?: object) => any} [store]  a named reactive store (signals plugin)
+ * What every action handler receives, with its props and element types.
+ * @template [P=any]
+ * @template {Element} [E=Element]
+ * @typedef {import('./types.js').Context<P, E>} Context
  */
 
 /**
- * @callback Action
- * @param {Context} context
- * @returns {unknown}
+ * An action handler.
+ * @template [P=any]
+ * @template {Element} [E=Element]
+ * @typedef {import('./types.js').Action<P, E>} Action
  */
+
+/** @typedef {import('./types.js').ActionName} ActionName */
+
+/**
+ * @template {string} N
+ * @typedef {import('./types.js').PropsOf<N>} PropsOf
+ */
+
+/** @typedef {import('./types.js').TraceEvent} TraceEvent */
 
 /**
  * @typedef {object} RunInfo
@@ -54,6 +57,7 @@ import { warn } from './util.js';
  * @property {(root: ParentNode) => void} [scan]  sees every subtree CycleWire scans: start, observe, added content
  * @property {(entry: ActionEntry, name: string) => void} [preload]  fetch what else an action needs, ahead of time
  * @property {(entry: ActionEntry | undefined, element: Element, name: string) => unknown} [load]  runs with the module import; the handler waits for the promise it returns
+ * @property {(event: TraceEvent) => void} [trace]  development build only: what the core schedules, fetches, skips and runs
  * @property {() => void} [stop]
  */
 
@@ -170,7 +174,7 @@ export function observe(root) {
  * Runs an action programmatically, with the same once, debounce and
  * concurrency rules as a delegated event. Resolves to the handler's return
  * value, or `undefined` when the run was dropped or cancelled.
- * @param {string} action
+ * @param {ActionName} action
  * @param {Element} [element]
  * @param {Event | null} [event]
  * @returns {Promise<unknown>}
@@ -183,7 +187,7 @@ export function run(action, element = document.documentElement, event = null) {
 
 /**
  * Fetches an action's module ahead of use, regardless of Save-Data.
- * @param {string} action
+ * @param {ActionName} action
  * @returns {Promise<void>}
  */
 export function preload(action) {
@@ -198,6 +202,25 @@ export function preload(action) {
 export function loaded() {
     return registry.loaded();
 }
+
+/**
+ * Names of the registered action modules, imported or not.
+ * @returns {string[]}
+ */
+export function registered() {
+    return registry.registered();
+}
+
+/**
+ * Returns the handler it is given. It exists for types: editors and
+ * TypeScript then check the handler's context, props included, as in
+ * `export const add = defineAction<{ sku: string }>(({ props }) => …)`.
+ * @template [P=any]
+ * @template {Element} [E=Element]
+ * @param {Action<P, E>} action
+ * @returns {Action<P, E>}
+ */
+export const defineAction = (action) => action;
 
 /**
  * Adds a plugin, such as `signals()` from `cyclewire/signals`.
@@ -232,7 +255,7 @@ export function fromGlob(modules, base = './actions/') {
     return actions;
 }
 
-Object.assign(api, { start, stop, register, listen, scan, observe, run, preload, loaded, use, fromGlob, version });
+Object.assign(api, { start, stop, register, listen, scan, observe, run, preload, loaded, registered, use, fromGlob, defineAction, version });
 
 /**
  * @typedef {object} Wire
@@ -245,7 +268,9 @@ Object.assign(api, { start, stop, register, listen, scan, observe, run, preload,
  * @property {typeof run} run
  * @property {typeof preload} preload
  * @property {typeof loaded} loaded
+ * @property {typeof registered} registered
  * @property {typeof use} use
  * @property {typeof fromGlob} fromGlob
+ * @property {typeof defineAction} defineAction
  * @property {string} version
  */

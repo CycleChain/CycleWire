@@ -3,7 +3,7 @@ import { attach, detach } from './delegate.js';
 import * as registry from './registry.js';
 import { abortDetached, announce, dispatch } from './runner.js';
 import { attrs, opts, plugins, started } from './state.js';
-import { noop, saveData, warn } from './util.js';
+import { noop, saveData, trace, warn } from './util.js';
 
 /**
  * Event-less activation (`data-cw-trigger`), scheduled preloads
@@ -116,6 +116,7 @@ function schedule(el, when, fn) {
 function fire(el, action) {
     if (!started || !el.isConnected) return;
     if (!registry.has(action)) {
+        if (__DEV__) trace({ type: 'wait', element: el, action });
         waiting.push([el, action]);
         return;
     }
@@ -131,16 +132,19 @@ function setup(el) {
     if (trigger && !activated.has(el)) {
         activated.add(el);
         const action = el.getAttribute(attrs.action)?.trim();
-        if (action) gate(() => schedule(el, trigger.trim(), () => current === generation && fire(el, action)));
-        else if (__DEV__) warn(`${attrs.trigger} needs a ${attrs.action} on the same element.`, el);
+        if (action) {
+            if (__DEV__) trace({ type: 'schedule', element: el, when: trigger.trim(), kind: 'trigger', action });
+            gate(() => schedule(el, trigger.trim(), () => current === generation && fire(el, action)));
+        } else if (__DEV__) warn(`${attrs.trigger} needs a ${attrs.action} on the same element.`, el);
     }
     const own = el.getAttribute(attrs.preload);
     const preload = own === null ? (el.hasAttribute(attrs.action) && ahead() ? 'ahead' : '') : own.trim();
     if (preload && preload !== 'intent' && preload !== 'none' && !preloaded.has(el)) {
         preloaded.add(el);
+        if (__DEV__) trace({ type: 'schedule', element: el, when: preload, kind: 'preload' });
         gate(() => schedule(el, preload, () => {
             if (current !== generation || saveData()) return;
-            for (const name of actionsOf(el, attrs)) registry.preload(splitName(name)[0]);
+            for (const name of actionsOf(el, attrs)) registry.preload(splitName(name)[0], preload);
         }));
     }
 }

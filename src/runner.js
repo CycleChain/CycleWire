@@ -1,7 +1,7 @@
 import { concurrency, splitName } from './attrs.js';
 import * as registry from './registry.js';
 import { api, attrs, opts, plugins } from './state.js';
-import { emit, warn } from './util.js';
+import { emit, trace, warn } from './util.js';
 
 /**
  * The run pipeline: once, debounce, concurrency admission, abort signals,
@@ -131,9 +131,10 @@ async function start(el, action, event, target, mode, state) {
     live.add(run);
     state.running++;
     pend(el, mode === 'drop');
+    const [name, exported] = splitName(action);
+    const cached = registry.isReady(name);
+    if (__DEV__) trace({ type: 'start', run, element: el, action, event, mode, cached });
     try {
-        const [name, exported] = splitName(action);
-        const cached = registry.isReady(name);
         const found = registry.entry(name);
         if (__DEV__ && found && typeof found === 'object' && found.css && !plugins.some((plugin) => plugin.load) && !warned.has(`css ${name}`)) {
             warned.add(`css ${name}`);
@@ -143,7 +144,10 @@ async function start(el, action, event, target, mode, state) {
         // parallel with the module; the handler waits for all of it.
         const [mod] = await Promise.all([registry.load(name), ...plugins.map((plugin) => plugin.load?.(found, el, name))]);
         if (cached) await yieldToMain();
-        if (signal.aborted) return undefined;
+        if (signal.aborted) {
+            if (__DEV__) trace({ type: 'end', run, status: 'aborted' });
+            return undefined;
+        }
         const handler = exported ? mod[exported] : mod.run || mod.default;
         if (typeof handler !== 'function') throw new TypeError(`[CycleWire] "${action}" is not a function export`);
         if (__DEV__ && handler.length > 1 && !warned.has(action)) {
@@ -152,11 +156,16 @@ async function start(el, action, event, target, mode, state) {
         }
         const result = await handler(context(el, action, event, target, signal));
         if (el.hasAttribute(attrs.once)) state.done = true;
+        if (__DEV__) trace({ type: 'end', run, status: 'done' });
         emit(el, 'done', { action, result });
         return result;
     } catch (error) {
         // Our own cancellation is not a failure.
-        if (signal.aborted && (error === signal.reason || /** @type {any} */ (error)?.name === 'AbortError')) return undefined;
+        if (signal.aborted && (error === signal.reason || /** @type {any} */ (error)?.name === 'AbortError')) {
+            if (__DEV__) trace({ type: 'end', run, status: 'aborted' });
+            return undefined;
+        }
+        if (__DEV__) trace({ type: 'end', run, status: 'error', error });
         emit(el, 'error', { action, error });
         if (opts.onError) opts.onError(error, { action, element: el, event });
         else console.error(`[CycleWire] "${action}" failed:`, error);
@@ -180,8 +189,12 @@ async function start(el, action, event, target, mode, state) {
  */
 function admit(el, action, event, target, mode, state) {
     if (state.running) {
-        if (mode === 'drop') return Promise.resolve();
+        if (mode === 'drop') {
+            if (__DEV__) trace({ type: 'skip', element: el, action, event, reason: 'busy' });
+            return Promise.resolve();
+        }
         if (mode === 'latest') {
+            if (__DEV__) trace({ type: 'queue', element: el, action, event });
             state.queued?.[2](undefined);
             return new Promise((resolve) => {
                 state.queued = [event, target, resolve];
@@ -209,10 +222,14 @@ export const announce = (el, action, event) => emit(el, 'run', { action, event }
 export function dispatch(el, action, event, target, type) {
     const state = binding(el, action);
     const once = el.hasAttribute(attrs.once);
-    if (once && state.done) return Promise.resolve();
+    if (once && state.done) {
+        if (__DEV__) trace({ type: 'skip', element: el, action, event, reason: 'once' });
+        return Promise.resolve();
+    }
     const mode = once ? 'drop' : concurrency(el.getAttribute(attrs.concurrency), type);
     const wait = Number(el.getAttribute(attrs.debounce)) || 0;
     if (wait <= 0) return admit(el, action, event, target, mode, state);
+    if (__DEV__) trace({ type: 'debounce', element: el, action, event, wait });
 
     clearTimeout(state.timer);
     state.settle?.(undefined);

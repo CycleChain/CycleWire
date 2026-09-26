@@ -1,7 +1,7 @@
 # JavaScript API
 
 ```js
-import { start, stop, register, listen, scan, observe, run, preload, loaded, use, fromGlob, version } from 'cyclewire';
+import { start, stop, register, listen, scan, observe, run, preload, loaded, registered, use, fromGlob, defineAction, version } from 'cyclewire';
 ```
 
 The classic-script builds expose the same functions on `window.CycleWire`. Every function
@@ -118,6 +118,11 @@ settles when the fetch has finished; it never rejects.
 Names of the action modules imported so far. It is `[]` until the user reaches for
 something, which makes it a handy assertion in tests and a quick check in the console.
 
+## `registered()`
+
+Names of the registered action modules, imported or not, in the order they were
+registered. Tools use it to compare the registry with the markup.
+
 ## `use(plugin)`
 
 Adds a plugin. A plugin is a plain object:
@@ -144,6 +149,21 @@ start({ actions: fromGlob(import.meta.glob('./actions/**/*.js')) });
 
 Turns a path → loader map into action names by stripping `base` and the extension and
 turning `/` into `.`.
+
+## `defineAction(handler)`
+
+Returns the handler it is given. It exists for types: with it, editors and TypeScript
+check the handler's context, props included, and `cyclewire types` reads the props for
+the markup's type checks.
+
+```ts
+import { defineAction } from 'cyclewire';
+
+export const add = defineAction<{ sku: string }, HTMLFormElement>(async ({ props, element, signal }) => {
+    await fetch('/cart', { method: 'POST', body: new FormData(element), signal });
+    console.log(props.sku);
+});
+```
 
 ## `version`
 
@@ -173,7 +193,19 @@ Types ship with the package:
 ```ts
 import type { ActionMap, Context, Options, Plugin } from 'cyclewire';
 
-export async function run({ element, props, signal }: Context) {
+export async function run({ element, props, signal }: Context<{ id: string }, HTMLButtonElement>) {
     // …
+}
+```
+
+`Context<Props, Element>` and `Action<Props, Element>` take the props and the element's
+type. `ActionName` is any string until a global `CycleWireActions` interface lists the
+actions; `run()` and `preload()` then accept only those names, and `PropsOf<'cart#add'>`
+is that handler's props:
+
+```ts
+// cyclewire-actions.d.ts
+interface CycleWireActions {
+    'cart#add': typeof import('./actions/cart.js').add;
 }
 ```

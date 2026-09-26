@@ -16,6 +16,21 @@ test.describe('registry and preloading', () => {
         await expect.poll(async () => (await log(page)).length).toBe(1);
     });
 
+    test('registered() lists every registered name, loaded() only the imported ones', async ({ page }) => {
+        await boot(page, { html: '<button id="b" data-cw-action="log">go</button>' });
+        expect(await page.evaluate(() => window.CW.registered())).toEqual(['log', 'gated', 'evaluated']);
+        expect(await page.evaluate(() => window.CW.loaded())).toEqual([]);
+        await page.evaluate(() => window.CW.register({ extra: '/fixtures/actions/log.js' }));
+        await page.click('#b');
+        await expect.poll(() => page.evaluate(() => window.CW.loaded())).toEqual(['log']);
+        expect(await page.evaluate(() => window.CW.registered())).toEqual(['log', 'gated', 'evaluated', 'extra']);
+        // defineAction() only exists for types: it returns the handler as it is.
+        expect(await page.evaluate(() => {
+            const handler = () => {};
+            return window.CW.defineAction(handler) === handler && window.CW.run === window.CW.start().run;
+        })).toBe(true);
+    });
+
     test('names that are not registered are never imported', async ({ page }) => {
         const requests = [];
         page.on('request', (request) => requests.push(request.url()));

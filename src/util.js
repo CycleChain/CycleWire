@@ -1,5 +1,16 @@
+import { plugins } from './state.js';
+
 /** @param {...unknown} args */
 export const warn = (...args) => console.warn('[CycleWire]', ...args);
+
+/**
+ * Tells plugins what the core is doing. Only the development build calls it,
+ * inside `if (__DEV__)`, so the production build carries none of the calls.
+ * @param {import('./types.js').TraceEvent} event
+ */
+export function trace(event) {
+    for (const plugin of plugins) plugin.trace?.(event);
+}
 
 export const noop = () => {};
 

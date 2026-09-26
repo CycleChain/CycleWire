@@ -95,6 +95,8 @@ export function analytics({ endpoint }) {
         // An action is about to run. The handler waits for the promise returned here,
         // which loads in parallel with the module; a rejection fails the run.
         load(entry, element, name) {},
+        // Development build only: what the core schedules, fetches, skips and runs.
+        trace(event) {},
         // On stop().
         stop() {},
     };
@@ -104,6 +106,15 @@ export function analytics({ endpoint }) {
 ```js
 start({ actions, plugins: [analytics({ endpoint: '/beacon' })] });
 ```
+
+`trace` receives one object per step, with a `type`: `schedule` (a trigger or preload
+was set up), `wait` (a trigger fired before its action was registered), `preload` (with
+its `reason`: `intent`, a `data-cw-preload` value, or none for `preload()`), `import` and
+`imported`, `skip` (with its `reason`: `unregistered`, `cancelled`, `once` or `busy`),
+`debounce`, `queue`, `start` and `end`. The `start` and `end` of a run share its `run`
+object. Only the development build (the `development` export condition, or
+`dist/esm-dev/`) calls it; the production build contains none of these calls. The
+`TraceEvent` type lists every field.
 
 Keep plugins independent of the core's internals. Import nothing from `cyclewire` beyond
 its public API, so a CDN copy and a bundled copy can never disagree.

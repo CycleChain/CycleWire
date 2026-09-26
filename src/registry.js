@@ -1,6 +1,6 @@
 import { splitName } from './attrs.js';
 import { plugins } from './state.js';
-import { link, warn } from './util.js';
+import { link, trace, warn } from './util.js';
 
 /**
  * The only door through which markup can reach code: names map to loaders,
@@ -90,6 +90,9 @@ export const entry = (name) => entries.get(name);
 /** Names of the action modules imported so far. */
 export const loaded = () => [...ready];
 
+/** Names of the registered action modules. */
+export const registered = () => [...entries.keys()];
+
 /**
  * Imports a module once; concurrent callers share the promise and a failed
  * load is forgotten so the next interaction can retry it.
@@ -101,12 +104,14 @@ export function load(name) {
     if (!promise) {
         const source = moduleOf(entries.get(name));
         if (!source) return Promise.reject(new Error(`[CycleWire] "${name}" is not registered`));
+        if (__DEV__) trace({ type: 'import', name });
         const pending = typeof source === 'function'
             ? source()
             : import(/* webpackIgnore: true */ /* @vite-ignore */ url(name, source));
         promise = pending.then(
             (mod) => {
                 if (modules.get(name) === promise) ready.add(name);
+                if (__DEV__) trace({ type: 'imported', name, ok: true });
                 return mod;
             },
             (error) => {
@@ -114,6 +119,7 @@ export function load(name) {
                     modules.delete(name);
                     failures.set(name, (failures.get(name) || 0) + 1);
                 }
+                if (__DEV__) trace({ type: 'imported', name, ok: false, error });
                 throw error;
             },
         );
@@ -129,15 +135,17 @@ export function load(name) {
  * evaluates the module. Failures stay silent: the real interaction retries
  * and reports.
  * @param {string} name
+ * @param {string} [reason] what asked for it, for the development build's trace
  * @returns {Promise<void>}
  */
-export function preload(name) {
+export function preload(name, reason) {
     const found = entries.get(name);
     if (!found) return Promise.resolve();
     for (const plugin of plugins) plugin.preload?.(found, name);
     const mod = moduleOf(found);
     if (modules.has(name) || preloaded.has(name)) return Promise.resolve();
     preloaded.add(name);
+    if (__DEV__) trace({ type: 'preload', name, reason });
     const forget = () => {
         preloaded.delete(name);
     };
