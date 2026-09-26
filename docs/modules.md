@@ -14,6 +14,7 @@ action runs.
 | `cyclewire/morph` | Morphing to new server HTML while keeping focus and input | 1.8 kB |
 | `cyclewire/signals` | Signals, reactive stores, `cw-bind` resumed from server JSON | 3.1 kB |
 | `cyclewire/stream` | Server-sent HTML messages that change the page, over Server-Sent Events or in responses | 3.3 kB |
+| `cyclewire/prefetch` | Data fetched on intent next to the action's code, taken by `ctx.fetch` | 0.5 kB |
 | `cyclewire/bootstrap` | Bootstrap 5's data API without its JavaScript | 2.1 kB |
 
 ## What the core does on its own

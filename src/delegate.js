@@ -1,7 +1,7 @@
 import { actionsOf, defaultEvent, isPassive, NON_BUBBLING, splitName } from './attrs.js';
 import * as registry from './registry.js';
 import { announce, dispatch } from './runner.js';
-import { attrs, opts, types } from './state.js';
+import { attrs, opts, plugins, types } from './state.js';
 import { noop, saveData, trace, warn } from './util.js';
 
 /**
@@ -110,27 +110,26 @@ function onEvent(event, root, type) {
     dispatch(el, action, event, target, type).catch(noop);
 }
 
-/** Preloads the modules bound on the element the user is heading for. */
+/** Preloads the modules bound on the element the user is heading for, and tells plugins (to prefetch its data, say). */
 function onIntent(/** @type {Event} */ event) {
-    /** @type {string[] | null} */
-    let names = null;
-    let mode = null;
+    /** @type {Element | null} */
+    let target = null;
+    /** @type {string[]} */
+    let names = [];
     for (const node of event.composedPath()) {
-        if (/** @type {Node} */ (node).nodeType !== 1) continue;
+        // An element without attributes can neither bind nor ignore.
+        if (/** @type {Node} */ (node).nodeType !== 1 || !(/** @type {Element} */ (node)).hasAttributes()) continue;
         const el = /** @type {Element} */ (node);
         // Nothing inside cw-ignore is preloaded either.
         if (el.hasAttribute(attrs.ignore)) return;
-        if (names) continue;
-        const bound = actionsOf(el, attrs);
-        if (bound.length) {
-            names = bound;
-            mode = el.getAttribute(attrs.preload);
-        }
+        if (target) continue;
+        names = actionsOf(el, attrs);
+        if (names.length) target = el;
     }
     // Intent fetches now what a scheduled preload would fetch later; only "none" opts out.
-    if (names && mode?.trim() !== 'none' && !saveData()) {
-        for (const name of names) registry.preload(splitName(name)[0], 'intent');
-    }
+    if (!target || target.getAttribute(attrs.preload)?.trim() === 'none' || saveData()) return;
+    for (const name of names) registry.preload(splitName(name)[0], 'intent');
+    for (const plugin of plugins) plugin.intent?.(target);
 }
 
 /** @param {Node} root @param {string} type */

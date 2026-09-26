@@ -123,8 +123,11 @@ function fire(el, action) {
     if (announce(el, action, null)) dispatch(el, action, null, el, null).catch(noop);
 }
 
-/** @param {Element} el */
-function setup(el) {
+/**
+ * @param {Element} el
+ * @param {boolean} look whether elements without a preload look ahead, decided once per scan
+ */
+function setup(el, look) {
     // Triggers and preloads inside cw-ignore never activate: injected markup must not run code.
     if (ignored(el, attrs)) return;
     const current = generation;
@@ -138,7 +141,7 @@ function setup(el) {
         } else if (__DEV__) warn(`${attrs.trigger} needs a ${attrs.action} on the same element.`, el);
     }
     const own = el.getAttribute(attrs.preload);
-    const preload = own === null ? (el.hasAttribute(attrs.action) && ahead() ? 'ahead' : '') : own.trim();
+    const preload = own === null ? (look && el.hasAttribute(attrs.action) ? 'ahead' : '') : own.trim();
     if (preload && preload !== 'intent' && preload !== 'none' && !preloaded.has(el)) {
         preloaded.add(el);
         if (__DEV__) trace({ type: 'schedule', element: el, when: preload, kind: 'preload' });
@@ -155,9 +158,10 @@ function setup(el) {
  * @param {ParentNode} root
  */
 export function scan(root) {
-    const selector = `[${attrs.trigger}],[${attrs.preload}]${ahead() ? `,[${attrs.action}]` : ''}`;
-    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) setup(/** @type {Element} */ (root));
-    for (const el of root.querySelectorAll(selector)) setup(el);
+    const look = ahead();
+    const selector = `[${attrs.trigger}],[${attrs.preload}]${look ? `,[${attrs.action}]` : ''}`;
+    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) setup(/** @type {Element} */ (root), look);
+    for (const el of root.querySelectorAll(selector)) setup(el, look);
     if (opts.shadow) {
         for (const el of root.querySelectorAll('*')) if (el.shadowRoot) observe(el.shadowRoot);
     }

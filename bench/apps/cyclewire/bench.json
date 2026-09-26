@@ -24,8 +24,8 @@
       "docs": "https://vite.dev/guide/backend-integration"
     },
     {
-      "choice": "Add to cart is preloaded when the browser is idle (cw-preload=\"idle\"), since most visitors use it; everything else loads on intent, the default.",
-      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#choose-when-to-fetch"
+      "choice": "Add to cart, the action most visitors use first, is preloaded with the page: the server writes <link rel=\"modulepreload\"> for its chunk and the chunks it imports, from Vite's manifest, so a tap on it right after the page appears waits only for the server. Everything else loads on intent, the default, and on touch screens also once the page is idle.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#preload-the-action-people-reach-for-first"
     },
     {
       "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
@@ -34,6 +34,10 @@
     {
       "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#import-it-from-the-action-that-needs-it"
+    },
+    {
+      "choice": "The quick view link names its data with cw-prefetch, and the prefetch plugin fetches it on intent, next to the action's code; the action's ctx.fetch() takes that response.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#fetch-code-and-data-together"
     }
   ]
 }

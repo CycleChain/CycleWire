@@ -1,6 +1,8 @@
 // The reference page with CycleWire, set up the way its documentation
 // recommends: the core as a module in <head>, actions in their own chunks,
-// the cart header bound to a store the server serializes.
+// the action most visitors use first (add to cart) preloaded with the page,
+// the quick view's data prefetched on intent, and the cart header bound to a
+// store the server serializes.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { summary } from '../../scenario/catalog.js';
@@ -8,7 +10,11 @@ import { listen } from '../../scenario/server.js';
 
 const manifest = JSON.parse(readFileSync(new URL('dist/js/.vite/manifest.json', import.meta.url), 'utf8'));
 const entry = manifest['src/main.js'];
-const preloads = [entry.file, ...(entry.imports ?? []).map((key) => manifest[key].file)];
+/** A chunk and the chunks it imports, from Vite's manifest. @param {string} key @returns {string[]} */
+const chunks = (key) => [manifest[key].file, ...(manifest[key].imports ?? []).flatMap(chunks)];
+// The entry, and the add-to-cart action with its imports: a tap on it right after the page
+// appears then waits only for the server, not for its code.
+const preloads = [...new Set([...chunks('src/main.js'), ...chunks('src/actions/cart.js')])];
 const head = [
     ...preloads.map((file) => `<link rel="modulepreload" href="/js/${file}">`),
     `<script type="module" src="/js/${entry.file}"></script>`,
@@ -25,8 +31,8 @@ listen({
             cartTotal: () => ' cw-bind="text: $cart.totalText"',
             searchForm: () => ' cw-action="catalog#search" cw-on-input="catalog#search"',
             categoryLink: () => ' cw-action="catalog#category" cw-prevent="click"',
-            addToCart: () => ' cw-action="cart#add" cw-preload="idle"',
-            quickView: () => ' cw-action="quickview" cw-prevent="click"',
+            addToCart: () => ' cw-action="cart#add"',
+            quickView: (product) => ` cw-action="quickview" cw-prevent="click" cw-prefetch="/api/products/${product.id}"`,
             newsletter: () => ' cw-action="newsletter"',
         },
     }),

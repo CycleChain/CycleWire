@@ -30,11 +30,14 @@ const live = new Set();
 const pendingState = new WeakMap();
 /** @type {Set<string>} */
 const warned = new Set();
+/** Actions whose handler last held the main thread longer than a frame allows. @type {Set<string>} */
+const slow = new Set();
 
 /**
- * Lets the browser paint (the pending state, a pressed button) before an
- * action runs synchronously off a cached module. A fresh import yields on its
- * own, so this only happens when the module is already in memory.
+ * Lets the browser paint (the pending state, a pressed button) before a
+ * handler that is known to hold the main thread runs off a cached module. A
+ * fresh import yields on its own, and a quick handler runs at once, so its
+ * result lands in the same frame.
  * @returns {Promise<unknown>}
  */
 function yieldToMain() {
@@ -133,7 +136,7 @@ async function start(el, action, event, target, mode, state) {
     pend(el, mode === 'drop');
     const [name, exported] = splitName(action);
     const cached = registry.isReady(name);
-    if (__DEV__) trace({ type: 'start', run, element: el, action, event, mode, cached });
+    if (__DEV__) trace({ type: 'start', run, element: el, action, event, mode, cached, yields: cached && slow.has(action) });
     try {
         const found = registry.entry(name);
         if (__DEV__ && found && typeof found === 'object' && found.css && !plugins.some((plugin) => plugin.load) && !warned.has(`css ${name}`)) {
@@ -143,7 +146,7 @@ async function start(el, action, event, target, mode, state) {
         // Plugins load what else the action needs (its stylesheets, say) in
         // parallel with the module; the handler waits for all of it.
         const [mod] = await Promise.all([registry.load(name), ...plugins.map((plugin) => plugin.load?.(found, el, name))]);
-        if (cached) await yieldToMain();
+        if (cached && slow.has(action)) await yieldToMain();
         if (signal.aborted) {
             if (__DEV__) trace({ type: 'end', run, status: 'aborted' });
             return undefined;
@@ -154,7 +157,12 @@ async function start(el, action, event, target, mode, state) {
             warned.add(action);
             warn(`Action "${action}" declares ${handler.length} parameters. Handlers receive one context object: ({ event, element, signal, ... }).`);
         }
-        const result = await handler(context(el, action, event, target, signal));
+        const began = performance.now();
+        const running = handler(context(el, action, event, target, signal));
+        // The synchronous part decides whether the next run waits for a paint first.
+        if (performance.now() - began > 10) slow.add(action);
+        else slow.delete(action);
+        const result = await running;
         if (el.hasAttribute(attrs.once)) state.done = true;
         if (__DEV__) trace({ type: 'end', run, status: 'done' });
         emit(el, 'done', { action, result });

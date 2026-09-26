@@ -90,8 +90,11 @@ export function analytics({ endpoint }) {
         // Called with every subtree CycleWire scans: at start, for observe(), and for added content.
         scan(root) {},
         // An action is being preloaded (intent, visible, idle, load): fetch what else it
-        // needs. `entry` is its registry entry, so object entries can carry options.
+        // needs, once per module. `entry` is its registry entry, so object entries can carry options.
         preload(entry, name) {},
+        // The user is heading for an element that binds actions: the pointer is over it,
+        // focus moved to it or a finger landed on it. Called every time, for that element.
+        intent(element) {},
         // An action is about to run. The handler waits for the promise returned here,
         // which loads in parallel with the module; a rejection fails the run.
         load(entry, element, name) {},

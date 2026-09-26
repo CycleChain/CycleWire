@@ -42,6 +42,11 @@ export interface Context<P = any, E extends Element = Element> {
     action: string;
     /** The CycleWire API. */
     wire: Wire;
+    /**
+     * `fetch()`, except that a plain GET of a URL the prefetch plugin fetched
+     * on intent takes that response (cyclewire/prefetch).
+     */
+    fetch?: typeof fetch;
     /** The element's reactive scope (signals plugin). */
     state?: any;
     /** A named reactive store (signals plugin). */
@@ -68,6 +73,8 @@ export type TraceEvent =
     | { type: 'wait'; element: Element; action: string }
     /** A module is being fetched ahead of use: `intent`, a `cw-preload` value, or none for `preload()`. */
     | { type: 'preload'; name: string; reason?: string }
+    /** Data a `cw-prefetch` names is being fetched on intent. */
+    | { type: 'prefetch'; url: string }
     /** A module import started, and settled. */
     | { type: 'import'; name: string }
     | { type: 'imported'; name: string; ok: boolean; error?: unknown }
@@ -77,6 +84,6 @@ export type TraceEvent =
     | { type: 'debounce'; element: Element; action: string; event: Event | null; wait: number }
     | { type: 'queue'; element: Element; action: string; event: Event | null }
     /** A run started, and ended. */
-    | { type: 'start'; run: TraceRun; element: Element; action: string; event: Event | null; mode: string; cached: boolean }
+    | { type: 'start'; run: TraceRun; element: Element; action: string; event: Event | null; mode: string; cached: boolean; yields: boolean }
     | { type: 'end'; run: TraceRun; status: 'done' | 'aborted' }
     | { type: 'end'; run: TraceRun; status: 'error'; error: unknown };

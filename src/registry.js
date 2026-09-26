@@ -129,22 +129,22 @@ export function load(name) {
 }
 
 /**
- * Fetches a module ahead of use, and lets plugins fetch what else the action
- * needs. URL entries use `<link rel="modulepreload">`, which downloads and
- * compiles without evaluating; loader functions have to be called, which
- * evaluates the module. Failures stay silent: the real interaction retries
- * and reports.
+ * Fetches a module ahead of use, once, and lets plugins fetch what else the
+ * action needs. URL entries use `<link rel="modulepreload">`, which downloads
+ * and compiles without evaluating, at high priority for intent and `load`,
+ * and at low priority when it is speculative, so it never delays the page's
+ * own images. Loader functions have to be called, which evaluates the module.
+ * Failures stay silent: the real interaction retries and reports.
  * @param {string} name
- * @param {string} [reason] what asked for it, for the development build's trace
+ * @param {string} [reason] what asked for it: intent, a cw-preload value, or nothing for preload()
  * @returns {Promise<void>}
  */
 export function preload(name, reason) {
     const found = entries.get(name);
-    if (!found) return Promise.resolve();
-    for (const plugin of plugins) plugin.preload?.(found, name);
     const mod = moduleOf(found);
-    if (modules.has(name) || preloaded.has(name)) return Promise.resolve();
+    if (!found || modules.has(name) || preloaded.has(name)) return Promise.resolve();
     preloaded.add(name);
+    for (const plugin of plugins) plugin.preload?.(found, name);
     if (__DEV__) trace({ type: 'preload', name, reason });
     const forget = () => {
         preloaded.delete(name);
@@ -152,6 +152,7 @@ export function preload(name, reason) {
     if (typeof mod !== 'string' || !URLISH.test(mod)) return load(name).then(forget, forget);
     return new Promise((resolve) => {
         const hint = link('modulepreload', url(name, mod));
+        if (reason) hint.fetchPriority = reason === 'intent' || reason === 'load' ? 'high' : 'low';
         hint.onload = () => resolve();
         hint.onerror = () => {
             // Some browsers remember the failed URL, so the real import uses a fresh one.

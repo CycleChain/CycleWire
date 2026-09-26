@@ -12,17 +12,20 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 // Budgets in bytes, a few percent above what each bundle weighs today, so an
 // accidental regression fails CI while a deliberate one updates this table.
 const budgets = {
-    'cyclewire.min.js': { brotli: 4864, gzip: 5376 },
+    // 1.1 adds the touch look-ahead, registered(), defineAction(), the intent hook,
+    // the adaptive yield and preload priorities: measured at 4952 B brotli.
+    'cyclewire.min.js': { brotli: 5120, gzip: 5632 },
     'css.min.js': { brotli: 768 },
     'dom.min.js': { brotli: 2304 },
     'morph.min.js': { brotli: 2048 },
     'signals.min.js': { brotli: 3200 },
     'stream.min.js': { brotli: 4096 },
+    'prefetch.min.js': { brotli: 768 },
     'bootstrap.min.js': { brotli: 2304 },
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
-    'cyclewire.global.min.js': { brotli: 5120 },
-    'cyclewire.full.global.min.js': { brotli: 14336 },
+    'cyclewire.global.min.js': { brotli: 5376 },
+    'cyclewire.full.global.min.js': { brotli: 14848 },
 };
 
 /** How the README names each bundle. */
@@ -31,6 +34,7 @@ const notes = {
     'cyclewire.global.min.js': 'core + auto start',
     'morph.min.js': 'includes what it needs from dom',
     'stream.min.js': 'includes dom and morph',
+    'prefetch.min.js': 'a plugin',
     'devtools.min.js': 'development only',
     'cyclewire.full.global.min.js': 'everything',
 };

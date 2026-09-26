@@ -28,20 +28,24 @@ export default function run(ctx) { /* used for cw-action="cart" */ }
 | `action` | The name that ran, e.g. `"cart#add"` |
 | `wire` | The CycleWire API (`run`, `preload`, `observe`, …) |
 | `state`, `store` | Added by the [signals](signals.md) plugin |
+| `fetch` | Added by the [prefetch](prefetch.md) plugin: `fetch()` that takes the data prefetched on intent |
 
-## Your code runs after dispatch
+## Your code runs after CycleWire's listener
 
-The first run of an action waits for its module to download. Even when the module is
-cached, CycleWire yields before calling you so the browser can paint the pressed state.
-Either way, your handler runs **after** the event has finished dispatching, which means:
+The first run of an action waits for its module to download. Once the module is in
+memory, a quick handler runs right after CycleWire's own listener returns, so its result
+lands in the next frame; a handler that held the main thread for more than 10 ms last
+time waits for the browser to paint the pressed state first. Either way, your handler
+runs **after** CycleWire has handled the event, and possibly after it has finished
+dispatching, which means:
 
-- `event.preventDefault()` in a handler does nothing. Use
+- Do not rely on `event.preventDefault()` in a handler. Use
   [`cw-prevent`](html-api.md#cw-prevent), which is applied synchronously.
 - APIs that need a user gesture, such as `navigator.clipboard.writeText`, `window.open`
   and `navigator.share`, may be refused after a slow first import, and Safari is the
   strictest. Preload the module (`cw-preload="load"`) or use the upgrade pattern
   below.
-- `event.currentTarget` is `null`. Use `element`.
+- `event.currentTarget` is not your element. Use `element`.
 
 ### The upgrade pattern
 

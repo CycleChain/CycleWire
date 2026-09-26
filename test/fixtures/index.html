@@ -14,10 +14,10 @@
         // ?build=esm (production) | esm-dev (default, with warnings) | min (bundled CDN files)
         const build = new URLSearchParams(location.search).get('build') || 'esm-dev';
         const file = (name) => (build === 'min' ? `/dist/${name === 'index' ? 'cyclewire' : name}.min.js` : `/dist/${build}/${name}.js`);
-        const [core, css, dom, morph, signals, bootstrap, stream] = await Promise.all(
-            ['index', 'css', 'dom', 'morph', 'signals', 'bootstrap', 'stream'].map((name) => import(file(name))),
+        const [core, css, dom, morph, signals, bootstrap, stream, prefetch] = await Promise.all(
+            ['index', 'css', 'dom', 'morph', 'signals', 'bootstrap', 'stream', 'prefetch'].map((name) => import(file(name))),
         );
-        Object.assign(window, { CW: core, CWX: { css, dom, morph, signals, bootstrap, stream } });
+        Object.assign(window, { CW: core, CWX: { css, dom, morph, signals, bootstrap, stream, prefetch } });
         window.__ready = true;
     </script>
 </body>

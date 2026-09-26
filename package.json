@@ -75,6 +75,11 @@
       "development": "./dist/esm-dev/stream.js",
       "default": "./dist/esm/stream.js"
     },
+    "./prefetch": {
+      "types": "./types/prefetch.d.ts",
+      "development": "./dist/esm-dev/prefetch.js",
+      "default": "./dist/esm/prefetch.js"
+    },
     "./bootstrap": {
       "types": "./types/bootstrap.d.ts",
       "development": "./dist/esm-dev/bootstrap.js",

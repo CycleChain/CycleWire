@@ -35,10 +35,13 @@ For the fastest possible activation, inline the 5.0 kB classic-script build in t
 - **Code arrives before the click.** On `pointerover`, `focusin` and `pointerdown`,
   CycleWire starts fetching the module. For URL entries it uses `modulepreload`, which
   downloads and compiles without running.
-- **Feedback paints first.** When the module is already in memory, CycleWire yields to
-  the browser before calling your handler, with `scheduler.yield()` where available and
-  `setTimeout(0)` otherwise. The `cw-pending` style and the pressed state paint
-  before your code runs.
+- **Quick handlers run at once; slow ones after a paint.** A handler whose module is in
+  memory runs in the same task as the event, so its result lands in the next frame. If
+  its synchronous part held the main thread for more than 10 ms the last time it ran,
+  CycleWire yields to the browser first (`scheduler.yield()` where available,
+  `setTimeout(0)` otherwise), so the `cw-pending` style and the pressed state paint
+  before it runs. The measure is per action and per device: a handler that is quick on a
+  laptop and slow on a phone yields only on the phone.
 - **Keep handlers short.** Split heavy work with `await scheduler.yield()` (feature
   detected) and pass `signal` to fetches so superseded work stops.
 - **Debounce chatty inputs:** `cw-debounce="150"`.
@@ -54,7 +57,10 @@ For the fastest possible activation, inline the 5.0 kB classic-script build in t
 | `none` | Rare, heavy features |
 
 Speculative preloads are skipped when the user asked to save data or is on a 2G
-connection. An explicit `preload()` call is not.
+connection. An explicit `preload()` call is not. URL entries are preloaded at high
+priority on intent and for `load`, and at low priority when the fetch is speculative
+(`visible`, `idle`, the look-ahead below), so they never hold up the page's own images
+and stylesheets.
 
 A touch screen gives no warning before a tap: the finger lands and the click follows
 about 100 ms later, too soon for a module to arrive over a slow connection. So where the
@@ -62,6 +68,56 @@ primary input cannot hover, the default looks ahead: once the page is idle, the 
 of the `cw-action` elements that near the viewport are fetched (downloaded and
 compiled, not run). Choose with `start({ preload })`: `'auto'` (the default), `'visible'`
 to look ahead on every screen, or `'intent'` to fetch nothing before intent.
+
+## Fetch code and data together
+
+A handler that fetches data after its module arrives pays two round trips on its first
+use: first the code, then the data. The [`cyclewire/prefetch`](prefetch.md) plugin starts
+the data at the same moment as the code. Name the URL on the element, and fetch it with
+`ctx.fetch`:
+
+```html
+<a href="/products/42" cw-action="quickview" cw-prefetch="/api/products/42">Quick view</a>
+```
+
+```js
+// main.js
+import { start } from 'cyclewire';
+import { prefetch } from 'cyclewire/prefetch';
+
+start({ actions, plugins: [prefetch()] });
+
+// actions/quickview.js
+export async function run({ element, fetch, signal }) {
+    const product = await (await fetch(element.getAttribute('cw-prefetch'), { signal })).json();
+    // …
+}
+```
+
+When the pointer reaches the link, or a finger lands on it, the module and the data are
+fetched side by side, and `ctx.fetch` takes the response that is already on its way. On a
+desktop that hovers for a tenth of a second before clicking, that is most of a round trip
+saved; on a phone, the time between touch and click.
+
+## Preload the action people reach for first
+
+People tap the button they came for as soon as they see it, often before the page has
+settled. If its code only starts downloading then, the tap waits a round trip before the
+request it sends. Preload that one action's code with the page: write a
+`<link rel="modulepreload">` for its chunk, and for the chunks it imports, next to the
+entry's. With Vite, the manifest names them:
+
+```js
+// Your server, reading Vite's .vite/manifest.json.
+const chunks = (key) => [manifest[key].file, ...(manifest[key].imports ?? []).flatMap(chunks)];
+const preloads = new Set([...chunks('src/main.js'), ...chunks('src/actions/cart.js')]);
+const head = [...preloads].map((file) => `<link rel="modulepreload" href="/build/${file}">`).join('');
+```
+
+The page then downloads that action's code up front, a few kilobytes, in exchange for a
+first tap that waits only for the server. `cw-preload="load"` does the same without
+touching the server, but starts later: when CycleWire starts, after the HTML is parsed.
+Keep it to the one or two actions nearly every visitor uses.
 
 ## What the benchmark shows
 
@@ -77,10 +133,10 @@ and what to do about it:
 - **An action's first use waits for its code.** On a slow network that is a round trip
   before the handler runs. On touch screens there is no hover, so intent preloading only
   starts when the finger lands; the default now also fetches what is in view once the page
-  is idle. A tap that comes sooner than that still waits: preload the one action people
-  reach for first with `load`.
+  is idle. A tap that comes sooner than that still waits:
+  [preload the action people reach for first](#preload-the-action-people-reach-for-first).
 - **Code, then data.** A handler that fetches data after its module arrives pays two round
-  trips on its first use. Preload those modules earlier.
+  trips on its first use: [fetch them together](#fetch-code-and-data-together).
 - **Let the bundler preload an action's imports.** Vite fetches the chunks an action
   imports together with the action; a bundler that does not makes the browser find them
   one import at a time.

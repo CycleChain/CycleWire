@@ -189,3 +189,4 @@ These belong to the optional modules and are documented with them:
 - [signals](signals.md): `cw-state`, `cw-store`, `cw-bind`.
 - [morph](morph.md): `cw-key`, `cw-preserve`.
 - [stream](stream.md): `cw-stream`, and the `cw-stream-state` it sets.
+- [prefetch](prefetch.md): `cw-prefetch`, a URL fetched on intent.

@@ -49,7 +49,7 @@ test('an entry with options loads its module like any other', async () => {
     assert.deepEqual(registry.entry('widget'), { module: registry.entry('widget')?.module, css: ['/a.css', '/b.css'] });
 });
 
-test('preloading hands the whole entry to plugins, every time', async () => {
+test('preloading hands the whole entry to plugins, once per module', async () => {
     /** @type {unknown[][]} */
     const seen = [];
     const plugin = { preload: (/** @type {unknown} */ entry, /** @type {string} */ name) => void seen.push([name, entry]) };
@@ -60,8 +60,8 @@ test('preloading hands the whole entry to plugins, every time', async () => {
         await registry.preload('hinted');
         await registry.preload('hinted');
         await registry.preload('unknown');
-        // The module is imported once; the plugin decides what repeating means.
-        assert.deepEqual(seen, [['hinted', entry], ['hinted', entry]]);
+        // Once, like the module: what depends on the element belongs in the intent hook.
+        assert.deepEqual(seen, [['hinted', entry]]);
     } finally {
         plugins.splice(plugins.indexOf(plugin), 1);
     }

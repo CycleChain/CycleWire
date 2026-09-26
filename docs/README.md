@@ -39,6 +39,7 @@ for it.
 - [signals](signals.md): reactivity that resumes from state the server serialized.
 - [stream](stream.md): the server changes the page with HTML messages, over Server-Sent
   Events or in any response.
+- [prefetch](prefetch.md): data fetched on intent, next to the action's code.
 - [plugins](plugins.md): the Bootstrap data-API plugin, and writing your own.
 
 ## Guides

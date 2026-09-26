@@ -56,6 +56,7 @@ import { warn } from './util.js';
  * @property {(context: Context) => void} [context]  may add fields to every action context
  * @property {(root: ParentNode) => void} [scan]  sees every subtree CycleWire scans: start, observe, added content
  * @property {(entry: ActionEntry, name: string) => void} [preload]  fetch what else an action needs, ahead of time
+ * @property {(element: Element) => void} [intent]  the user is heading for an element that binds actions (pointer over, focus, press)
  * @property {(entry: ActionEntry | undefined, element: Element, name: string) => unknown} [load]  runs with the module import; the handler waits for the promise it returns
  * @property {(event: TraceEvent) => void} [trace]  development build only: what the core schedules, fetches, skips and runs
  * @property {() => void} [stop]

@@ -1,5 +1,5 @@
 // The cart store is seeded from the JSON the server rendered, and the header
-// is bound to it with data-cw-bind, so adding an item only changes the store.
+// is bound to it with cw-bind, so adding an item only changes the store.
 import { store } from 'cyclewire/signals';
 import { formatPrice } from '../../../../scenario/markup.js';
 

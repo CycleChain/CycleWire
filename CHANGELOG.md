@@ -6,6 +6,34 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **`cyclewire/prefetch`** (0.5 kB brotli): data fetched on intent, next to the
+  action's code. An element names a URL with `cw-prefetch`; when the pointer, focus or a
+  finger reaches it, the plugin starts a GET of that URL on the page's own origin, and
+  the handler's `ctx.fetch` takes the response that is already on its way. The code and
+  the data then arrive together instead of one after the other.
+- An `intent(element)` plugin hook, called whenever the user heads for an element that
+  binds actions.
+
+### Changed
+
+- **Quick handlers run at once.** A handler whose module is in memory no longer waits
+  for a paint unless its synchronous part held the main thread for more than 10 ms the
+  last time it ran, per action and per device. Its result then lands in the next frame
+  instead of the one after. Slow handlers still let the pressed state paint first.
+- **Speculative preloads step aside.** URL entries are preloaded at high priority on
+  intent and for `cw-preload="load"`, and at low priority for `visible`, `idle` and the
+  touch look-ahead, so they never hold up the page's own images.
+- Size budgets: `cyclewire.min.js` 5120 B brotli (measured 4952 B), the classic builds
+  5376 B and 14848 B, and `prefetch.min.js` 768 B.
+
+### Performance
+
+- The pointer-over handler skips elements without attributes, the look-ahead decides
+  once per scanned subtree instead of once per element, and plugins' `preload` hooks run
+  once per module instead of on every hover.
+
 ## [1.1.0-beta.1] - 2026-09-26
 
 ### Added
