@@ -51,6 +51,11 @@ boot, and there are no runtime dependencies.
   - [`dom`](docs/dom.md): safe `html` templates, inert fragments, swaps
   - [`morph`](docs/morph.md): DOM morphing that keeps state, instead of a virtual DOM
   - [`signals`](docs/signals.md): reactivity that resumes from server-rendered state
+  - [`stream`](docs/stream.md): HTML messages from the server that change the page
+  - [`prefetch`](docs/prefetch.md): data fetched on intent, next to the action's code
+  - [`request`](docs/request.md): links, forms and buttons that fetch HTML, declared in
+    markup the way htmx does it
+  - [`early`](docs/early.md): taps made before CycleWire starts, kept and run once it does
   - [`bootstrap`](docs/plugins.md): Bootstrap's data API without its JavaScript
 
 ---
