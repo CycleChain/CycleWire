@@ -15,6 +15,11 @@ name: Benchmark
 # crosscheck: next to measure, Lighthouse and the harness's cold load in turn on
 #          one runner, to check the harness's load metrics (crosscheck/run.js);
 #          the table is in the job's summary.
+# micro:   by hand or weekly, the micro benchmarks (micro/): cyclewire/signals
+#          next to Preact Signals, alien-signals and Vue's reactivity in Node,
+#          and cyclewire/morph next to morphdom and idiomorph in Chromium,
+#          Firefox and WebKit. The report is in the job's summary; the JSON is
+#          kept as an artifact.
 # publish: when every profile was measured and the repository variable
 #          BENCH_PUBLISH is 'true', a pull request from github-actions[bot]
 #          replaces bench/results/ with the new runs and updates the README's
@@ -228,6 +233,46 @@ jobs:
         with:
           name: bench-crosscheck-${{ matrix.profile }}
           path: bench/crosscheck/out/*.json
+          if-no-files-found: ignore
+          retention-days: 90
+
+  micro:
+    name: Micro benchmarks (signals and morph)
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ${{ vars.BENCH_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            bench/package-lock.json
+            bench/micro/package-lock.json
+      - name: Build CycleWire, which the micro benchmarks import
+        working-directory: .
+        run: npm ci && npm run build
+      # The harness's Playwright and Ajv.
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm ci
+        working-directory: bench/micro
+      - run: npm test
+        working-directory: bench/micro
+      - name: Measure
+        working-directory: bench/micro
+        run: node run.js --suite=all --browsers=chromium,firefox,webkit --samples=30 --warmup=5 --out=out/micro.json
+      - name: Report
+        if: always()
+        working-directory: bench/micro
+        run: |
+          if [ -f out/micro.json ]; then node report.js out/micro.json >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench-micro
+          path: bench/micro/out/*.json
           if-no-files-found: ignore
           retention-days: 90
 

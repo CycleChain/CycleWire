@@ -102,10 +102,28 @@ Lighthouse's on one runner and writes the table into the job's summary. With the
 of each profile, and `node scripts/readme.js --write` updates the tables in the
 repository's README.
 
+## Micro benchmarks
+
+[`micro/`](micro/README.md) measures two of CycleWire's modules on their own, next to
+libraries that do the same job: `cyclewire/signals` with `@preact/signals-core`,
+`alien-signals` and `@vue/reactivity` in Node (the js-reactivity-benchmark scenarios,
+cellx, creation, updates and dynamic graphs, every result checked), and
+`cyclewire/morph` with `morphdom` and `idiomorph` in Chromium, Firefox and WebKit
+(correctness cases such as focus, typed values and scroll positions, and seven
+operations on 1,000 keyed rows, timed and with their DOM mutations counted). It has its
+own `package.json`; the Benchmark workflow's `micro` job runs it weekly and by hand.
+
+```bash
+cd bench/micro && npm ci
+node run.js --suite=signals|morph|all [--browsers=chromium,firefox,webkit] [--samples=15]
+node report.js out/<file>.json
+```
+
 ## Layout
 
 | Path | |
 | --- | --- |
+| `micro/` | The micro benchmarks of CycleWire's signals and morph |
 | `scenario/` | The page: products, reference render, stylesheet, images, the shared API, and `golden.json`, the text every stack must show |
 | `proxy/` | The HTTP/2 proxy every stack is measured through |
 | `runner/` | The in-page probe, journeys, visits, conformance checks and statistics |

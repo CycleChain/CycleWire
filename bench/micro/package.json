@@ -1,0 +1,23 @@
+{
+  "name": "cyclewire-bench-micro",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Micro benchmarks of CycleWire's signals and morph next to other libraries that do the same job.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "micro": "node run.js",
+    "report": "node report.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@preact/signals-core": "1.14.4",
+    "@vue/reactivity": "3.5.43",
+    "alien-signals": "3.2.1",
+    "cyclewire": "file:../..",
+    "idiomorph": "0.8.0",
+    "morphdom": "2.7.8"
+  }
+}

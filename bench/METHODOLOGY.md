@@ -242,3 +242,25 @@ stack runs a published release, except CycleWire's own app, which is built from 
 repository's source so that each run measures the library at the commit it runs on; its
 version is recorded with that commit, as in `1.1.0-beta.1+6ef70dd`. Build the library
 first (`npm ci && npm run build` in the repository root) when you run it yourself.
+
+## 13. Micro benchmarks
+
+[`micro/`](micro/README.md) measures `cyclewire/signals` and `cyclewire/morph` on their
+own, next to libraries that do the same job, each called through its documented API
+with its defaults. The same rules apply as above: every result is checked, so a library
+that computes or renders something wrong is recorded as failed rather than timed; every
+number is a median with a bootstrap 95% interval, published with its samples; and the
+results say where CycleWire is slower or wrong.
+
+- **Signals** run in Node, each scenario for each library in a process of its own
+  (`--expose-gc`, `NODE_ENV=production`), the libraries in a shuffled order, with a
+  garbage collection before every sample. The scenarios are ports of
+  js-reactivity-benchmark's (MIT) kairo set, cellx and dynamic graphs, plus creation and
+  update scenarios; they check values, how often effects ran, and that no computed sees
+  a half-updated graph. `@vue/reactivity` exports no batching function, so its effects
+  run after each write where the others run once per batch, and its checks expect that.
+- **Morph** runs in Chromium, Firefox and WebKit, in a page served locally and
+  cross-origin isolated for the finest timer. The correctness cases say what a person
+  would want and why, and name the two where the libraries differ by design. The speed
+  test times one operation on a fresh copy of 1,000 keyed rows per sample, the library's
+  own parsing of the markup included, and counts the DOM mutations each library makes.

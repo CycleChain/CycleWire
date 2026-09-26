@@ -1,0 +1,726 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyclechain.github.io/CycleWire/bench/schema/micro.v1.json",
+  "title": "One run of the CycleWire micro benchmarks (signals and morph)",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "startedAt",
+    "finishedAt",
+    "environment",
+    "config",
+    "signals",
+    "morph",
+    "failures"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "cyclewire-bench/micro@1"
+    },
+    "id": {
+      "type": "string"
+    },
+    "startedAt": {
+      "type": "string"
+    },
+    "finishedAt": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "runner",
+        "os",
+        "arch",
+        "cpu",
+        "cores",
+        "memoryGB",
+        "loadAverage",
+        "node",
+        "playwright",
+        "commit",
+        "nodeCpuIndex"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "runner": {
+          "enum": [
+            "local",
+            "github-hosted",
+            "self-hosted"
+          ]
+        },
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "cpu": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cores": {
+          "type": "integer"
+        },
+        "memoryGB": {
+          "type": "number"
+        },
+        "loadAverage": {
+          "description": "The 1, 5 and 15 minute load averages when the run started",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "loadAverageEnd": {
+          "description": "The same, when the run finished",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "node": {
+          "type": "string"
+        },
+        "playwright": {
+          "type": "string"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "nodeCpuIndex": {
+          "description": "The harness's CPU speed index loop, run in Node: iterations per second, higher is faster. Not comparable with the harness's browser cpuIndex",
+          "type": "number"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "required": [
+        "suites",
+        "samples",
+        "warmup",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "suites": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "signals",
+              "morph"
+            ]
+          },
+          "minItems": 1
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warmup": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "browsers": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "chromium",
+              "firefox",
+              "webkit"
+            ]
+          }
+        },
+        "channel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "signals": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/signalsSuite"
+        }
+      ]
+    },
+    "morph": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/morphSuite"
+        }
+      ]
+    },
+    "failures": {
+      "description": "What went wrong outside a single measurement: a browser that did not launch, errors thrown in a page",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "suite",
+          "message"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "suite": {
+            "enum": [
+              "signals",
+              "morph"
+            ]
+          },
+          "browser": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "number": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "summary": {
+      "description": "summarize() from runner/stats.js: the median with a bootstrap 95% confidence interval, quartiles and range",
+      "type": "object",
+      "required": [
+        "n",
+        "median",
+        "p25",
+        "p75",
+        "min",
+        "max",
+        "ci95"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "median": {
+          "$ref": "#/$defs/number"
+        },
+        "p25": {
+          "$ref": "#/$defs/number"
+        },
+        "p75": {
+          "$ref": "#/$defs/number"
+        },
+        "min": {
+          "$ref": "#/$defs/number"
+        },
+        "max": {
+          "$ref": "#/$defs/number"
+        },
+        "ci95": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "maybeSummary": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/summary"
+        }
+      ]
+    },
+    "times": {
+      "description": "Raw samples, in ms",
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "strings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "signalsSuite": {
+      "type": "object",
+      "required": [
+        "libraries",
+        "scenarios",
+        "results"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "package",
+              "version",
+              "module",
+              "batching",
+              "api"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "package": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "module": {
+                "type": "string"
+              },
+              "batching": {
+                "description": "Whether withBatch defers effects until the batch ends",
+                "type": "boolean"
+              },
+              "api": {
+                "description": "What each adapter method calls",
+                "$ref": "#/$defs/strings"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "group",
+              "title",
+              "measures",
+              "checks"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "group": {
+                "enum": [
+                  "kairo",
+                  "cellx",
+                  "create",
+                  "update",
+                  "dynamic"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "measures": {
+                "type": "string"
+              },
+              "checks": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "library",
+              "scenario",
+              "status",
+              "samples",
+              "summary"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "library": {
+                "type": "string"
+              },
+              "scenario": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "ok",
+                  "failed"
+                ]
+              },
+              "message": {
+                "description": "Why it failed: a check that did not hold, an exception, a crash or a timeout",
+                "type": "string"
+              },
+              "samples": {
+                "$ref": "#/$defs/times"
+              },
+              "summary": {
+                "$ref": "#/$defs/maybeSummary"
+              },
+              "counts": {
+                "description": "Work counted in the first sample, such as how many times computeds ran (per iteration for the kairo scenarios)",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "morphSuite": {
+      "type": "object",
+      "required": [
+        "libraries",
+        "browsers",
+        "cases",
+        "operations",
+        "correctness",
+        "speed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "package",
+              "version",
+              "call",
+              "options",
+              "defaults"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "package": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "call": {
+                "type": "string"
+              },
+              "options": {
+                "type": "object"
+              },
+              "defaults": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "browsers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "channel",
+              "version",
+              "crossOriginIsolated",
+              "timerResolutionMs",
+              "moveBefore",
+              "gc",
+              "userAgent"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "enum": [
+                  "chromium",
+                  "firefox",
+                  "webkit"
+                ]
+              },
+              "channel": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "version": {
+                "type": "string"
+              },
+              "crossOriginIsolated": {
+                "type": "boolean"
+              },
+              "timerResolutionMs": {
+                "description": "The smallest step performance.now() took in the page",
+                "type": "number"
+              },
+              "moveBefore": {
+                "description": "Whether the browser has Element.moveBefore(), which moves an element without resetting its state",
+                "type": "boolean"
+              },
+              "gc": {
+                "description": "Whether the page could collect garbage before each sample",
+                "type": "boolean"
+              },
+              "userAgent": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "want",
+              "why"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "want": {
+                "description": "What a person would want",
+                "type": "string"
+              },
+              "why": {
+                "type": "string"
+              },
+              "design": {
+                "description": "Where the libraries disagree by design",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "rows"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "rows": {
+                "description": "Rows in the container before the operation",
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "correctness": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "browser",
+              "library",
+              "case",
+              "pass",
+              "problems"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "browser": {
+                "type": "string"
+              },
+              "library": {
+                "type": "string"
+              },
+              "case": {
+                "type": "string"
+              },
+              "pass": {
+                "type": "boolean"
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "speed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "browser",
+              "library",
+              "operation",
+              "status",
+              "samples",
+              "withLayout",
+              "summary",
+              "summaryWithLayout",
+              "mutations",
+              "kept",
+              "expectedKept"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "browser": {
+                "type": "string"
+              },
+              "library": {
+                "type": "string"
+              },
+              "operation": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "ok",
+                  "failed"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "samples": {
+                "description": "The morph call alone, in ms",
+                "$ref": "#/$defs/times"
+              },
+              "withLayout": {
+                "description": "The morph call and the style and layout it forces, in ms",
+                "$ref": "#/$defs/times"
+              },
+              "summary": {
+                "$ref": "#/$defs/maybeSummary"
+              },
+              "summaryWithLayout": {
+                "$ref": "#/$defs/maybeSummary"
+              },
+              "mutations": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "description": "What a MutationObserver on the container recorded during one untimed run of the operation",
+                    "type": "object",
+                    "required": [
+                      "records",
+                      "childList",
+                      "attributes",
+                      "characterData",
+                      "added",
+                      "removed"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "records": {
+                        "type": "integer"
+                      },
+                      "childList": {
+                        "type": "integer"
+                      },
+                      "attributes": {
+                        "type": "integer"
+                      },
+                      "characterData": {
+                        "type": "integer"
+                      },
+                      "added": {
+                        "description": "Nodes added, over all records",
+                        "type": "integer"
+                      },
+                      "removed": {
+                        "description": "Nodes removed, over all records",
+                        "type": "integer"
+                      }
+                    }
+                  }
+                ]
+              },
+              "kept": {
+                "description": "Rows that should have stayed the same elements and did",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "expectedKept": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
