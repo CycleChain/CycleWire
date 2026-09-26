@@ -60,7 +60,8 @@ the run fail with a `SyntaxError` naming the attribute.
 ```
 
 Escape it for the attribute. In Blade, `data-cw-props='@json($props)'` is safe. Laravel's
-`@json` escapes quotes, `<`, `>` and `&` by default.
+`@json` escapes quotes, `<`, `>` and `&` by default. The [server helpers](server-helpers.md)
+write and escape it in PHP, Ruby, Python and JavaScript.
 
 ## Activation without events
 

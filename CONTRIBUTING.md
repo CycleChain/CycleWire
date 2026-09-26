@@ -31,6 +31,14 @@ The end-to-end tests run against the built files, so run `npm run build` before
 `npm run test:e2e`. They build the examples themselves, since some tests run against
 them.
 
+The [server helpers](docs/server-helpers.md) live in `test/snippets`, one folder per
+language, and each passes the cases in `test/snippets/vectors.json`. CI runs them all;
+locally, run the ones you have: `node --test test/snippets/node/cw.test.js`,
+`php test/snippets/php/test.php`, `ruby test/snippets/ruby/test.rb` and
+`python3 test/snippets/python/test_cyclewire.py` (its Django test runs when Django is
+installed). The docs quote the files, and `node scripts/check-snippets.js` fails until
+each quote matches its file again.
+
 The benchmark lives in [`bench/`](bench/README.md), with its own `package.json`; its
 [contributing guide](bench/CONTRIBUTING.md) explains how to add or correct a stack.
 

@@ -29,6 +29,10 @@ start({
 `@json` escapes quotes and `<`, `>`, `&`, so it is safe inside a single-quoted attribute.
 The form above still posts normally if JavaScript never arrives.
 
+The [`@cw` directive](server-helpers.md#php-and-laravel) writes the attributes for you,
+escapes them and rejects a misspelt name or option:
+`<button @cw('favorites.toggle', ['type' => 'firm', 'id' => $firm->id])>`.
+
 A handler that posts to Laravel with the CSRF token:
 
 ```js
@@ -55,6 +59,9 @@ Rails turns `data: { cw_action: … }` into `data-cw-action`:
 Stimulus uses `data-action` too. The default `cw-` prefix keeps the two apart, so they
 can live on the same page.
 
+In markup you write out, the [`cw` helper](server-helpers.md#ruby-on-rails) prints the
+attributes, escaped: `<button <%= cw('cart#add', { sku: product.sku }) %>>`.
+
 ## Django
 
 ```django
@@ -66,6 +73,9 @@ can live on the same page.
 
 `json_script` pairs naturally with `data-cw-state="#id"` from [signals](signals.md).
 
+The [`{% cw %}` tag](server-helpers.md#python-and-django) builds the JSON from a dictionary
+in the context and escapes it: `<button {% cw 'cart#add' props %}>`.
+
 ## Plain PHP
 
 ```php
@@ -74,6 +84,9 @@ can live on the same page.
     Add
 </button>
 ```
+
+[`cw.php`](server-helpers.md#php-and-laravel) does both in one call:
+`<button <?= \CycleWire\cw('cart#add', ['sku' => $sku]) ?>>`.
 
 ## No build step at all
 
@@ -123,7 +136,8 @@ islands. CycleWire can load the islands themselves (a `visible` trigger hydrates
 server-rendered component when it scrolls into view), and components can use CycleWire
 actions:
 
-- The attributes are valid in JSX and templates (`data-cw-action="…"`).
+- The attributes are valid in JSX and templates (`data-cw-action="…"`). In JSX, you can
+  also spread [`cw()`](server-helpers.md#javascript-and-jsx): `<button {...cw('cart#add', { sku })}>`.
 - CycleWire listens in the bubble phase, so your framework's handlers run first and its
   `stopPropagation()` is respected. `start({ capture: true })` flips that.
 - CycleWire writes nothing into markup except `data-cw-pending` / `aria-busy` during a

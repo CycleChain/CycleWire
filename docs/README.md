@@ -46,6 +46,8 @@ for it.
 - [Shadow DOM and Web Components](shadow-dom.md)
 - [Integrations](integrations.md): Laravel, Rails, Django, PHP, Astro, Vite, React, Vue,
   Svelte, htmx, Turbo.
+- [Server helpers](server-helpers.md): a tested `cw()` for Laravel, Rails, Django, plain PHP
+  and JSX that writes the attributes, escapes them and rejects misspelt names.
 - [React, Vue, Svelte and other frameworks](frameworks.md): islands that CycleWire loads
   and hydrates, and CycleWire actions inside components.
 - [Popular libraries](libraries.md): Flatpickr, SweetAlert2, DataTables, jQuery and more,

@@ -44,6 +44,12 @@ All notable changes to CycleWire are documented here. The format follows
   or from a bookmarklet on any page; Alt+Shift+W toggles it. It also works with the
   production build and with 1.0.x, and costs nothing unless imported (`devtools.min.js`,
   about 7 kB brotli).
+- Server helpers (`docs/server-helpers.md`): a copy-in `cw()` for PHP (with a Blade
+  directive), Ruby (with a Rails helper), Python (with a Django template tag) and
+  JavaScript (for template literals and JSX). It writes the `data-cw-*` attributes,
+  escapes them for HTML and throws on a misspelt name, option or value. Each helper is
+  tested in its own language against one set of shared cases, and CI checks that the
+  docs quote the tested files.
 
 ### Changed
 
