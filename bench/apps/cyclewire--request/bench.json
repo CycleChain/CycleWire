@@ -1,0 +1,67 @@
+{
+  "$schema": "../../schema/bench.v1.json",
+  "id": "cyclewire--request",
+  "name": "CycleWire, requests from markup",
+  "kind": "library",
+  "summary": "The CycleWire app with its interactions declared in markup with cyclewire/request, the way htmx builds them: links and forms fetch HTML fragments from the server and swap them in (the results, the header's cart summary, the quick view, the newsletter message), and <cw-stream> messages in an answer update the other parts of the page. The core loads up front, and the request action's code with the page.",
+  "variant": {
+    "of": "cyclewire",
+    "differs": "Every interaction is cyclewire/request in the page's markup instead of a hand-written action: links and forms fetch HTML fragments from the server and swap them in, <cw-stream> messages in an answer update the rest of the page, and only the quick view has a small action of its own, to open the dialog once the request has filled it. It shows what CycleWire costs, and how fast it is, used the way htmx is."
+  },
+  "build": "npm run build",
+  "start": "node server.js",
+  "search": "live",
+  "packages": [
+    "cyclewire"
+  ],
+  "idioms": [
+    {
+      "choice": "The core loads as a module in <head>, with a modulepreload link, as the performance guide recommends.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#load-cyclewire-early"
+    },
+    {
+      "choice": "cyclewire/request is registered once, as the action \"request\", and the page's forms and links run it with cw-action=\"request\" and a cw-target: each asks the server for HTML and swaps it in, with no JavaScript of the app's own but the quick view's.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md"
+    },
+    {
+      "choice": "Vite bundles the page's script, and actions are registered as loader functions, so cyclewire/request, with the morph and message code it brings, and the quick view action are chunks of their own.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
+    },
+    {
+      "choice": "The server writes the entry's <script> and <link rel=\"modulepreload\"> tags from Vite's manifest, and the modulepreload polyfill is turned off rather than imported, as the backend integration guide allows. Preloading an action's imports stays on.",
+      "docs": "https://vite.dev/guide/backend-integration"
+    },
+    {
+      "choice": "Add to cart, the action most visitors use first, runs cyclewire/request, so the request action is preloaded with the page: the server writes <link rel=\"modulepreload\"> for its chunk and the chunks it imports, from Vite's manifest. The quick view's action loads on intent, the default, and on touch screens also once the page is idle.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#preload-the-action-people-reach-for-first"
+    },
+    {
+      "choice": "Links request their href and forms their action, so each works without JavaScript through a full page load. The server tells the request action's fetches (Sec-Fetch-Dest: empty) from navigations and answers them with only the part the interaction needs, with Vary: Sec-Fetch-Dest.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#on-the-server"
+    },
+    {
+      "choice": "Search as you type sits on the search form, so the query goes with the category's hidden field: cw-on-input=\"request\" with cw-debounce=\"200\" (the scenario's 200 ms; the docs' example uses 150), next to cw-action=\"request\" for a submit, which waits out the same debounce. Input runs in restart mode, so each key aborts the request before it. Only the results are swapped, never the input.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#examples"
+    },
+    {
+      "choice": "The result count, and after a category link the search form's fields and the category links, come in the same answer as <cw-stream> messages, the request action's counterpart to htmx's out-of-band swaps. The category links are morphed, so the link that was tapped keeps focus.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#what-comes-back"
+    },
+    {
+      "choice": "Add to cart swaps the new count and total into the header's cart summary (cw-target=\".cart\"), so the header needs no store and cyclewire/signals is not used.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#attributes"
+    },
+    {
+      "choice": "The newsletter's answer goes into #newsletter-status. An invalid address is answered with 422, a form sent back with its errors, which the request action shows like any answer.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#what-comes-back"
+    },
+    {
+      "choice": "The quick view link has an empty cw-prefetch: the prefetch plugin fetches the link's own URL on intent, next to the action's code, and the request takes that response.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md#fetch-it-before-the-click"
+    },
+    {
+      "choice": "The quick view runs a small action of the app's own, which runs cyclewire/request and then opens the dialog with showModal(): markup cannot open a modal once the answer is in. The platform's way, an Invoker Command (command=\"show-modal\"), would open it before the product arrives, and needs a button where the page has a link that works without JavaScript.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/actions.md"
+    }
+  ]
+}

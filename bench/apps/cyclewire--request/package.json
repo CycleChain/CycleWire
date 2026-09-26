@@ -1,0 +1,15 @@
+{
+  "name": "bench-cyclewire-request",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cyclewire": "file:../../.."
+  },
+  "devDependencies": {
+    "vite": "8.3.1"
+  }
+}

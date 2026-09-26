@@ -29,6 +29,7 @@ overall score, and the results list the metrics where CycleWire is not the best.
 | `cyclewire` | CycleWire: the core up front, each interaction's code on intent |
 | `cyclewire--inline` | Variant: the core inlined in `<head>`, actions registered by URL |
 | `cyclewire--no-preload` | Variant: nothing fetched ahead of intent, not even Add to cart |
+| `cyclewire--request` | Variant: the interactions declared in markup with `cyclewire/request`, HTML fragments from the server |
 | `htmx` | htmx: server-rendered fragments swapped into the page |
 | `alpine` | Alpine.js: directives in the server's markup, stores for shared state |
 | `hotwire` | Hotwire: Turbo Drive, Frames and Streams from the server, Stimulus for the rest |
