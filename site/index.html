@@ -907,9 +907,10 @@ export async function run({ element, signal }) {
                     <summary>Read this first: what is measured, and the limits</summary>
                     <ul>
                         <li><b>Time to effect</b> runs from the input (the finger or the button going down, or the last key) to the frame that shows the result. A full page load counts, as it does for people.</li>
-                        <li><b>The early tap</b> lands on "Add to cart" in the first frame after first paint, because people tap as soon as they see a button.</li>
+                        <li><b>The early tap</b> lands on "Add to cart" in the first frame after first paint, because people tap as soon as they see a button. Two more land one and two seconds later, to show when each page starts handling a tap itself.</li>
+                        <li><b>Variants</b> are other documented ways to build the page with a stack, such as CycleWire with its core inlined. A variant of CycleWire is never counted as another stack beating it.</li>
                         <li><b>What every build shares.</b> The same text, data, stylesheet and images, rendered on the server for every request and working without JavaScript. Automatic checks enforce it.</li>
-                        <li><b>Limits.</b> Chromium only; network throttling per request inside the browser; shared CI machines; a modelled person: 80 ms taps and, on desktop, a pointer that rests on its target for 100 ms, which gives hover preloading a head start that touch screens do not have.</li>
+                        <li><b>Limits.</b> Chromium only; network throttling per request inside the browser, cross-checked against Lighthouse on the same machine; shared CI machines; a modelled person: 80 ms taps and, on desktop, a pointer that rests on its target for 100 ms, which gives hover preloading a head start that touch screens do not have.</li>
                         <li><b>Corrections welcome.</b> If an app does not follow its documentation, <a href="https://github.com/CycleChain/CycleWire/blob/main/bench/CONTRIBUTING.md">change it</a>; the people behind a stack can add a response to it. The <a href="https://github.com/CycleChain/CycleWire/blob/main/bench/METHODOLOGY.md">methodology</a> explains every choice, and <a href="https://github.com/CycleChain/CycleWire/blob/main/bench/README.md">anyone can run it</a>.</li>
                     </ul>
                 </details>
