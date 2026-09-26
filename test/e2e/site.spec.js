@@ -54,3 +54,25 @@ test('the old results page sends visitors to the section', async ({ page }) => {
     await page.goto('/bench/');
     await expect(page).toHaveURL(/\/#benchmark$/);
 });
+
+test('the request demo appends older releases, and its button keeps focus to the end', async ({ page }) => {
+    await page.goto('/');
+    const button = page.locator('#feed-more');
+    await button.evaluate((element) => { element.__same = true; });
+    // From the keyboard, where keeping focus matters.
+    await button.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#feed li')).toHaveCount(6);
+    await expect(button).toHaveAttribute('cw-get', './partials/feed-3.html');
+    // Morphed, not replaced: the same element, still focused.
+    expect(await button.evaluate((element) => element.__same === true && document.activeElement === element)).toBe(true);
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#feed li')).toHaveCount(8);
+    await expect(button).toHaveText("That's every release");
+    await expect(button).toHaveAttribute('aria-disabled', 'true');
+    await expect(button).toBeFocused();
+    // aria-disabled: CycleWire swallows the click.
+    await button.click({ force: true });
+    await page.waitForTimeout(300);
+    await expect(page.locator('#feed li')).toHaveCount(8);
+});

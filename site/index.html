@@ -153,7 +153,7 @@
         .btn:active { transform: translateY(1px); }
         .btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
         .btn--primary:hover { filter: brightness(1.05); }
-        .btn[disabled] { opacity: .45; cursor: not-allowed; }
+        .btn[disabled], .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
         [cw-pending] { cursor: progress; }
         .btn[cw-pending] { opacity: .7; }
 
@@ -312,6 +312,10 @@
         .cart__foot { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: .88rem; color: var(--muted); }
 
         /* Demo: morph */
+        .demo--wide { grid-column: 1 / -1; }
+        .feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .feed li { padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+        .feed b { font: 700 .8rem/1 var(--mono); color: var(--accent); margin-right: 8px; }
         .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
         .board__row { display: grid; grid-template-columns: 26px 1fr minmax(0, 110px) 44px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
         .board__rank { font: 700 .85rem/1 var(--mono); color: var(--accent); }
@@ -738,6 +742,32 @@ export async function refresh({ signal }) {
 <pre cw-action="highlight" cw-trigger="visible"><code data-lang="js">start({ actions, shadow: true }); // or observe(host.shadowRoot)</code></pre>
                         </details>
                     </article>
+
+                    <article class="demo card demo--wide">
+                        <header><span class="demo__num">07</span><h3>Requests from markup, no JavaScript of yours</h3></header>
+                        <p>The button asks the server for the next page of this list and appends it, as htmx would; a <code>&lt;cw-stream&gt;</code> message in the same answer updates the button, which keeps focus. <code>cyclewire/request</code> is an action like any other, so its code arrives when you reach for the button. The answers here are static files.</p>
+                        <div class="demo__stage">
+                            <ul id="feed" class="feed" aria-live="polite">
+                                <li><b>1.2.0</b> <code>cyclewire/request</code>: links, forms and buttons that fetch HTML, declared in markup</li>
+                                <li><b>1.2.0</b> <code>cyclewire/early</code>: taps made before CycleWire starts, kept and run once it does</li>
+                                <li><b>1.2.0</b> A listener only for the event types a page binds</li>
+                            </ul>
+                            <div><button id="feed-more" type="button" class="btn" cw-action="request" cw-get="./partials/feed-2.html" cw-target="#feed" cw-swap="append">Load older releases</button></div>
+                        </div>
+                        <details class="demo__code">
+                            <summary>Markup and answer</summary>
+<pre cw-action="highlight" cw-trigger="visible"><code data-lang="html">&lt;ul id="feed"&gt;…&lt;/ul&gt;
+&lt;button id="feed-more" cw-action="request" cw-get="./partials/feed-2.html"
+        cw-target="#feed" cw-swap="append"&gt;Load older releases&lt;/button&gt;
+
+&lt;!-- ./partials/feed-2.html: the next items, and a message for the button --&gt;
+&lt;li&gt;&lt;b&gt;1.1.0&lt;/b&gt; cyclewire/stream …&lt;/li&gt;
+&lt;cw-stream op="morph" target="feed-more"&gt;&lt;template&gt;
+    &lt;button id="feed-more" cw-action="request" cw-get="./partials/feed-3.html" …&gt;…&lt;/button&gt;
+&lt;/template&gt;&lt;/cw-stream&gt;</code></pre>
+<pre cw-action="highlight" cw-trigger="visible"><code data-lang="js">start({ actions: { request: () => import('cyclewire/request') } });</code></pre>
+                        </details>
+                    </article>
                 </div>
             </div>
         </section>
@@ -968,6 +998,7 @@ export async function run({ element, signal }) {
                 highlight: './actions/highlight.js',
                 bench: './actions/bench.js',
                 sort: './actions/sort.js',
+                request: './dist/request.min.js',
             },
         });
     </script>
