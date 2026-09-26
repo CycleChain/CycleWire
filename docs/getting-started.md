@@ -79,6 +79,15 @@ import { start, fromGlob } from 'cyclewire';
 start({ actions: fromGlob(import.meta.glob('./actions/**/*.js')) });
 ```
 
+or let the [Vite plugin](vite.md) do it, and get edits without reloads and typed action
+names as well:
+
+```js
+import actions from 'virtual:cyclewire/actions'; // with cyclewire/vite in vite.config.js
+
+start({ actions });
+```
+
 Without a bundler, map names to URLs in a JSON block placed before the script:
 
 ```html

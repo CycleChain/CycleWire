@@ -16,6 +16,15 @@ for it.
 - [HTML API](html-api.md): every attribute.
 - [JavaScript API](js-api.md): `start`, `register`, `run`, `observe` and friends.
 
+## Tools
+
+- [TypeScript](typescript.md): typed handlers and props, and action names checked by
+  the compiler.
+- [Command line](cli.md): `cyclewire check` finds unknown actions and invalid values in
+  your templates; `cyclewire types` writes the declarations.
+- [Vite plugin](vite.md): an actions directory as chunks, edits without reloads, and the
+  declarations kept up to date.
+
 ## Optional modules
 
 - [Core first, modules when you need them](modules.md): what the core covers on its own,

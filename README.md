@@ -307,6 +307,22 @@ and [live on GitHub Pages](https://cyclechain.github.io/CycleWire/examples/).
 
 ---
 
+## 🛠️ Tools
+
+```sh
+npx cyclewire check    # every data-cw-* value in your templates, against your actions
+```
+
+- **`cyclewire check`** reads HTML, Blade, ERB, Django, Jinja, Twig, JSX, Vue, Svelte and
+  Astro templates and reports actions that are not registered, exports that do not exist
+  and values CycleWire does not understand, with suggestions (`did you mean "cart#add"?`)
+  and annotations on GitHub pull requests. [CLI docs](docs/cli.md)
+- **`cyclewire/vite`** registers an actions directory as chunks, re-registers an action
+  when you edit it instead of reloading the page, and keeps the declarations of your
+  action names up to date. [Vite plugin](docs/vite.md)
+- **`defineAction<Props>()`** types a handler's props, and with the generated names
+  `run('cart#ad')` is a compile error. [TypeScript](docs/typescript.md)
+
 ## 🌐 Browser support
 
 The core needs an ES2020 browser: Chrome/Edge 86+, Firefox 78+ or Safari 14+. Newer
@@ -423,6 +439,7 @@ The release process is documented in [docs/releasing.md](docs/releasing.md).
 | [Getting started](docs/getting-started.md) | Install, first action, first trigger |
 | [Concepts](docs/concepts.md) | The architecture, compared with Qwik |
 | [HTML API](docs/html-api.md) · [JavaScript API](docs/js-api.md) | Complete reference |
+| [TypeScript](docs/typescript.md) · [Command line](docs/cli.md) · [Vite plugin](docs/vite.md) | Typed actions, template checks, edits without reloads |
 | [Actions](docs/actions.md) | Context, signals, concurrency, errors, patterns |
 | [css](docs/css.md) · [dom](docs/dom.md) · [morph](docs/morph.md) · [signals](docs/signals.md) · [plugins](docs/plugins.md) | Optional modules |
 | [Shadow DOM](docs/shadow-dom.md) | Web Components and declarative shadow DOM |

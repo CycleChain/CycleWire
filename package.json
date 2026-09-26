@@ -75,7 +75,14 @@
       "development": "./dist/esm-dev/bootstrap.js",
       "default": "./dist/esm/bootstrap.js"
     },
+    "./vite": {
+      "types": "./tooling/vite.d.ts",
+      "default": "./tooling/vite.js"
+    },
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "cyclewire": "./tooling/bin.js"
   },
   "main": "./dist/esm/index.js",
   "types": "./types/index.d.ts",
@@ -85,12 +92,15 @@
     "dist",
     "types",
     "src",
+    "tooling",
     "CHANGELOG.md"
   ],
   "scripts": {
     "build": "node scripts/build.js && tsc -p tsconfig.json && node scripts/types.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:types": "tsc -p test/types/named && tsc -p test/types/plain",
+    "typecheck:tooling": "tsc -p tsconfig.tooling.json",
+    "test:tooling": "node --test \"test/tooling/**/*.test.js\"",
     "check:es": "node scripts/check-es.js",
     "dev": "node scripts/serve.js",
     "examples": "node examples/build.js",
@@ -100,8 +110,17 @@
     "test:e2e": "playwright test",
     "prepublishOnly": "npm run build && npm run check:es && npm run size && npm run test:types && npm test"
   },
+  "peerDependencies": {
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@types/node": "^22.20.4",
     "acorn": "^8.18.0",
     "datatables.net-dt": "^3.1.2",
     "esbuild": "^0.28.2",
@@ -112,6 +131,7 @@
     "svelte": "^5.57.1",
     "sweetalert2": "^11.26.25",
     "typescript": "^7.0.2",
+    "vite": "^8.3.1",
     "vue": "^3.5.43"
   }
 }

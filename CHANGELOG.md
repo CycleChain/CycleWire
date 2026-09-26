@@ -16,6 +16,17 @@ All notable changes to CycleWire are documented here. The format follows
 - Generic types: `Context<Props, Element>` and `Action<Props, Element>`. Once a global
   `CycleWireActions` interface lists the actions, `ActionName` is their union, `run()`
   and `preload()` accept only those names, and `PropsOf<Name>` is a handler's props.
+- **`cyclewire check`**, a command that reads your templates (HTML, Blade, ERB, Django,
+  Jinja, Twig, Liquid, Handlebars, JSX, Vue, Svelte, Astro) and reports actions that are
+  not registered or exports that do not exist, with suggestions, and values CycleWire
+  does not understand. `--format github` annotates pull requests; `--unused` lists the
+  actions no template uses. Configured with JSON only; no dependencies.
+- **`cyclewire types`**, which writes the `CycleWireActions` declarations from your
+  actions directory.
+- **`cyclewire/vite`**, a Vite plugin: `virtual:cyclewire/actions` registers an actions
+  directory as chunks; an edited action is registered again instead of reloading the
+  page; the declarations stay up to date; `index.html` is checked; and the build writes a
+  manifest `cyclewire check` can read. `vite` is an optional peer dependency.
 
 ### Changed
 

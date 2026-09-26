@@ -209,3 +209,6 @@ interface CycleWireActions {
     'cart#add': typeof import('./actions/cart.js').add;
 }
 ```
+
+`cyclewire types` and the Vite plugin write this file for you: see
+[TypeScript](typescript.md).

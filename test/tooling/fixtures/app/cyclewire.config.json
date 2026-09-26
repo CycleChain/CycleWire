@@ -1,0 +1,4 @@
+{
+  "actions": "src/actions",
+  "templates": ["views/**/*.{html,blade.php}", "src/**/*.jsx"]
+}

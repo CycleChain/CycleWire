@@ -1,0 +1,4 @@
+# Line endings stay LF on every platform: fixtures, snapshots and size checks compare bytes.
+* text=auto eol=lf
+*.png binary
+*.webp binary
