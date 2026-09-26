@@ -49,7 +49,8 @@ export async function latest(dir, { local = false } = {}) {
 
 /** @typedef {{ n: number, median: number | null, ci95: [number, number] | null }} Summary */
 
-const time = (value) => (value === null || value === undefined ? '–' : `${Math.round(value).toLocaleString('en-US')} ms`);
+/** Whole milliseconds, or tenths below 10 ms, where rounding would hide a difference the tables report. */
+const time = (value) => (value === null || value === undefined ? '–' : value < 10 && value % 1 ? `${value.toFixed(1)} ms` : `${Math.round(value).toLocaleString('en-US')} ms`);
 const kilobytes = (value) => (value === null || value === undefined ? '–' : `${(value / 1000).toFixed(1)} kB`);
 const plain = (value) => (value === null || value === undefined ? '–' : Math.round(value).toLocaleString('en-US'));
 const score = (value) => (value === null || value === undefined ? '–' : value.toFixed(3));
