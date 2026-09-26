@@ -22,9 +22,10 @@ Without a bundler, give its file instead:
 
 Being an action has three consequences:
 
-- **It costs nothing until it is used.** Its 1.9 kB (brotli) arrive when someone reaches
-  for an element that uses it, like any other action. `cyclewire/morph` and
-  `cyclewire/stream` follow only if a swap or an answer needs them.
+- **It costs nothing until it is used.** Its 3.6 kB (brotli) arrive when someone reaches
+  for an element that uses it, like any other action's code. They include
+  [morph](morph.md) and what applies [`<cw-stream>` messages](stream.md), so the first
+  answer that needs them does not wait for more code.
 - **Everything else in CycleWire applies:** `cw-on-<event>` for the event, `cw-debounce`,
   `cw-trigger`, `cw-concurrency`, `cw-pending` while a request is on its way,
   `cw:run`/`cw:done`/`cw:error`, [`cyclewire/early`](early.md) for taps before

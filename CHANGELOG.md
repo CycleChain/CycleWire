@@ -15,7 +15,7 @@ All notable changes to CycleWire are documented here. The format follows
   default (a submit button, a link with `cw-prevent`), the action does not run as well.
   `earlyScript(prefix)` returns the script for a server to inline, `dist/early.min.js`
   is the same for the default prefix, and the Vite plugin adds it with `early: true`.
-- **`cyclewire/request`** (1.9 kB brotli): links, forms and buttons that fetch HTML and
+- **`cyclewire/request`** (3.6 kB brotli): links, forms and buttons that fetch HTML and
   put it into the page, declared in markup. `cw-get`, `cw-post`, `cw-put`, `cw-patch` and
   `cw-delete` name the method and URL (empty, the element's own), `cw-target` where the
   answer goes (a selector, or `closest …`), `cw-swap` how (`inner`, `outer`, `before`,

@@ -82,16 +82,6 @@ const bundles = {
     'devtools.min.js': 'src/devtools.js',
 };
 
-// A module a bundle imports only when it needs it (request's morph and stream)
-// stays a file of its own, next to the bundle on the CDN.
-/** @type {import('esbuild').Plugin} */
-const later = {
-    name: 'later',
-    setup(bundler) {
-        bundler.onResolve({ filter: /^\.\/\w+\.js$/ }, ({ path, kind }) => (kind === 'dynamic-import' ? { path: path.replace(/\.js$/, '.min.js'), external: true } : undefined));
-    },
-};
-
 for (const [file, entry] of Object.entries(bundles)) {
     await build({
         ...common,
@@ -103,7 +93,6 @@ for (const [file, entry] of Object.entries(bundles)) {
         sourcemap: 'linked',
         define: define(false),
         banner: { js: banner },
-        plugins: [later],
     });
 }
 

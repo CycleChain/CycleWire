@@ -13,8 +13,13 @@
  * concurrency, debounce, pending state and trigger. Requests go to the page's
  * own origin only. The response is parsed inertly, so scripts in it never
  * run, and the <cw-stream> messages at its top level are applied.
+ *
+ * Morph and the message applier come with it, not with the first answer that
+ * needs them: that answer would otherwise wait a round trip for their code.
  */
 import { fragment, SafeHTML, swap, transition } from './dom.js';
+import { morph } from './morph.js';
+import { apply } from './stream.js';
 
 /** The methods an attribute can name: `cw-get`, `cw-post`, … */
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
@@ -102,7 +107,6 @@ export async function run({ element, event, signal, action, fetch: get = fetch }
     if (response.status === 204 && mode !== 'remove') return;
 
     const content = fragment(new SafeHTML(await response.text()));
-    const morph = mode === 'morph' && (await import('./morph.js')).morph;
     // A newer run took over while this one was reading its answer.
     if (signal.aborted) throw signal.reason;
     const messages = [...content.children].filter((child) => child.localName === 'cw-stream');
@@ -113,7 +117,7 @@ export async function run({ element, event, signal, action, fetch: get = fetch }
         chosen.append(...content.querySelectorAll(select));
     }
     const change = () => {
-        if (morph) {
+        if (mode === 'morph') {
             // New markup for the target itself is morphed onto it; anything else becomes its children.
             const only = chosen.children.length === 1 && chosen.firstElementChild;
             morph(target, chosen, { children: !(only && only.id && only.id === target.id) });
@@ -125,6 +129,6 @@ export async function run({ element, event, signal, action, fetch: get = fetch }
     if (messages.length) {
         const rest = document.createDocumentFragment();
         rest.append(...messages);
-        await (await import('./stream.js')).apply(rest);
+        await apply(rest);
     }
 }
