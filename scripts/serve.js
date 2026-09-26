@@ -22,7 +22,12 @@
  *   POST /sse/send?channel=         writes the request body, raw SSE, to the channel's listeners
  *   POST /sse/drop?channel=         ends the channel's streams, as a dropped connection would
  *   /sse/stats?channel=             { open, connects, lastEventId } for the channel
+ *   ws:/ws/listen?channel=          a WebSocket that sends what /ws/send is given, as text messages
+ *   POST /ws/send?channel=          sends the request body to the channel's sockets
+ *   POST /ws/drop?channel=          closes the channel's sockets, as a dropped connection would
+ *   /ws/stats?channel=              { open, connects } for the channel
  */
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
@@ -103,6 +108,56 @@ async function sse(req, res, url) {
     req.on('close', () => state.open.delete(res));
 }
 
+/** WebSocket channels for the stream tests. @type {Map<string, { open: Set<import('node:stream').Duplex>, connects: number }>} */
+const sockets = new Map();
+const socketChannel = (/** @type {string} */ name) => {
+    if (!sockets.has(name)) sockets.set(name, { open: new Set(), connects: 0 });
+    return /** @type {NonNullable<ReturnType<typeof sockets.get>>} */ (sockets.get(name));
+};
+
+/** One WebSocket frame from the server: text, or a close frame for null. @param {string | null} text */
+function frame(text) {
+    if (text === null) return Buffer.from([0x88, 0]);
+    const data = Buffer.from(text);
+    const length = Buffer.alloc(data.length < 126 ? 0 : data.length < 65536 ? 2 : 8);
+    if (data.length >= 65536) length.writeBigUInt64BE(BigInt(data.length));
+    else if (data.length >= 126) length.writeUInt16BE(data.length);
+    return Buffer.concat([Buffer.from([0x81, data.length < 126 ? data.length : data.length < 65536 ? 126 : 127]), length, data]);
+}
+
+/** Accepts a WebSocket on /ws/listen. The page only listens, so anything it sends (a close) ends it. */
+function upgrade(/** @type {import('node:http').IncomingMessage} */ req, /** @type {import('node:stream').Duplex} */ socket) {
+    const url = new URL(req.url ?? '/', 'http://localhost');
+    if (url.pathname !== '/ws/listen') return socket.destroy();
+    const state = socketChannel(url.searchParams.get('channel') || 'default');
+    const accept = createHash('sha1').update(`${req.headers['sec-websocket-key']}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`).digest('base64');
+    socket.write(`HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${accept}\r\n\r\n`);
+    state.connects++;
+    state.open.add(socket);
+    socket.on('data', () => socket.end(frame(null)));
+    socket.on('close', () => state.open.delete(socket));
+    socket.on('error', () => state.open.delete(socket));
+}
+
+/** @param {import('node:http').IncomingMessage} req @param {import('node:http').ServerResponse} res @param {URL} url */
+async function ws(req, res, url) {
+    const state = socketChannel(url.searchParams.get('channel') || 'default');
+    const action = url.pathname.slice('/ws/'.length);
+    if (action === 'stats') return send(res, 200, JSON.stringify({ open: state.open.size, connects: state.connects }), types['.json']);
+    if (req.method === 'POST' && action === 'send') {
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        for (const socket of state.open) socket.write(frame(body));
+        return send(res, 200, JSON.stringify({ listeners: state.open.size }), types['.json']);
+    }
+    if (req.method === 'POST' && action === 'drop') {
+        for (const socket of state.open) socket.end(frame(null));
+        state.open.clear();
+        return send(res, 200, '{}', types['.json']);
+    }
+    send(res, 404, 'Not found');
+}
+
 const escape = (value) => String(value).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function send(res, status, body, type = 'text/plain; charset=utf-8') {
@@ -139,6 +194,7 @@ async function handle(req, res) {
     if (url.pathname === '/health') return send(res, 200, 'ok');
     if (url.pathname === '/echo') return echo(req, res);
     if (url.pathname.startsWith('/sse/')) return sse(req, res, url);
+    if (url.pathname.startsWith('/ws/')) return ws(req, res, url);
 
     let pathname = decodeURIComponent(url.pathname);
     const failOnce = /^\/fail-once\/([\w-]+)(\/.*)$/.exec(pathname);
@@ -173,6 +229,6 @@ async function handle(req, res) {
 }
 
 // A request the page gave up on (an aborted fetch) ends here, not the server.
-createServer((req, res) => handle(req, res).catch(() => res.destroy())).listen(port, host, () => {
+createServer((req, res) => handle(req, res).catch(() => res.destroy())).on('upgrade', upgrade).listen(port, host, () => {
     console.log(`CycleWire dev server → http://${host}:${port}/`);
 });

@@ -8,6 +8,11 @@ const stats = async (page, channel) => (await page.request.get(`/sse/stats?chann
 /** One SSE event: every line of the data gets its own `data:` field. */
 const event = (data, id) => `${id ? `id: ${id}\n` : ''}${data.split('\n').map((line) => `data: ${line}`).join('\n')}\n\n`;
 const sendTo = (page, channel, body) => page.request.post(`/sse/send?channel=${channel}`, { data: body, headers: { 'content-type': 'text/plain' } });
+// The test server's WebSocket channels: what /ws/send is given arrives as one text message.
+const socketStats = async (page, channel) => (await page.request.get(`/ws/stats?channel=${channel}`)).json();
+const sendOver = (page, channel, body) => page.request.post(`/ws/send?channel=${channel}`, { data: body, headers: { 'content-type': 'text/plain' } });
+/** Made a ws: URL in the page, from its own origin. */
+const socketPath = (channel) => `/ws/listen?channel=${channel}`;
 
 test.describe('apply()', () => {
     test('every operation, by id or by selector', async ({ page }) => {
@@ -155,7 +160,59 @@ test.describe('connect()', () => {
     });
 });
 
+test.describe('connect() over a WebSocket', () => {
+    test('subscribers to one ws: URL share a socket that closes with the last of them, for good', async ({ page }, info) => {
+        const channel = channelFor(info, 'ws-share');
+        await boot(page, { html: '<ul id="feed"></ul><div id="status"></div>' });
+        await page.evaluate((path) => {
+            const url = location.origin.replace(/^http/, 'ws') + path;
+            window.__first = window.CWX.stream.connect(url, { element: document.getElementById('status') });
+            window.__second = window.CWX.stream.connect(url);
+        }, socketPath(channel));
+        await expect.poll(() => socketStats(page, channel)).toMatchObject({ open: 1, connects: 1 });
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'open');
+
+        await sendOver(page, channel, '<cw-stream op="append" target="feed"><template><li>one</li></template></cw-stream><cw-stream op="append" target="feed"><template><li>two</li></template></cw-stream>');
+        await expect(page.locator('#feed li')).toHaveText(['one', 'two']);
+
+        await page.evaluate(() => window.__first());
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'closed');
+        expect((await socketStats(page, channel)).open).toBe(1);
+        await page.evaluate(() => window.__second());
+        await expect.poll(async () => (await socketStats(page, channel)).open).toBe(0);
+        // Closed on purpose: it does not come back.
+        await page.waitForTimeout(1500);
+        expect((await socketStats(page, channel)).connects).toBe(1);
+    });
+
+    test('a dropped socket comes back after a delay', async ({ page }, info) => {
+        const channel = channelFor(info, 'ws-drop');
+        await boot(page, { html: '<ul id="feed"></ul><div id="status"></div>' });
+        await page.evaluate((path) => window.CWX.stream.connect(location.origin.replace(/^http/, 'ws') + path, { element: document.getElementById('status') }), socketPath(channel));
+        await expect.poll(async () => (await socketStats(page, channel)).open).toBe(1);
+        await page.request.post(`/ws/drop?channel=${channel}`);
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'connecting');
+        await expect.poll(() => socketStats(page, channel), { timeout: 10_000 }).toMatchObject({ open: 1, connects: 2 });
+        await expect(page.locator('#status')).toHaveAttribute('cw-stream-state', 'open');
+        await sendOver(page, channel, '<cw-stream op="append" target="feed"><template><li>back</li></template></cw-stream>');
+        await expect(page.locator('#feed li')).toHaveText(['back']);
+    });
+});
+
 test.describe('streams() plugin', () => {
+    test('a WebSocket channel opens on the page\'s own origin, and not on another', async ({ page }, info) => {
+        const channel = channelFor(info, 'ws-plugin');
+        await boot(page, { start: false, html: '<ul id="feed" cw-stream="live"></ul><div cw-stream="away"></div>' });
+        await page.evaluate((path) => {
+            const { streams } = window.CWX.stream;
+            window.CW.start({ plugins: [streams({ channels: { live: () => location.origin.replace(/^http/, 'ws') + path, away: 'wss://example.com/live' } })] });
+        }, socketPath(channel));
+        await expect(page.locator('#feed')).toHaveAttribute('cw-stream-state', 'open');
+        await sendOver(page, channel, '<cw-stream op="append" target="feed"><template><li>hi</li></template></cw-stream>');
+        await expect(page.locator('#feed li')).toHaveText(['hi']);
+        expect((await warnings(page)).some((text) => text.includes('"away" points to another origin'))).toBe(true);
+    });
+
     test('cw-stream opens only the channels it lists, on the same origin', async ({ page }, info) => {
         const channel = channelFor(info, 'plugin');
         await boot(page, {

@@ -1,6 +1,6 @@
 /**
  * cyclewire/stream — the server changes the page with small HTML messages,
- * sent over Server-Sent Events or in the body of any response:
+ * sent over Server-Sent Events, a WebSocket, or in the body of any response:
  *
  *   <cw-stream op="append" target="messages"><template><li>Hello</li></template></cw-stream>
  *
@@ -97,7 +97,7 @@ export function apply(content, { root = document, source = null } = {}) {
  * @property {string} key
  * @property {string} url
  * @property {boolean} credentials
- * @property {EventSource | null} source
+ * @property {EventSource | WebSocket | null} source
  * @property {Set<Subscription>} subscriptions
  * @property {string} last       the last event id seen
  * @property {number} delay      the wait before reconnecting after the browser gave up
@@ -129,6 +129,24 @@ function prune() {
     for (const subscription of tracked) if (!subscription.element?.isConnected) subscription.close();
 }
 
+/** Applies a message to the roots its subscribers look in. @param {Connection} connection @param {string} data */
+function deliver(connection, data) {
+    prune();
+    const content = new SafeHTML(data);
+    for (const root of new Set([...connection.subscriptions].map((subscription) => subscription.root))) apply(content, { root, source: connection.url });
+}
+
+/** Opens the connection again after a growing, jittered delay. @param {Connection} connection */
+function retry(connection) {
+    connection.source = null;
+    setState(connection, 'connecting');
+    connection.delay = Math.min(MAX_DELAY, (connection.delay || 500) * 2);
+    connection.timer = setTimeout(() => {
+        connection.timer = undefined;
+        open(connection);
+    }, connection.delay * (0.75 + Math.random() / 2));
+}
+
 /** @param {Connection} connection */
 function open(connection) {
     if (connection.source || connection.timer !== undefined || !connection.subscriptions.size) return;
@@ -138,48 +156,55 @@ function open(connection) {
         return;
     }
     const url = new URL(connection.url);
+    const opened = () => {
+        connection.delay = 0;
+        setState(connection, 'open');
+    };
+    setState(connection, 'connecting');
+    if (/^wss?:$/.test(url.protocol)) {
+        // Every text message is HTML. A socket that closes, and was not closed here, comes back.
+        const socket = new WebSocket(url);
+        connection.source = socket;
+        socket.onopen = opened;
+        socket.onmessage = (event) => typeof event.data === 'string' && deliver(connection, event.data);
+        socket.onclose = () => connection.source === socket && retry(connection);
+        return;
+    }
     // Reconnecting on our own, not the browser's: say where the stream left off.
     if (connection.last && connection.delay) url.searchParams.set('last-event-id', connection.last);
     const source = new EventSource(url, { withCredentials: connection.credentials });
     connection.source = source;
-    setState(connection, 'connecting');
-    source.onopen = () => {
-        connection.delay = 0;
-        setState(connection, 'open');
-    };
+    source.onopen = opened;
     source.onmessage = (event) => {
         if (event.lastEventId) connection.last = event.lastEventId;
-        prune();
-        const content = new SafeHTML(event.data);
-        for (const root of new Set([...connection.subscriptions].map((subscription) => subscription.root))) apply(content, { root, source: connection.url });
+        deliver(connection, event.data);
     };
     source.onerror = () => {
         setState(connection, 'connecting');
         // While CONNECTING, the browser retries by itself and sends Last-Event-ID; once CLOSED it has given up.
         if (source.readyState !== EventSource.CLOSED) return;
         source.close();
-        connection.source = null;
-        connection.delay = Math.min(MAX_DELAY, (connection.delay || 500) * 2);
-        connection.timer = setTimeout(() => {
-            connection.timer = undefined;
-            open(connection);
-        }, connection.delay * (0.75 + Math.random() / 2));
+        retry(connection);
     };
 }
 
 /** @param {Connection} connection */
 function shut(connection) {
-    connection.source?.close();
+    const source = connection.source;
+    // Cleared first, so a socket that closes now knows it was closed on purpose.
     connection.source = null;
+    source?.close();
     clearTimeout(connection.timer);
     connection.timer = undefined;
 }
 
 /**
  * Opens a stream, or joins the one already open for the same URL, and
- * applies every message it sends. Messages are the default event
- * (no `event:` field); their `id` lets a reconnection pick up where the
- * stream left off. The connection closes when its last subscriber leaves.
+ * applies every message it sends. Over Server-Sent Events, messages are the
+ * default event (no `event:` field), and their `id` lets a reconnection pick
+ * up where the stream left off. A `ws:` or `wss:` URL opens a WebSocket
+ * instead, whose every text message is HTML with `<cw-stream>` messages.
+ * The connection closes when its last subscriber leaves.
  * @param {string | URL} url  resolved against the page
  * @param {object} [options]
  * @param {AbortSignal} [options.signal]      closes this subscription
@@ -241,8 +266,9 @@ export function connect(url, { signal, element, root = document, withCredentials
 /**
  * The plugin behind `cw-stream="<channel>"`: while such an element is in
  * the page, it is subscribed to the channel's stream. Channels map names to
- * same-origin URLs, or to functions that build one from the element, so
- * markup can only open the streams you list.
+ * same-origin URLs (WebSocket ones too: `wss:` on an `https:` page), or to
+ * functions that build one from the element, so markup can only open the
+ * streams you list.
  * @param {{ channels?: Record<string, string | ((element: Element) => string)> }} [options]
  * @returns {import('./index.js').Plugin}
  */
@@ -266,7 +292,8 @@ export function streams({ channels = {} } = {}) {
                 const name = /** @type {string} */ (el.getAttribute(attr)).trim();
                 const channel = Object.prototype.hasOwnProperty.call(channels, name) ? channels[name] : null;
                 const url = channel && new URL(typeof channel === 'function' ? channel(el) : channel, document.baseURI);
-                if (!url || url.origin !== location.origin) {
+                // A WebSocket URL has the page's origin when its http: or https: twin does.
+                if (!url || new URL(url.href.replace(/^ws/, 'http')).origin !== location.origin) {
                     if (__DEV__) warn(url ? `Stream channel "${name}" points to another origin; markup can only open same-origin streams.` : `No stream channel is named "${name}". Add it to streams({ channels }).`, el);
                     continue;
                 }

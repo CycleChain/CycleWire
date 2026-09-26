@@ -8,6 +8,12 @@ All notable changes to CycleWire are documented here. The format follows
 
 ### Added
 
+- **`cyclewire/stream` over a WebSocket.** `connect()` opens a WebSocket for a `ws:` or
+  `wss:` URL, with the same sharing, state, back/forward cache and prerendering rules as
+  Server-Sent Events. Every text message is HTML with `<cw-stream>` messages, and a socket
+  that closes without being told to comes back after a growing delay. In `streams()`, a
+  WebSocket channel must be on the page's own origin too. `stream.min.js` is 3.8 kB
+  brotli.
 - The server helpers (`docs/server-helpers.md`) write `cyclewire/request`'s attributes:
   `get`, `post`, `put`, `patch` and `delete` (a URL, or `true` for the element's own; one
   at most), `target`, `swap` and `select`, checked and escaped like the others, in PHP,

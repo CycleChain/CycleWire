@@ -1,8 +1,9 @@
 # Streams: `cyclewire/stream`
 
 The server changes the page with small HTML messages, sent over
-[Server-Sent Events](https://developer.mozilla.org/docs/Web/API/Server-sent_events) as
-things happen, or in the body of any response. 3.7 kB brotli, with `dom` and `morph`.
+[Server-Sent Events](https://developer.mozilla.org/docs/Web/API/Server-sent_events) or a
+WebSocket as things happen, or in the body of any response. 3.8 kB brotli, with `dom` and
+`morph`.
 
 ```html
 <cw-stream op="append" target="messages">
@@ -78,6 +79,39 @@ last subscriber.
 [cw-stream-state="connecting"]::after { content: " reconnecting…"; color: gray; }
 ```
 
+## Over a WebSocket
+
+A `ws:` or `wss:` URL opens a WebSocket instead of an `EventSource`, with the same
+sharing, state, back/forward cache and prerendering rules. Every text message the server
+sends is HTML with one or more `<cw-stream>` messages:
+
+```js
+connect(`${location.origin.replace(/^http/, 'ws')}/rooms/42/live`);
+```
+
+When the socket closes without being told to, CycleWire opens it again after 1 s, 2 s,
+4 s… up to 30 s. A WebSocket has no event ids, so to pick up where it left off, put a
+cursor in the URL, or have the server send what was missed when a socket opens.
+
+In `streams()`, a WebSocket channel must be on the page's own origin too (`wss:` on an
+`https:` page); build it in a function, since the scheme differs from the page's:
+
+```js
+streams({ channels: { room: (element) => `${location.origin.replace(/^http/, 'ws')}/rooms/${element.dataset.room}/live` } })
+```
+
+A framework's own client works as well: give `apply()` the HTML it receives.
+
+```js
+// Rails, Action Cable
+consumer.subscriptions.create({ channel: 'RoomChannel', room: 42 }, {
+    received: (data) => apply(html.raw(data.html)),
+});
+
+// Laravel, Echo with Reverb or Pusher
+Echo.private('rooms.42').listen('MessagePosted', (event) => apply(html.raw(event.html)));
+```
+
 ## Streams from markup: `streams()`
 
 ```js
@@ -132,7 +166,8 @@ messages at the top level of a response are applied for you.
 ## On the server
 
 A message is one event; each line of its HTML goes in its own `data:` field. Escape
-anything that users wrote, as in any other HTML your server renders.
+anything that users wrote, as in any other HTML your server renders. Over a WebSocket, a
+message is one text frame, as it is.
 
 ### Node
 
@@ -153,6 +188,19 @@ createServer((req, res) => {
     }, 5000);
     req.on('close', () => clearInterval(timer));
 }).listen(3000);
+```
+
+The same messages over a WebSocket, with the [`ws`](https://github.com/websockets/ws)
+package:
+
+```js
+import { WebSocketServer } from 'ws';
+
+const room = new WebSocketServer({ server, path: '/rooms/42/live' }); // server: your http.Server
+export function post(text) {
+    const message = `<cw-stream op="append" target="messages"><template><li>${escape(text)}</li></template></cw-stream>`;
+    for (const socket of room.clients) socket.send(message);
+}
 ```
 
 ### PHP and Laravel
