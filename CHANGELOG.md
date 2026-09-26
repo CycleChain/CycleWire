@@ -6,6 +6,8 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-26
+
 ### Added
 
 - **`cyclewire/early`** (0.4 kB brotli), a script to inline at the top of `<head>`. Until
@@ -230,7 +232,8 @@ interactive without hydration.
   SweetAlert2, DataTables and jQuery, tested in Chromium, Firefox and WebKit and live
   on GitHub Pages.
 
-[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/CycleChain/CycleWire/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CycleChain/CycleWire/releases/tag/v1.0.0

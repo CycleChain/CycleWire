@@ -370,7 +370,7 @@ Minified, measured by `npm run size` and enforced in CI:
 | `request.min.js` (an action; includes morph and what it needs from stream) | 3.6 kB | 4.0 kB |
 | `early.min.js` (inline, before the core) | 0.4 kB | 0.5 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
-| `devtools.min.js` (development only) | 7.0 kB | 7.9 kB |
+| `devtools.min.js` (development only) | 7.1 kB | 7.9 kB |
 | `cyclewire.global.min.js` (core + auto start) | 5.3 kB | 5.8 kB |
 | `cyclewire.full.global.min.js` (everything) | 16.0 kB | 17.6 kB |
 <!-- size:end -->
