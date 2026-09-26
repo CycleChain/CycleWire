@@ -15,6 +15,8 @@ All notable changes to CycleWire are documented here. The format follows
   the data then arrive together instead of one after the other.
 - An `intent(element)` plugin hook, called whenever the user heads for an element that
   binds actions.
+- The package exports its CDN builds as `cyclewire/dist/*.min.js`, so a server can
+  resolve the classic-script build to inline it in `<head>`.
 
 ### Changed
 

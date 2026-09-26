@@ -28,7 +28,19 @@ forms submit, but plain buttons do nothing. Start early:
 ```
 
 For the fastest possible activation, inline the 5.0 kB classic-script build in the
-`<head>`, the way Qwik inlines its loader.
+`<head>`, the way Qwik inlines its loader. It starts CycleWire while the page is still
+parsing, from the JSON block before it:
+
+```js
+// Your server: read the build once, then write both scripts into every page's <head>.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const core = readFileSync(fileURLToPath(import.meta.resolve('cyclewire/dist/cyclewire.global.min.js')), 'utf8')
+    .replace(/\n\/\/# sourceMappingURL=.*$/, '');
+const head = `<script type="application/json" data-cyclewire>{"actions": {"cart": "/js/cart.js"}}</script>
+<script>${core}</script>`;
+```
 
 ## Make interactions fast (INP)
 

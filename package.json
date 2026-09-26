@@ -94,6 +94,7 @@
       "types": "./tooling/vite.d.ts",
       "default": "./tooling/vite.js"
     },
+    "./dist/*.min.js": "./dist/*.min.js",
     "./package.json": "./package.json"
   },
   "bin": {
