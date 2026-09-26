@@ -14,7 +14,7 @@ test('the landing page marks every place it shows the version', async () => {
     const { html, count } = stamp(page, await version());
     assert.equal(count, 3);
     // Any version written without a mark would go stale at the next release.
-    assert.doesNotMatch(html.replace(/data-version>v\d+\.\d+\.\d+</g, ''), /\bv\d+\.\d+\.\d+\b/);
+    assert.doesNotMatch(html.replace(/data-version>v\d+\.\d+\.\d+(?:-[\w.]+)?</g, ''), /\bv\d+\.\d+\.\d+\b/);
 });
 
 test('the benchmark section goes between the landing page\'s marks, and a page without them fails the build', async () => {

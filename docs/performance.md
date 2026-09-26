@@ -2,7 +2,7 @@
 
 ## What the page pays on load
 
-- **One script.** The core is 4.8 kB brotli, or 5.0 kB for the classic-script build
+- **One script.** The core is 4.9 kB brotli, or 5.0 kB for the classic-script build
   that also starts itself.
 - **No action code** until someone reaches for it, or a trigger or preload asks for it.
   On screens that cannot hover, the modules of the actions in view are fetched once the

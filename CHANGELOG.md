@@ -6,6 +6,8 @@ All notable changes to CycleWire are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0-beta.1] - 2026-09-26
+
 ### Added
 
 - `registered()`: the names of the registered action modules, imported or not.
@@ -146,6 +148,7 @@ interactive without hydration.
   SweetAlert2, DataTables and jQuery, tested in Chromium, Firefox and WebKit and live
   on GitHub Pages.
 
-[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/CycleChain/CycleWire/compare/v1.1.0-beta.1...HEAD
+[1.1.0-beta.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.1...v1.1.0-beta.1
 [1.0.1]: https://github.com/CycleChain/CycleWire/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CycleChain/CycleWire/releases/tag/v1.0.0

@@ -1,6 +1,6 @@
 {
   "name": "cyclewire",
-  "version": "1.0.1",
+  "version": "1.1.0-beta.1",
   "description": "Zero-initial-JS selective activation engine. Turn server-rendered HTML into instant interactivity on intent.",
   "keywords": [
     "resumability",

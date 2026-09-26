@@ -25,7 +25,7 @@ there are no runtime dependencies.
 
 ## ✨ Why CycleWire
 
-- **Nothing to hydrate.** The HTML your server sends is the UI. The 4.8 kB core
+- **Nothing to hydrate.** The HTML your server sends is the UI. The 4.9 kB core
   (brotli) activates it; action code is fetched per feature, on demand.
 - **Intent-aware loading.** Modules start downloading on hover, focus or touch, before
   the click lands. `modulepreload` fetches them without running them, and Save-Data and
@@ -163,7 +163,7 @@ hash published with each [release](https://github.com/CycleChain/CycleWire/relea
 ```text
  Server renders HTML ──► browser paints it, fully usable as links and forms
                               │
-                     CycleWire core, 4.8 kB: one listener per event type
+                     CycleWire core, 4.9 kB: one listener per event type
                               │
          pointer / focus ─────┼────► preload: modulepreload the action (no execution)
                               │
@@ -347,14 +347,14 @@ Minified, measured by `npm run size` and enforced in CI:
 <!-- size:start -->
 | File | brotli | gzip |
 | --- | --- | --- |
-| `cyclewire.min.js` (core) | 4.8 kB | 5.3 kB |
+| `cyclewire.min.js` (core) | 4.9 kB | 5.3 kB |
 | `css.min.js` | 0.6 kB | 0.7 kB |
-| `dom.min.js` | 2.2 kB | 2.4 kB |
+| `dom.min.js` | 2.2 kB | 2.5 kB |
 | `morph.min.js` (includes what it needs from dom) | 1.8 kB | 2.0 kB |
 | `signals.min.js` | 3.1 kB | 3.4 kB |
 | `stream.min.js` (includes dom and morph) | 3.3 kB | 3.6 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
-| `devtools.min.js` (development only) | 7.0 kB | 7.9 kB |
+| `devtools.min.js` (development only) | 7.1 kB | 7.9 kB |
 | `cyclewire.global.min.js` (core + auto start) | 5.0 kB | 5.5 kB |
 | `cyclewire.full.global.min.js` (everything) | 14.0 kB | 15.3 kB |
 <!-- size:end -->
