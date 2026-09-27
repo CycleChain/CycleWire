@@ -393,53 +393,55 @@ Medians, lower is better. Time to effect runs from the input to the frame that s
 [website](https://cyclechain.github.io/CycleWire/#benchmark) charts each metric with its 95% confidence
 interval, and lists more metrics and how each app is built.
 
-**Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-26, AMD EPYC 9V74 80-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
+**Mobile**: slow 4G, 4× CPU slowdown, touch. 15 iterations on 2026-09-26, INTEL(R) XEON(R) PLATINUM 8573C (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
 | Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Static HTML (control) | 0.0 kB | 1,580 ms | 0 ms | 1,351 ms | 749 ms | 783 ms | 767 ms | 1,368 ms | by a page load, 1,624 ms |
-| Vanilla JS (control) | 1.2 kB | 1,584 ms | 0 ms | 700 ms | 113 ms | 9 ms | 692 ms | 696 ms | in the page, 832 ms |
-| Alpine.js | 17.9 kB | 1,728 ms | 30 ms | 698 ms | 130 ms | 15 ms | 698 ms | 700 ms | by a page load, 1,739 ms |
-| Angular | 87.5 kB | 1,772 ms | 89 ms | 709 ms | 131 ms | 20 ms | 716 ms | 710 ms | by a page load, 1,652 ms |
-| Astro + Preact | 13.1 kB | 1,580 ms | 0 ms | 695 ms | 117 ms | 11 ms | 710 ms | 699 ms | by a page load, 1,664 ms |
-| CycleWire | 12.2 kB | 1,640 ms | 0 ms | 707 ms | 119 ms | 11 ms | 607 ms | 705 ms | in the page, 854 ms |
-| CycleWire, inline (variant) | 6.9 kB | 1,420 ms | 0 ms | 715 ms | 136 ms | 12 ms | 610 ms | 712 ms | in the page, 860 ms |
-| CycleWire, intent only (variant) | 5.8 kB | 1,612 ms | 0 ms | 1,217 ms | 615 ms | 12 ms | 638 ms | 707 ms | in the page, 1,753 ms |
-| Hotwire (Turbo + Stimulus) | 31.9 kB | 1,680 ms | 0 ms | 726 ms | 756 ms | 842 ms | 747 ms | 730 ms | by a page load, 1,620 ms |
-| htmx | 15.4 kB | 1,536 ms | 0 ms | 706 ms | 736 ms | 832 ms | 708 ms | 710 ms | in the page, 863 ms |
-| Marko | 4.9 kB | 1,608 ms | 0 ms | 700 ms | 118 ms | 12 ms | 694 ms | 704 ms | in the page, 833 ms |
-| Next.js | 120.1 kB | 2,012 ms | 71 ms | 757 ms | 728 ms | 830 ms | 1,297 ms | 717 ms | by a page load, 996 ms |
-| Next.js, client filtering (variant) | 119.2 kB | 1,840 ms | 70 ms | 739 ms | 137 ms | 19 ms | 1,302 ms | 717 ms | by a page load, 984 ms |
-| Nuxt | 70.9 kB | 2,016 ms | 77 ms | 702 ms | 148 ms | 33 ms | 724 ms | 699 ms | by a page load, 1,690 ms |
-| Qwik City | 37.4 kB | 1,720 ms | 0 ms | 791 ms | 178 ms | 30 ms | 761 ms | 793 ms | in the page, 2,465 ms |
-| SolidStart | 31.1 kB | 1,572 ms | 0 ms | 710 ms | 124 ms | 13 ms | 713 ms | 699 ms | by a page load, 1,664 ms |
-| SvelteKit | 32.8 kB | 1,800 ms | 0 ms | 1,290 ms | 138 ms | 17 ms | 623 ms | 1,302 ms | by a page load, 959 ms |
+| Static HTML (control) | 0.0 kB | 1,584 ms | 0 ms | 1,365 ms | 760 ms | 790 ms | 777 ms | 1,379 ms | by a page load, 1,624 ms |
+| Vanilla JS (control) | 1.2 kB | 1,596 ms | 0 ms | 700 ms | 116 ms | 12 ms | 696 ms | 699 ms | in the page, 834 ms |
+| Alpine.js | 18.0 kB | 1,748 ms | 35 ms | 701 ms | 128 ms | 22 ms | 701 ms | 701 ms | by a page load, 1,752 ms |
+| Angular | 87.5 kB | 1,788 ms | 116 ms | 707 ms | 135 ms | 22 ms | 719 ms | 715 ms | by a page load, 1,652 ms |
+| Astro + Preact | 13.1 kB | 1,588 ms | 0 ms | 710 ms | 120 ms | 13 ms | 712 ms | 710 ms | by a page load, 1,675 ms |
+| CycleWire | 12.3 kB | 1,652 ms | 0 ms | 701 ms | 120 ms | 12 ms | 611 ms | 704 ms | in the page, 853 ms |
+| CycleWire, inline (variant) | 6.9 kB | 1,428 ms | 0 ms | 718 ms | 136 ms | 12 ms | 614 ms | 710 ms | in the page, 856 ms |
+| CycleWire, intent only (variant) | 5.9 kB | 1,616 ms | 0 ms | 1,217 ms | 620 ms | 13 ms | 644 ms | 707 ms | in the page, 1,819 ms |
+| CycleWire, requests from markup (variant) | 9.4 kB | 1,640 ms | 0 ms | 708 ms | 708 ms | 805 ms | 612 ms | 716 ms | in the page, 852 ms |
+| Hotwire (Turbo + Stimulus) | 31.9 kB | 1,688 ms | 0 ms | 731 ms | 775 ms | 853 ms | 748 ms | 727 ms | by a page load, 1,626 ms |
+| htmx | 15.4 kB | 1,560 ms | 0 ms | 713 ms | 751 ms | 838 ms | 717 ms | 712 ms | in the page, 866 ms |
+| Marko | 4.8 kB | 1,620 ms | 0 ms | 704 ms | 118 ms | 12 ms | 698 ms | 701 ms | in the page, 834 ms |
+| Next.js | 120.1 kB | 1,876 ms | 91 ms | 762 ms | 736 ms | 834 ms | 1,303 ms | 714 ms | by a page load, 993 ms |
+| Next.js, client filtering (variant) | 119.2 kB | 1,828 ms | 90 ms | 753 ms | 142 ms | 21 ms | 1,316 ms | 717 ms | by a page load, 988 ms |
+| Nuxt | 70.9 kB | 2,028 ms | 92 ms | 706 ms | 148 ms | 31 ms | 734 ms | 705 ms | by a page load, 1,703 ms |
+| Qwik City | 37.4 kB | 1,728 ms | 0 ms | 802 ms | 184 ms | 31 ms | 773 ms | 804 ms | in the page, 2,466 ms |
+| SolidStart | 31.1 kB | 1,580 ms | 0 ms | 709 ms | 127 ms | 14 ms | 719 ms | 707 ms | by a page load, 1,671 ms |
+| SvelteKit | 32.8 kB | 1,824 ms | 0 ms | 1,299 ms | 143 ms | 18 ms | 635 ms | 1,300 ms | by a page load, 963 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,196 ms, CycleWire 1,256 ms); Largest Contentful Paint (htmx 1,536 ms, CycleWire 1,640 ms); JavaScript (Marko 4.9 kB, CycleWire 12.2 kB); HTML (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Requests (Alpine.js 24, CycleWire 28); Script (Qwik City 12 ms, CycleWire 20 ms); Layout (htmx 26 ms, CycleWire 27 ms); Bytes, repeat visit (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Event listeners (Marko 9, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 1,204 ms, CycleWire 1,268 ms); Largest Contentful Paint (htmx 1,560 ms, CycleWire 1,652 ms); JavaScript (Marko 4.8 kB, CycleWire 12.3 kB); HTML (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Requests (Alpine.js 24, CycleWire 28); Main thread (Marko 351 ms, CycleWire 365 ms); Script (Qwik City 15 ms, CycleWire 26 ms); Bytes, repeat visit (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); JS heap (Marko 1075.4 kB, CycleWire 1121.2 kB); Event listeners (Marko 9, CycleWire 11).
 
 **Desktop**: fast connection, no CPU slowdown, mouse. 15 iterations on 2026-09-26, AMD EPYC 7763 64-Core Processor (4 cores, GitHub's hosted runner), Chrome 153.0.8010.12.
 
 | Stack | JavaScript | LCP | TBT | Add to cart | Category filter | Live search | Quick view | Newsletter | Early tap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Static HTML (control) | 0.0 kB | 376 ms | 0 ms | 432 ms | 269 ms | 314 ms | 272 ms | 432 ms | by a page load, 504 ms |
-| Vanilla JS (control) | 1.2 kB | 380 ms | 0 ms | 250 ms | 99 ms | 11 ms | 251 ms | 251 ms | in the page, 284 ms |
-| Alpine.js | 17.9 kB | 380 ms | 0 ms | 250 ms | 100 ms | 27 ms | 251 ms | 251 ms | in the page, 290 ms |
-| Angular | 87.5 kB | 388 ms | 0 ms | 250 ms | 113 ms | 26 ms | 266 ms | 251 ms | in the page, 300 ms |
-| Astro + Preact | 13.1 kB | 388 ms | 0 ms | 251 ms | 87 ms | 13 ms | 251 ms | 251 ms | by a page load, 521 ms |
-| CycleWire | 9.5 kB | 384 ms | 0 ms | 250 ms | 99 ms | 7 ms | 114 ms | 250 ms | in the page, 284 ms |
-| CycleWire, inline (variant) | 4.1 kB | 396 ms | 0 ms | 266 ms | 116 ms | 8 ms | 115 ms | 267 ms | in the page, 300 ms |
-| CycleWire, intent only (variant) | 5.8 kB | 380 ms | 0 ms | 249 ms | 99 ms | 9 ms | 115 ms | 251 ms | in the page, 382 ms |
-| Hotwire (Turbo + Stimulus) | 31.9 kB | 380 ms | 0 ms | 266 ms | 183 ms | 385 ms | 216 ms | 266 ms | in the page, 299 ms |
-| htmx | 15.3 kB | 428 ms | 0 ms | 250 ms | 255 ms | 371 ms | 251 ms | 251 ms | in the page, 286 ms |
-| Marko | 4.8 kB | 384 ms | 0 ms | 250 ms | 87 ms | 8 ms | 251 ms | 251 ms | in the page, 284 ms |
-| Next.js | 120.1 kB | 392 ms | 0 ms | 256 ms | 252 ms | 371 ms | 416 ms | 250 ms | in the page, 455 ms |
-| Next.js, client filtering (variant) | 119.2 kB | 392 ms | 0 ms | 255 ms | 100 ms | 11 ms | 416 ms | 250 ms | – |
-| Nuxt | 70.9 kB | 388 ms | 0 ms | 250 ms | 105 ms | 27 ms | 251 ms | 251 ms | in the page, 284 ms |
-| Qwik City | 37.4 kB | 392 ms | 0 ms | 284 ms | 105 ms | 29 ms | 267 ms | 284 ms | in the page, 484 ms |
-| SolidStart | 31.1 kB | 396 ms | 0 ms | 250 ms | 99 ms | 12 ms | 99 ms | 251 ms | in the page, 284 ms |
-| SvelteKit | 32.7 kB | 396 ms | 0 ms | 402 ms | 116 ms | 13 ms | 99 ms | 403 ms | in the page, 520 ms |
+| Static HTML (control) | 0.0 kB | 376 ms | 0 ms | 427 ms | 267 ms | 315 ms | 272 ms | 433 ms | by a page load, 509 ms |
+| Vanilla JS (control) | 1.2 kB | 380 ms | 0 ms | 250 ms | 86 ms | 10 ms | 251 ms | 251 ms | in the page, 284 ms |
+| Alpine.js | 17.9 kB | 376 ms | 0 ms | 250 ms | 100 ms | 28 ms | 251 ms | 251 ms | in the page, 289 ms |
+| Angular | 87.5 kB | 388 ms | 0 ms | 250 ms | 101 ms | 23 ms | 266 ms | 251 ms | in the page, 299 ms |
+| Astro + Preact | 13.1 kB | 388 ms | 0 ms | 251 ms | 87 ms | 11 ms | 251 ms | 251 ms | by a page load, 521 ms |
+| CycleWire | 9.6 kB | 380 ms | 0 ms | 250 ms | 99 ms | 7 ms | 115 ms | 250 ms | in the page, 283 ms |
+| CycleWire, inline (variant) | 4.1 kB | 404 ms | 0 ms | 266 ms | 116 ms | 7 ms | 116 ms | 251 ms | in the page, 299 ms |
+| CycleWire, intent only (variant) | 5.9 kB | 380 ms | 0 ms | 249 ms | 98 ms | 11 ms | 115 ms | 250 ms | in the page, 382 ms |
+| CycleWire, requests from markup (variant) | 9.2 kB | 384 ms | 0 ms | 250 ms | 250 ms | 364 ms | 116 ms | 250 ms | in the page, 284 ms |
+| Hotwire (Turbo + Stimulus) | 31.9 kB | 380 ms | 0 ms | 265 ms | 182 ms | 385 ms | 215 ms | 266 ms | in the page, 300 ms |
+| htmx | 15.3 kB | 428 ms | 0 ms | 250 ms | 255 ms | 370 ms | 251 ms | 251 ms | in the page, 285 ms |
+| Marko | 4.8 kB | 384 ms | 0 ms | 250 ms | 87 ms | 10 ms | 251 ms | 251 ms | in the page, 284 ms |
+| Next.js | 120.1 kB | 388 ms | 0 ms | 255 ms | 251 ms | 371 ms | 416 ms | 250 ms | in the page 13/15, by a page load 2/15, 450 ms |
+| Next.js, client filtering (variant) | 119.2 kB | 388 ms | 0 ms | 254 ms | 100 ms | 7 ms | 416 ms | 250 ms | in the page, 367 ms |
+| Nuxt | 70.9 kB | 384 ms | 0 ms | 250 ms | 117 ms | 27 ms | 252 ms | 251 ms | in the page, 284 ms |
+| Qwik City | 37.4 kB | 392 ms | 0 ms | 284 ms | 104 ms | 28 ms | 267 ms | 284 ms | in the page, 500 ms |
+| SolidStart | 31.1 kB | 392 ms | 0 ms | 250 ms | 100 ms | 12 ms | 99 ms | 250 ms | in the page, 284 ms |
+| SvelteKit | 32.7 kB | 396 ms | 0 ms | 401 ms | 115 ms | 8 ms | 98 ms | 400 ms | in the page, 523 ms |
 
-Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 348 ms, CycleWire 384 ms); JavaScript (Marko 4.8 kB, CycleWire 9.5 kB); HTML (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Requests (Alpine.js 40, CycleWire 42); Layout (htmx 9.6 ms, CycleWire 10 ms); Quick view (SolidStart 99 ms, CycleWire 114 ms); Bytes, repeat visit (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Event listeners (Marko 9, CycleWire 18).
+Where another stack beats CycleWire here (the 95% confidence intervals do not overlap and the difference is at least 3%): First Contentful Paint (Astro + Preact 348 ms, CycleWire 380 ms); JavaScript (Marko 4.8 kB, CycleWire 9.6 kB); HTML (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Requests (Alpine.js 40, CycleWire 42); Layout (htmx 9.4 ms, CycleWire 10 ms); Quick view (SvelteKit 98 ms, CycleWire 115 ms); Bytes, repeat visit (Hotwire (Turbo + Stimulus) 2.7 kB, CycleWire 2.8 kB); Event listeners (Marko 9, CycleWire 11).
 
 <!-- bench:end -->
 
