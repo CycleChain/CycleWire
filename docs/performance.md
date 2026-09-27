@@ -150,7 +150,7 @@ and what to do about it:
   nothing runs, so first paint, layout shift and blocking time stay close to the page
   without JavaScript. Preloading the first action and fetching the code of actions in
   view on touch screens cost a few kilobytes and a few milliseconds of script; on the
-  phone profile the largest paint lands about 5% after the fastest stack's.
+  phone profile the largest paint lands about 6% after the fastest stack's.
 - **Interactions land as fast as hand-written code.** With the defaults and the two
   steps below, a filter, a search, an add to cart and a tap in the first frame after
   paint take as long as the page's vanilla control, and the quick view is the fastest of
@@ -162,7 +162,10 @@ and what to do about it:
   one import at a time.
 - **Every choice has a variant that measures it.** The benchmark also runs the CycleWire
   app with nothing fetched ahead of intent, and with its core inlined in `<head>`, so the
-  cost and the gain of each recommendation above are numbers, not claims.
+  cost and the gain of each recommendation above are numbers, not claims. A third
+  variant builds the page with [`cyclewire/request`](request.md), the way htmx builds it:
+  on the phone profile it answers the filter, the search and the quick view sooner than
+  htmx does, with less JavaScript.
 
 ## Triggers
 

@@ -33,6 +33,10 @@ Being an action has three consequences:
 - **Markup reaches it only because you registered it,** as with every action (see
   [Security](#security)).
 
+The [benchmark](https://cyclechain.github.io/CycleWire/#benchmark) builds its store page
+this way too, as the `cyclewire--request` variant: on the phone profile it answers the
+filter, the search and the quick view sooner than the htmx app, with less JavaScript.
+
 ## Examples
 
 A form that gives way to the server's answer. The form works without JavaScript too:
