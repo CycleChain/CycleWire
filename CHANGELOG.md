@@ -19,6 +19,17 @@ All notable changes to CycleWire are documented here. The format follows
   at most), `target`, `swap` and `select`, checked and escaped like the others, in PHP,
   Ruby, Python and JavaScript.
 
+### Fixed
+
+- **The lazy listeners of 1.2.0 no longer cost script time on load.** The scan that
+  finds which event types a page binds visited every binding, and while a page was still
+  parsing, it built its selectors again for every element the parser added. In the
+  benchmark's 1.2.0 run, the page with the core inlined in `<head>` spent 62 ms in script
+  on the phone profile, against 35 ms for 1.1.0 (on a slower machine). The scan now looks
+  only for bindings of the event types still without a listener, with a selector built
+  once, which on most pages matches nothing; measured on one machine, script time is
+  back to 1.1.0's. The core is 5.2 kB brotli.
+
 ### Changed
 
 - `cw-debounce` no longer holds up a submit: it runs at once, and a run still waiting for

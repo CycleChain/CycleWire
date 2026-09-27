@@ -13,8 +13,11 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 // accidental regression fails CI while a deliberate one updates this table.
 const budgets = {
     // 1.1 adds the touch look-ahead, registered(), defineAction(), the intent hook,
-    // the adaptive yield and preload priorities: measured at 4952 B brotli.
-    'cyclewire.min.js': { brotli: 5120, gzip: 5632 },
+    // the adaptive yield and preload priorities: measured at 4952 B brotli. 1.2
+    // adds the replay of cyclewire/early's taps, and a listener only for the
+    // event types a page binds, found without adding script time on load:
+    // measured at 5172 B.
+    'cyclewire.min.js': { brotli: 5248, gzip: 5760 },
     'css.min.js': { brotli: 768 },
     'dom.min.js': { brotli: 2304 },
     // 1.1 pairs children first and moves only those out of the longest run in
@@ -35,7 +38,7 @@ const budgets = {
     'bootstrap.min.js': { brotli: 2304 },
     // Measured at 7031 B, plus 5%; it loads only when you open it.
     'devtools.min.js': { brotli: 7424 },
-    'cyclewire.global.min.js': { brotli: 5376 },
+    'cyclewire.global.min.js': { brotli: 5504 },
     // With 1.2's request: measured at 15982 B.
     'cyclewire.full.global.min.js': { brotli: 16384 },
 };

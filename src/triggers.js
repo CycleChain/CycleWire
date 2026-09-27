@@ -1,8 +1,8 @@
 import { actionsOf, ignored, splitName } from './attrs.js';
-import { attach, detach, needs } from './delegate.js';
+import { attach, detach, need } from './delegate.js';
 import * as registry from './registry.js';
 import { abortDetached, announce, dispatch } from './runner.js';
-import { attrs, opts, plugins, started, types } from './state.js';
+import { attrs, opts, plugins, started } from './state.js';
 import { noop, saveData, trace, warn } from './util.js';
 
 /**
@@ -67,7 +67,9 @@ function idle(fn) {
  * the default `auto`, on screens that cannot hover, where the first sign of
  * intent is the tap itself.
  */
-const ahead = () => opts.preload === 'visible' || (opts.preload === 'auto' && matchMedia('(hover: none)').matches);
+/** @type {MediaQueryList | undefined} made once: a scan runs for every element the parser adds */
+let touch;
+const ahead = () => opts.preload === 'visible' || (opts.preload === 'auto' && (touch ||= matchMedia('(hover: none)')).matches);
 
 /** @param {Element} el @param {() => void} fn */
 function whenVisible(el, fn) {
@@ -159,15 +161,11 @@ function setup(el, look) {
  * @param {ParentNode} root
  */
 export function scan(root) {
+    need(root);
     const look = ahead();
-    // Triggers, preloads and every binding.
-    const selector = [attrs.trigger, attrs.preload, attrs.action, ...[...types].map((type) => CSS.escape(attrs.on + type))].map((name) => `[${name}]`).join();
-    const found = (/** @type {Element} */ el) => {
-        needs(el);
-        setup(el, look);
-    };
-    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) found(/** @type {Element} */ (root));
-    root.querySelectorAll(selector).forEach(found);
+    const selector = `[${attrs.trigger}],[${attrs.preload}]${look ? `,[${attrs.action}]` : ''}`;
+    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(selector)) setup(/** @type {Element} */ (root), look);
+    for (const el of root.querySelectorAll(selector)) setup(el, look);
     if (opts.shadow) {
         for (const el of root.querySelectorAll('*')) if (el.shadowRoot) observe(el.shadowRoot);
     }

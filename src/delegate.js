@@ -161,27 +161,48 @@ function add(root, type) {
     listeners.set(type, [listener, capture]);
 }
 
+/** The bindings of the event types still without a listener, as a selector; built again when that changes. @type {string | undefined} */
+let wanted;
+
 /** Delegates an event type on every root from now on, if CycleWire delegates it. @param {string} type */
 function use(type) {
     if (!used.has(type) && types.has(type)) {
         used.add(type);
+        wanted = undefined;
         for (const root of roots.keys()) add(root, type);
     }
 }
 
 /**
  * Delegates the event types an element's bindings need: its `cw-on-<event>`
- * attributes, and the event its `cw-action` runs on. Every scan calls it for
- * the bindings it finds: at start, in content added later, in observed roots.
+ * attributes, and the event its `cw-action` runs on.
  * @param {Element} el
  */
-export function needs(el) {
+function needs(el) {
     for (const name of el.getAttributeNames()) use(name === attrs.action ? defaultEvent(el) : name.startsWith(attrs.on) ? name.slice(attrs.on.length) : '');
+}
+
+/**
+ * Delegates the event types the bindings in `root` need, `root` included.
+ * Every scan calls it: at start, in content added later, in observed roots,
+ * and while the page is parsed, for every element the parser adds. So it
+ * looks only for the types still without a listener, usually none of the
+ * bindings in a page: `cw-action` runs on the four always delegated but for
+ * a `<details>`.
+ * @param {ParentNode} root
+ */
+export function need(root) {
+    if (wanted === undefined) wanted = [...types].filter((type) => !used.has(type)).map((type) => `[${CSS.escape(attrs.on + type)}]`).concat(used.has('toggle') ? [] : `details[${attrs.action}]`).join();
+    if (!wanted) return;
+    if (/** @type {Node} */ (root).nodeType === 1 && /** @type {Element} */ (root).matches(wanted)) needs(/** @type {Element} */ (root));
+    for (const el of root.querySelectorAll(wanted)) needs(el);
 }
 
 /** @param {Node} root */
 export function attach(root) {
     if (roots.has(root)) return;
+    // start() may have changed the prefix, or the event types, since the selector was built.
+    wanted = undefined;
     roots.set(root, new Map());
     for (const type of used) add(root, type);
     for (const type of INTENT) root.addEventListener(type, onIntent, { capture: true, passive: true });

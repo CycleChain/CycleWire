@@ -8,7 +8,7 @@ action runs.
 
 | Import | Adds | brotli |
 | --- | --- | --- |
-| `cyclewire` | Activation: everything in the next section | 5.1 kB |
+| `cyclewire` | Activation: everything in the next section | 5.2 kB |
 | `cyclewire/css` | Stylesheets that arrive with the actions that need them | 0.6 kB |
 | `cyclewire/dom` | Safe `html` templates, inert fragments, `swap`, `transition` | 2.2 kB |
 | `cyclewire/morph` | Morphing to new server HTML while keeping focus and input | 2.2 kB |
