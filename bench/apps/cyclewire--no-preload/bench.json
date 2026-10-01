@@ -28,8 +28,8 @@
       "docs": "https://vite.dev/guide/backend-integration"
     },
     {
-      "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
-      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#cw-store"
+      "choice": "The cart shows in one place, the header, so the cart action writes the new count and total into it, on the core alone: the modules guide keeps cyclewire/signals for state that several places show.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#when-to-add-a-module"
     },
     {
       "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",

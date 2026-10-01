@@ -1,6 +1,6 @@
-// The cart store is seeded from the JSON the server rendered, and the header
-// is bound to it with cw-bind, so adding an item only changes the store.
-import { store } from 'cyclewire/signals';
+// The header shows the cart in one place, so the action writes the new count
+// and total into it, as the modules guide has it: cyclewire/signals is for
+// state that several places show.
 import { formatPrice } from '../../../../scenario/markup.js';
 
 export async function add({ element, signal }) {
@@ -12,7 +12,6 @@ export async function add({ element, signal }) {
     });
     if (!response.ok) throw new Error(`The cart answered ${response.status}`);
     const { count, total } = await response.json();
-    const cart = store('cart', { get totalText() { return formatPrice(this.total); } });
-    cart.count = count;
-    cart.total = total;
+    /** @type {HTMLElement} */ (document.getElementById('cart-count')).textContent = String(count);
+    /** @type {HTMLElement} */ (document.getElementById('cart-total')).textContent = formatPrice(total);
 }

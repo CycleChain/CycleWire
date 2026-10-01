@@ -25,7 +25,7 @@
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
     },
     {
-      "choice": "esbuild builds each action into one module with what it imports bundled in, so loading an action is one request. Modules that two actions include, such as cyclewire/signals, keep one state per page.",
+      "choice": "esbuild builds each action into one module with what it imports bundled in, so loading an action is one request.",
       "docs": "https://esbuild.github.io/api/#bundle"
     },
     {
@@ -33,8 +33,8 @@
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#preload-the-action-people-reach-for-first"
     },
     {
-      "choice": "The cart header is bound to a store the server serializes (cw-store, cw-bind); cyclewire/signals arrives with the cart action.",
-      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/signals.md#cw-store"
+      "choice": "The cart shows in one place, the header, so the cart action writes the new count and total into it, on the core alone: the modules guide keeps cyclewire/signals for state that several places show.",
+      "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/modules.md#when-to-add-a-module"
     },
     {
       "choice": "The quick view fetches JSON and renders it with cyclewire/dom, which arrives with that action.",

@@ -1,12 +1,8 @@
 // What the CycleWire app and its variants (apps/cyclewire--*) share: the
 // attributes that wire the reference page to the actions in src/actions/,
-// the store the server serializes for the cart header, and Vite's manifest.
-// They differ only in what they put in <head>.
+// and Vite's manifest. They differ only in what they put in <head>.
 import { readFileSync } from 'node:fs';
-import { summary } from '../../scenario/catalog.js';
 import { listen } from '../../scenario/server.js';
-
-const json = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
 /**
  * Reads a Vite manifest. `chunks(key)` is a chunk's file and the files of the
@@ -27,12 +23,9 @@ export function manifestOf(url) {
 export function serve({ js, head }) {
     return listen({
         js,
-        hooks: (state) => ({
+        hooks: () => ({
             head,
-            bodyEnd: `<script type="application/json" cw-store="cart">${json(summary(state.cart))}</script>`,
             attrs: {
-                cartCount: () => ' cw-bind="text: $cart.count"',
-                cartTotal: () => ' cw-bind="text: $cart.totalText"',
                 searchForm: () => ' cw-action="catalog#search" cw-on-input="catalog#search"',
                 categoryLink: () => ' cw-action="catalog#category" cw-prevent="click"',
                 addToCart: () => ' cw-action="cart#add"',

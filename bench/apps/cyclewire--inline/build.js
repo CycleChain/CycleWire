@@ -1,9 +1,9 @@
 // Builds each action in ../cyclewire/src/actions/, and src/plugins.js, into a
 // module of its own, with what it imports bundled in: a page without a
-// bundled entry loads an action with one request, not one per chunk. Shared
-// modules such as cyclewire/signals keep one state per page even when two
-// files include them. esbuild's metafile says which file came from which
-// source, for server.js.
+// bundled entry loads an action with one request, not one per chunk. A
+// CycleWire module that two files include keeps one state per page all the
+// same. esbuild's metafile says which file came from which source, for
+// server.js.
 import { build } from 'esbuild';
 import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

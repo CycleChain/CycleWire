@@ -1,8 +1,7 @@
 // The reference page with CycleWire, set up the way its documentation
 // recommends: the core as a module in <head>, actions in their own chunks,
 // the action most visitors use first (add to cart) preloaded with the page,
-// the quick view's data prefetched on intent, and the cart header bound to a
-// store the server serializes (page.js).
+// and the quick view's data prefetched on intent (page.js).
 import { fileURLToPath } from 'node:url';
 import { manifestOf, serve } from './page.js';
 
