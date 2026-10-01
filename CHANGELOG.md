@@ -41,6 +41,9 @@ All notable changes to CycleWire are documented here. The format follows
 - `cyclewire/request`: the newest request for a target wins. A request still on its way
   to a target stops when another one sets out for it, from any element, and ends quietly,
   so a late answer never covers a newer one.
+- The performance guide shows how, with a bundler, the action people reach for first
+  comes in the entry and costs no request of its own; `modulepreload` stays the way
+  without one.
 
 ## [1.2.0] - 2026-09-26
 
