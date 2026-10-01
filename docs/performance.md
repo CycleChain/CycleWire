@@ -122,8 +122,24 @@ saved; on a phone, the time between touch and click.
 
 People tap the button they came for as soon as they see it, often before the page has
 settled. If its code only starts downloading then, the tap waits a round trip before the
-request it sends. Preload that one action's code with the page: write a
-`<link rel="modulepreload">` for its chunk, and for the chunks it imports, next to the
+request it sends. So let that one action's code come with the page.
+
+With a bundler, import it into your entry and register it from there. It then travels in
+the entry's own file, with no request of its own, while every other action stays a chunk
+that loads when it is needed:
+
+```js
+// src/main.js
+import { fromGlob, start } from 'cyclewire';
+import * as cart from './actions/cart.js';
+
+start({
+    actions: { ...fromGlob(import.meta.glob(['./actions/*.js', '!./actions/cart.js'])), cart: async () => cart },
+});
+```
+
+Without a bundler, or to keep a large action out of the entry, preload its file instead:
+write a `<link rel="modulepreload">` for it, and for the chunks it imports, next to the
 entry's. With Vite, the manifest names them:
 
 ```js
@@ -133,10 +149,10 @@ const preloads = new Set([...chunks('src/main.js'), ...chunks('src/actions/cart.
 const head = [...preloads].map((file) => `<link rel="modulepreload" href="/build/${file}">`).join('');
 ```
 
-The page then downloads that action's code up front, a few kilobytes, in exchange for a
-first tap that waits only for the server. `cw-preload="load"` does the same without
-touching the server, but starts later: when CycleWire starts, after the HTML is parsed.
-Keep it to the one or two actions nearly every visitor uses.
+Either way, the page downloads that action's code up front, a few kilobytes, in exchange
+for a first tap that waits only for the server. `cw-preload="load"` does the same without
+touching the server or the entry, but starts later: when CycleWire starts, after the HTML
+is parsed. Keep it to the one or two actions nearly every visitor uses.
 
 ## What the benchmark shows
 

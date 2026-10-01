@@ -24,7 +24,7 @@
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/request.md"
     },
     {
-      "choice": "Vite bundles the page's script, and actions are registered as loader functions, so cyclewire/request, with the morph and message code it brings, and the quick view action are chunks of their own.",
+      "choice": "Vite bundles the page's script: cyclewire/request, with the morph and message code it brings, is in the entry, and the quick view action, registered as a loader function, is a chunk of its own.",
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/getting-started.md#4-register-and-start"
     },
     {
@@ -32,7 +32,7 @@
       "docs": "https://vite.dev/guide/backend-integration"
     },
     {
-      "choice": "Add to cart, the action most visitors use first, runs cyclewire/request, so the request action is preloaded with the page: the server writes <link rel=\"modulepreload\"> for its chunk and the chunks it imports, from Vite's manifest. The quick view's action loads on intent, the default, and on touch screens also once the page is idle.",
+      "choice": "Add to cart, the action most visitors use first, runs cyclewire/request, so request is imported into the entry and registered from there: it arrives with the page in the same file, and a tap on Add to cart right after the page appears waits only for the server. The quick view's action loads on intent, the default, and on touch screens also once the page is idle.",
       "docs": "https://github.com/CycleChain/CycleWire/blob/main/docs/performance.md#preload-the-action-people-reach-for-first"
     },
     {

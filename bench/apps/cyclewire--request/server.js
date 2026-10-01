@@ -11,7 +11,6 @@
 //   POST /newsletter   email → fetched, the message, otherwise the page that shows it
 //   GET  /js/*         the Vite build
 import { createServer } from 'node:http';
-import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { add, cartCookie, readCart } from '../../scenario/cart.js';
 import { product, summary } from '../../scenario/catalog.js';
@@ -25,12 +24,8 @@ const HTML = TYPES['.html'];
 const JS = fileURLToPath(new URL('dist/js/', import.meta.url));
 
 const { manifest, chunks } = manifestOf(new URL('dist/js/.vite/manifest.json', import.meta.url));
-// Vite's manifest names a module by its path from this folder.
-const REQUEST = relative(fileURLToPath(new URL('.', import.meta.url)), fileURLToPath(import.meta.resolve('cyclewire/request')));
-// The entry, and cyclewire/request with its imports: add to cart, the action
-// most visitors use first, runs it, so a tap on it right after the page
-// appears waits only for the server, not for its code.
-const preloads = [...new Set([...chunks('src/main.js'), ...chunks(REQUEST)])];
+// The entry, with cyclewire/request in it, and the chunks it imports.
+const preloads = chunks('src/main.js');
 const HEAD = [
     ...preloads.map((path) => `<link rel="modulepreload" href="/js/${path}">`),
     `<script type="module" src="/js/${manifest['src/main.js'].file}"></script>`,

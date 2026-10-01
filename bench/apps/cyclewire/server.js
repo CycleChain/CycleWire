@@ -1,14 +1,13 @@
 // The reference page with CycleWire, set up the way its documentation
-// recommends: the core as a module in <head>, actions in their own chunks,
-// the action most visitors use first (add to cart) preloaded with the page,
-// and the quick view's data prefetched on intent (page.js).
+// recommends: the core as a module in <head>, with the action most visitors
+// use first (add to cart) in the entry, every other action in a chunk of its
+// own, and the quick view's data prefetched on intent (page.js).
 import { fileURLToPath } from 'node:url';
 import { manifestOf, serve } from './page.js';
 
 const { manifest, chunks } = manifestOf(new URL('dist/js/.vite/manifest.json', import.meta.url));
-// The entry, and the add-to-cart action with its imports: a tap on it right after the page
-// appears then waits only for the server, not for its code.
-const preloads = [...new Set([...chunks('src/main.js'), ...chunks('src/actions/cart.js')])];
+// The entry, with add to cart in it, and the chunks it imports.
+const preloads = chunks('src/main.js');
 
 serve({
     js: fileURLToPath(new URL('dist/js/', import.meta.url)),
