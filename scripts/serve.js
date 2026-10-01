@@ -11,6 +11,8 @@
  *
  * The landing page gets the version stamp and the Benchmark section, built at
  * start from bench/results/ (--local-results includes your own *.local.json runs).
+ * Everything is also served under the site's path (/CycleWire/, or wherever
+ * scripts/site-url.js puts it), where the documentation's links point.
  *
  * Test helpers:
  *   ?delay=ms                       hold the response
@@ -33,6 +35,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildSite } from '../bench/scripts/build-site.js';
+import { SITE } from './site-url.js';
 import { insertBenchmark, stamp, stampSizes, version } from './site.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -185,9 +188,13 @@ async function echo(req, res) {
     send(res, Number(url.searchParams.get('status')) || 200, `<!doctype html><title>echo</title><h1 id="echo">${escape(req.method)} /echo</h1>${csrf}<ul>${rows}</ul>`, types['.html']);
 }
 
+/** The site's path: what is built for it, such as the documentation, is found under it too. */
+const PREFIX = new URL(SITE).pathname;
+
 /** @param {import('node:http').IncomingMessage} req @param {import('node:http').ServerResponse} res */
 async function handle(req, res) {
     const url = new URL(req.url, 'http://localhost');
+    if (PREFIX !== '/' && url.pathname.startsWith(PREFIX)) url.pathname = url.pathname.slice(PREFIX.length - 1);
     const delay = Math.min(Number(url.searchParams.get('delay')) || 0, 10_000);
     if (delay) await new Promise((done) => setTimeout(done, delay));
 

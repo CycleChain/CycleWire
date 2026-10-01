@@ -22,6 +22,7 @@
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { SITE } from '../../scripts/site-url.js';
 
 const BENCH = fileURLToPath(new URL('..', import.meta.url));
 const REPO = 'https://github.com/CycleChain/CycleWire';
@@ -392,7 +393,7 @@ export const REDIRECT = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark · CycleWire</title>
 <meta name="robots" content="noindex">
-<link rel="canonical" href="https://cyclechain.github.io/CycleWire/#benchmark">
+<link rel="canonical" href="${SITE}#benchmark">
 <meta http-equiv="refresh" content="0; url=../#benchmark">
 </head>
 <body>

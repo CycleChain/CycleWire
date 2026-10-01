@@ -1,9 +1,14 @@
 name: Pages
 
-# Deploys the landing page (site/ plus the built dist/), the live examples
-# (examples/dist/, under /examples/) and the documentation (docs-site/, under
-# /docs/) to GitHub Pages on every push to main, so the live site always
-# matches main. Run it by hand to redeploy.
+# Publishes the site: the landing page (site/ plus the built dist/), the live
+# examples (examples/dist/, under examples/) and the documentation
+# (docs-site/, under docs/), on every push to main, so the live site always
+# matches main. Run it by hand to publish again.
+#
+# Where: on GitHub Pages, until the repository variable SITE_DEPLOY is
+# "server". From then on the site is built for its address on cyclechain.io,
+# copied to the server over SSH, and GitHub Pages only sends visitors there.
+# docs/releasing.md has the one-time setup.
 
 on:
   push:
@@ -21,6 +26,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Read by scripts/site-url.js; empty means GitHub Pages.
+      CYCLEWIRE_SITE: ${{ vars.SITE_DEPLOY == 'server' && 'https://cyclechain.io/labs/cyclewire/' || '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -37,12 +45,22 @@ jobs:
         run: npm ci && npm run build
       - name: Assemble the site
         run: node scripts/site.js
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
+      - if: vars.SITE_DEPLOY != 'server'
+        uses: actions/configure-pages@v6
+      - if: vars.SITE_DEPLOY != 'server'
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
+      - if: vars.SITE_DEPLOY == 'server'
+        uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: _site
+          retention-days: 3
 
+  # GitHub Pages serves the site.
   deploy:
+    if: vars.SITE_DEPLOY != 'server'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -52,5 +70,76 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  # cyclechain.io serves the site: it is copied into the server's
+  # labs/cyclewire/ folder, which becomes a mirror of the build.
+  server:
+    if: vars.SITE_DEPLOY == 'server'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cyclechain.io
+      url: https://cyclechain.io/labs/cyclewire/
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: _site
+      - name: Copy the site to the server
+        env:
+          HOST: ${{ secrets.SITE_DEPLOY_HOST }}
+          PORT: ${{ secrets.SITE_DEPLOY_PORT }}
+          LOGIN: ${{ secrets.SITE_DEPLOY_USER }}
+          KEY: ${{ secrets.SITE_DEPLOY_KEY }}
+          KNOWN_HOSTS: ${{ secrets.SITE_DEPLOY_KNOWN_HOSTS }}
+          FOLDER: ${{ secrets.SITE_DEPLOY_PATH }}
+        run: |
+          for name in HOST LOGIN KEY KNOWN_HOSTS FOLDER; do
+            [ -n "${!name}" ] || { echo "::error::A secret for the server is missing ($name); docs/releasing.md lists them."; exit 1; }
+          done
+          # The copy deletes what the build does not have: never anywhere but the site's own folder.
+          case "${FOLDER%/}" in
+            */cyclewire | cyclewire) ;;
+            *) echo "::error::SITE_DEPLOY_PATH must be the site's own folder, ending in cyclewire (such as /srv/www/labs/cyclewire)."; exit 1 ;;
+          esac
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/site
+          chmod 600 ~/.ssh/site
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # By content, not by date: only what changed is sent. Files the build no
+          # longer has are deleted once the new ones are in place, so pages open
+          # during the copy keep working.
+          rsync -rlptz --checksum --delete-after --delay-updates --chmod=D755,F644 --exclude=.nojekyll \
+            -e "ssh -i $HOME/.ssh/site -p ${PORT:-22} -o BatchMode=yes" \
+            _site/ "$LOGIN@$HOST:${FOLDER%/}/"
+
+  # Once the site is on cyclechain.io, GitHub Pages sends every old address
+  # to the same page there.
+  redirect:
+    if: vars.SITE_DEPLOY == 'server'
+    needs: server
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Write the redirect
+        run: node scripts/redirect-site.js --out _redirect
+        env:
+          CYCLEWIRE_SITE: https://cyclechain.io/labs/cyclewire/
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _redirect
       - id: deployment
         uses: actions/deploy-pages@v5

@@ -9,9 +9,9 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { BASE } from '../sync-docs.js';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
-const BASE = '/CycleWire/docs/';
 /** Uncompressed bytes a page may load up front: theme, navigation, table of contents, copy buttons. */
 export const BUDGET = 20_000;
 const SEARCH_UI = /pagefind|ui-core/;

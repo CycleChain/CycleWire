@@ -1,17 +1,20 @@
-// The documentation site, served at /CycleWire/docs/ next to the landing page.
-// Its pages are docs/*.md, copied in by sync-docs.js: edit those, not
-// src/content/docs/, which is written again on every build.
+// The documentation site, served at docs/ next to the landing page, wherever
+// ../scripts/site-url.js says the site is. Its pages are docs/*.md, copied in
+// by sync-docs.js: edit those, not src/content/docs/, which is written again
+// on every build.
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 import { watch } from 'node:fs';
 import starlightLinksValidator from 'starlight-links-validator';
+import { SITE } from '../scripts/site-url.js';
 import { DOCS, sync } from './sync-docs.js';
 
 const { sidebar } = await sync();
+const site = new URL(SITE);
 
 export default defineConfig({
-    site: 'https://cyclechain.github.io',
-    base: '/CycleWire/docs',
+    site: site.origin,
+    base: `${site.pathname}docs`,
     trailingSlash: 'always',
     integrations: [
         starlight({

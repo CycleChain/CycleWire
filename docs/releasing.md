@@ -31,8 +31,8 @@ The tag starts `.github/workflows/release.yml`, which:
 4. creates the GitHub Release. The notes come from `CHANGELOG.md`, and the `dist/` bundles
    and their SRI hashes are attached.
 
-The landing page and the live examples redeploy on every push to `main`
-(`.github/workflows/pages.yml`), the release commit included.
+The site (the landing page, the documentation and the live examples) redeploys on every
+push to `main` (`.github/workflows/pages.yml`), the release commit included.
 
 ## Publishing by hand
 
@@ -80,6 +80,55 @@ These steps need the owner's npm and GitHub accounts.
 3. **GitHub Pages.** In the repository settings, set Pages to be deployed by "GitHub
    Actions". The `github-pages` environment then accepts deployments from `main`, which
    is where the Pages workflow deploys from.
+
+4. **The site on cyclechain.io.** The Pages workflow publishes the site on GitHub Pages
+   until the repository variable `SITE_DEPLOY` is `server`. From then on it builds the
+   site for `https://cyclechain.io/labs/cyclewire/`, copies it into the server's
+   `labs/cyclewire/` folder with rsync over SSH, and only after that turns GitHub Pages
+   into a page that sends every old address to the same page on cyclechain.io. To set it
+   up:
+
+   1. On the server, give the copy a user of its own that can write to that folder and
+      nowhere else, and make the folder:
+
+      ```bash
+      sudo adduser --disabled-password --gecos '' cyclewire-site
+      sudo mkdir -p <web root>/labs/cyclewire
+      sudo chown cyclewire-site: <web root>/labs/cyclewire
+      ```
+
+   2. On your machine, make a key for the workflow, with no passphrase:
+
+      ```bash
+      ssh-keygen -t ed25519 -N '' -C cyclewire-site -f cyclewire-site
+      ```
+
+      Put `cyclewire-site.pub` in the server's
+      `/home/cyclewire-site/.ssh/authorized_keys`, preceded by `restrict ` so the key
+      can copy files but not open a shell with forwarding.
+
+   3. In the repository settings, under Secrets and variables, then Actions, add these
+      secrets:
+
+      | Secret | Value |
+      | --- | --- |
+      | `SITE_DEPLOY_HOST` | The server's own address, not the cyclechain.io name Cloudflare answers for |
+      | `SITE_DEPLOY_PORT` | Its SSH port, if not 22 |
+      | `SITE_DEPLOY_USER` | `cyclewire-site` |
+      | `SITE_DEPLOY_KEY` | The contents of `cyclewire-site`, the private key |
+      | `SITE_DEPLOY_KNOWN_HOSTS` | What `ssh-keyscan -p <port> <host>` prints |
+      | `SITE_DEPLOY_PATH` | `<web root>/labs/cyclewire`, the folder from step 1 |
+
+      The workflow refuses any path that does not end in `cyclewire`: the copy deletes
+      what the build does not have, so it never runs anywhere else.
+
+   4. Add the variable `SITE_DEPLOY` with the value `server`, then run the Pages workflow
+      by hand (Actions, then Pages, then Run workflow). Removing the variable puts the
+      site back on GitHub Pages at the next run.
+
+   The cyclechain.io site is published from its own repository with rsync too, as a
+   mirror of its build: its `deploy/keep.rsync` has to keep `labs/cyclewire/`, or its
+   next deploy would delete this site.
 
 ## cdnjs
 

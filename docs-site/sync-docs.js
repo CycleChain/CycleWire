@@ -9,13 +9,14 @@
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { relocate, SITE } from '../scripts/site-url.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const DOCS = join(HERE, '..', 'docs');
 export const OUT = join(HERE, 'src', 'content', 'docs');
-export const BASE = '/CycleWire/docs/';
+export const BASE = `${new URL(SITE).pathname}docs/`;
 const REPO = 'https://github.com/CycleChain/CycleWire';
-const LIVE = 'https://cyclechain.github.io/CycleWire/';
+const LIVE = SITE;
 
 const slugOf = (/** @type {string} */ file) => (file === 'README.md' ? '' : basename(file, '.md'));
 const exists = (/** @type {string} */ path) => stat(path).then(() => true, () => false);
@@ -27,7 +28,8 @@ const exists = (/** @type {string} */ path) => stat(path).then(() => true, () =>
  * @returns {Promise<string>}
  */
 export async function rewrite(href, pages) {
-    if (/^(?:[a-z][\w+.-]*:|#)/i.test(href)) return href;
+    // Absolute links to the site stay on it, wherever it is published.
+    if (/^(?:[a-z][\w+.-]*:|#)/i.test(href)) return relocate(href);
     const [path, hash = ''] = href.split('#');
     const anchor = hash ? `#${hash}` : '';
     if (!path.includes('/')) {

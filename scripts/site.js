@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Assembles the GitHub Pages site into _site/ (or --out <dir>):
+ * Assembles the site into _site/ (or --out <dir>), for the address
+ * scripts/site-url.js gives (GitHub Pages, or CYCLEWIRE_SITE):
  *
  *   /               site/ (the landing page)
  *   /dist/          dist/*.min.js, their source maps and sizes.json
@@ -24,6 +25,7 @@ import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promi
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildSite } from '../bench/scripts/build-site.js';
+import { relocate, SITE } from './site-url.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -106,9 +108,10 @@ export async function assemble(out) {
     const { html, count } = stamp(await readFile(page, 'utf8'), current);
     if (!count) throw new Error('site/index.html has no element marked data-version.');
     const sized = stampSizes(html, JSON.parse(await readFile(join(root, 'dist', 'sizes.json'), 'utf8')));
-    await writeFile(page, insertBenchmark(sized.html, bench.html));
+    // The share tags name the page's own address.
+    await writeFile(page, relocate(insertBenchmark(sized.html, bench.html)));
     await writeFile(join(out, '.nojekyll'), '');
-    console.log(`Assembled the site for v${current} in ${out} (${count} version marks, ${sized.count} sizes).`);
+    console.log(`Assembled the site for v${current}, at ${SITE}, in ${out} (${count} version marks, ${sized.count} sizes).`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
