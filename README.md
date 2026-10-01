@@ -371,7 +371,7 @@ Minified, measured by `npm run size` and enforced in CI:
 | `early.min.js` (inline, before the core) | 0.4 kB | 0.5 kB |
 | `bootstrap.min.js` | 2.1 kB | 2.4 kB |
 | `devtools.min.js` (development only) | 7.1 kB | 7.9 kB |
-| `cyclewire.global.min.js` (core + auto start) | 5.4 kB | 5.9 kB |
+| `cyclewire.global.min.js` (core + auto start) | 5.3 kB | 5.9 kB |
 | `cyclewire.full.global.min.js` (everything) | 16.2 kB | 17.8 kB |
 <!-- size:end -->
 
