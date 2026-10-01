@@ -166,7 +166,7 @@ and what to do about it:
   nothing runs, so first paint, layout shift and blocking time stay close to the page
   without JavaScript. Preloading the first action and fetching the code of actions in
   view on touch screens cost a few kilobytes and a few milliseconds of script; on the
-  phone profile the largest paint lands about 6% after the fastest stack's.
+  phone profile the largest paint lands about 4% after the fastest stack's.
 - **Interactions land as fast as hand-written code.** With the defaults and the two
   steps below, a filter, a search, an add to cart and a tap in the first frame after
   paint take as long as the page's vanilla control, and the quick view is the fastest of
