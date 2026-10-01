@@ -63,8 +63,10 @@ test.describe('intent on a touch screen', () => {
     test.use({ hasTouch: true });
 
     test('a finger on an element is intent: its module is fetched before the tap runs it', async ({ page }) => {
-        // Not focusable, so intent can only come from the pointerover a finger fires as it lands.
-        await boot(page, { start: false, html: '<div id="b" cw-action="log">go</div>' });
+        // A button: WebKit, which does not focus one on a tap, can then only take intent from
+        // the pointerover a finger fires as it lands. (A tap on a plain <div> fires no click
+        // there at all.)
+        await boot(page, { start: false, html: '<button id="b" cw-action="log">go</button>' });
         await page.evaluate(record);
         await page.evaluate(() => window.CW.start({ preload: 'intent', actions: { log: '/fixtures/actions/log.js' } }));
         await page.tap('#b');
