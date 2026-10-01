@@ -58,3 +58,20 @@ test.describe('trace', () => {
         expect(await trace(page)).toEqual([]);
     });
 });
+
+test.describe('intent on a touch screen', () => {
+    test.use({ hasTouch: true });
+
+    test('a finger on an element is intent: its module is fetched before the tap runs it', async ({ page }) => {
+        // Not focusable, so intent can only come from the pointerover a finger fires as it lands.
+        await boot(page, { start: false, html: '<div id="b" cw-action="log">go</div>' });
+        await page.evaluate(record);
+        await page.evaluate(() => window.CW.start({ preload: 'intent', actions: { log: '/fixtures/actions/log.js' } }));
+        await page.tap('#b');
+        await expectLog(page, [{ fn: 'run', el: 'b', type: 'click', target: 'b', props: null }]);
+        const events = await trace(page);
+        const intent = events.indexOf('preload log intent');
+        expect(intent).toBeGreaterThan(-1);
+        expect(intent).toBeLessThan(events.findIndex((event) => event.startsWith('start log')));
+    });
+});

@@ -207,7 +207,7 @@ test.describe('delegation', () => {
         const types = async () => {
             const { result } = await cdp.send('Runtime.evaluate', { expression: 'document' });
             const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
-            // The intent listeners (pointerover, focusin, pointerdown) are passive; Playwright adds its own.
+            // The intent listeners (pointerover, focusin) are passive; Playwright adds its own.
             return listeners.filter((listener) => !listener.passive && !listener.type.startsWith('__')).map((listener) => listener.type).sort();
         };
         expect(await types()).toEqual(['change', 'click', 'input', 'submit']);

@@ -11,8 +11,12 @@ import { noop, saveData, trace, warn } from './util.js';
  * and hands the run to the runner.
  */
 
-/** Events that hint the user is about to interact: time to fetch the module. */
-const INTENT = ['pointerover', 'focusin', 'pointerdown'];
+/**
+ * Events that hint the user is about to interact: time to fetch the module. A
+ * finger fires pointerover too, just before pointerdown, as a mouse does on
+ * its way to a click, so pointerdown would only repeat it.
+ */
+const INTENT = ['pointerover', 'focusin'];
 
 /** @type {Map<Node, Map<string, [EventListener, boolean]>>} */
 const roots = new Map();

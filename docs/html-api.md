@@ -96,7 +96,7 @@ the page is prerendered by speculation rules.
 
 | Value | Fetches the element's action modules |
 | --- | --- |
-| `intent` (default) | On `pointerover`, `focusin` or `pointerdown`. On screens that cannot hover, also once the page is idle and the element nears the viewport |
+| `intent` (default) | On `pointerover` (a pointer over it, or a finger on it) or `focusin`. On screens that cannot hover, also once the page is idle and the element nears the viewport |
 | `visible` | When the element nears the viewport |
 | `idle` | When the browser is idle after load |
 | `load` | At start |

@@ -11,8 +11,8 @@
   triggers and scheduled preloads. No component renders; state is not even parsed until
   it is used.
 - **A listener only for what the page uses:** `click`, `submit`, `input` and `change`,
-  three for intent (`pointerover`, `focusin`, `pointerdown`), and one more for each other
-  event type a binding in the page uses. The benchmark page has six.
+  two for intent (`pointerover`, `focusin`), and one more for each other event type a
+  binding in the page uses. The benchmark page has six.
 
 Check it on any page:
 
@@ -49,9 +49,9 @@ const head = `<script type="application/json" data-cyclewire>{"actions": {"cart"
 
 ## Make interactions fast (INP)
 
-- **Code arrives before the click.** On `pointerover`, `focusin` and `pointerdown`,
-  CycleWire starts fetching the module. For URL entries it uses `modulepreload`, which
-  downloads and compiles without running.
+- **Code arrives before the click.** On `pointerover`, which a finger fires as it lands,
+  and `focusin`, CycleWire starts fetching the module. For URL entries it uses
+  `modulepreload`, which downloads and compiles without running.
 - **Quick handlers run at once; slow ones after a paint.** A handler whose module is in
   memory runs in the same task as the event, so its result lands in the next frame. If
   its synchronous part held the main thread for more than 10 ms the last time it ran,

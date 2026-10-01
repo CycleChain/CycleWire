@@ -32,6 +32,9 @@ All notable changes to CycleWire are documented here. The format follows
 
 ### Changed
 
+- Intent comes from `pointerover` and `focusin`. A finger fires `pointerover` too, just
+  before `pointerdown`, in Chromium, Firefox and WebKit alike, so the `pointerdown`
+  listener only repeated it: a page now has one listener fewer.
 - `cw-debounce` no longer holds up a submit: it runs at once, and a run still waiting for
   the pause is dropped. On a search form with `cw-on-input` and `cw-debounce`, Enter
   answers without the delay.
