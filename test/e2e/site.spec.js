@@ -76,3 +76,12 @@ test('the request demo appends older releases, and its button keeps focus to the
     await page.waitForTimeout(300);
     await expect(page.locator('#feed li')).toHaveCount(8);
 });
+
+test('on a 320 px screen the page fits, with every demo\'s code open', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/');
+    await page.locator('.demo__code').evaluateAll((samples) => samples.forEach((sample) => { sample.open = true; }));
+    // A long line of code scrolls inside its sample; the page never scrolls sideways.
+    const { scroll, client } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
+    expect(scroll).toBe(client);
+});

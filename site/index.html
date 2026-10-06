@@ -175,7 +175,12 @@
             :root:not([data-theme]) .icon-btn .sun { display: none; }
             :root:not([data-theme]) .icon-btn .moon { display: block; }
         }
-        @media (max-width: 720px) { .nav__links .hide-sm { display: none; } }
+        @media (max-width: 720px) {
+            .nav__links .hide-sm { display: none; }
+            .nav .wrap, .nav__links { gap: 12px; }
+        }
+        /* The hero shows the version just below. */
+        @media (max-width: 400px) { .brand__version { display: none; } }
 
         /* Hero */
         .hero { padding: clamp(48px, 8vw, 96px) 0 40px; }
@@ -250,9 +255,10 @@
         }
         @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
 
-        /* Demos */
+        /* Demos. minmax(0, …), not 1fr: a 1fr column grows to fit an opened code sample's
+           longest line, and the page with it; this way the sample scrolls instead. */
         .demos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-        @media (max-width: 860px) { .demos { grid-template-columns: 1fr; } }
+        @media (max-width: 860px) { .demos { grid-template-columns: minmax(0, 1fr); } }
         .demo { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
         .demo header { display: flex; align-items: baseline; gap: 12px; }
         .demo__num { font: 700 .8rem/1 var(--mono); color: var(--accent); }
@@ -263,6 +269,10 @@
         .demo__code summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--muted); }
         .demo__code summary:hover { color: var(--text); }
         .demo__code pre { margin: 12px 0 0; }
+        @media (max-width: 520px) {
+            .demo { padding: 16px; }
+            .demo__stage { padding: 14px; }
+        }
 
         pre {
             margin: 0;
@@ -277,6 +287,7 @@
             tab-size: 4;
         }
         pre + pre { margin-top: 10px; }
+        @media (max-width: 520px) { pre { padding: 12px 14px; font-size: .8rem; } }
         .tok-com { color: #7d8590; font-style: italic; }
         .tok-str { color: #a5d6ff; }
         .tok-kw { color: #ff7b72; }
@@ -317,11 +328,13 @@
         .feed li { padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
         .feed b { font: 700 .8rem/1 var(--mono); color: var(--accent); margin-right: 8px; }
         .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-        .board__row { display: grid; grid-template-columns: 26px 1fr minmax(0, 110px) 44px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+        /* The names get a width of their own, so the notes line up when there is little room. */
+        .board__row { display: grid; grid-template-columns: 26px minmax(4.5em, 1fr) minmax(0, 110px) 44px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
         .board__rank { font: 700 .85rem/1 var(--mono); color: var(--accent); }
         .board__name { font-weight: 600; }
         .board__note { min-width: 0; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: .85rem/1.2 var(--font); }
         .board__score { text-align: right; font-family: var(--mono); }
+        @media (max-width: 400px) { .board__row { grid-template-columns: 18px minmax(3.5em, 1fr) minmax(0, 110px) 2em; gap: 6px; } }
         .board__round { font: 600 .78rem/1 var(--mono); opacity: .75; }
         ::view-transition-group(*) { animation-duration: .4s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
 
@@ -338,7 +351,7 @@
         @media (max-width: 640px) {
             .tabs { grid-template-columns: 1fr 1fr; }
             .tabs label { border-radius: 10px; border: 1px solid var(--border); margin: 0 6px 6px 0; text-align: center; }
-            .tabs__panel { grid-row: auto; border-radius: var(--radius); }
+            .tabs__panel { grid-row: auto; padding: 14px; border-radius: var(--radius); }
         }
 
         /* Tables */
