@@ -10,9 +10,9 @@
     "start": "node --enable-source-maps ./dist/index.mjs"
   },
   "dependencies": {
-    "marko": "6.3.56"
+    "marko": "6.4.6"
   },
   "devDependencies": {
-    "@marko/run": "0.11.13"
+    "@marko/run": "0.11.16"
   }
 }
